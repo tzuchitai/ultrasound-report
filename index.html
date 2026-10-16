@@ -146,6 +146,8 @@ details summary{cursor:pointer;font-weight:700}
 .btable th{text-align:left;font-size:12px;color:var(--muted);font-weight:500;padding:4px}
 .btable td{padding:3px}
 .btable td.bf{white-space:nowrap;color:var(--warn);font-weight:700}
+.btable tr.babn td{background:var(--warn-soft)}
+.btable select{min-width:5.2em}
 .exporthost{position:fixed;left:0;top:0;z-index:-1}
 #pages [data-src]{cursor:pointer;border-radius:3px}
 #pages [data-src]:hover{outline:2px dashed #3d5a99;outline-offset:2px;background:rgba(61,90,153,.06)}
@@ -260,6 +262,7 @@ details summary{cursor:pointer;font-weight:700}
 .rpt-hc .bt td.v{font-weight:700;font-variant-numeric:tabular-nums}
 .rpt-hc .bt tr.fH td.v,.rpt-hc .bt tr.fH td.fl{color:#B42318}
 .rpt-hc .bt tr.fL td.v,.rpt-hc .bt tr.fL td.fl{color:#1D5FB4}
+.rpt-hc .bt.abn th{background:#FBE1DC;color:#9A2A1A}
 .rpt-hc .hnote{font-size:11px;color:#666;margin:6px 10px}
 .rpt-card .refs .tx{font-size:12.5px;color:#555;line-height:1.55;margin:0 0 6px}
 </style>
@@ -1456,7 +1459,7 @@ function hcSummary(){
 }
 function blankHC(){return {p:blankP(),temp:'',plan:'',fast:'',doctor:'',hr:'',rr:'',bp:'',
   ecto:{reg:'',prod:'',last:''},endo:{reg:'',prod:'',last:''},vac:{reg:'',last:'',content:''},
-  items:{},blood:[],bloodNote:'',wts:[],rec:'',ctx:'',incAbd:true,incCard:true,incBlood:true}}
+  items:{},blood:[],bloodNote:'',bloodAbnOnly:false,wts:[],rec:'',ctx:'',incAbd:true,incCard:true,incBlood:true}}
 
 /* ---- editor ---- */
 const BFILES=[];
@@ -1484,18 +1487,19 @@ function renderHc(){
       h+=`<div class="hcrow"><span>${l}</span><div class="grp"><button type="button" class="chip${it.st==='n'?' on':''}" data-hcst="${id}" data-v="n">無明顯異常</button><button type="button" class="chip ab${it.st==='a'?' on':''}" data-hcst="${id}" data-v="a">異常</button></div>
         <input id="t-hc-items.${id}.note" data-k="hc" data-f="items.${id}.note" value="${esc(it.note||'')}" placeholder="說明"></div>`}}
   h+=`</div>`;
-  h+=`<div class="card"><h2>血液檢查 <small>上傳血檢報告（PDF／圖片）或貼上文字，讀出後可逐項修改</small></h2>
+  h+=`<div class="card"><h2>血液檢查 <small>上傳血檢報告（PDF／Excel／圖片）或貼上文字，讀出後可逐項修改；異常項目會排在最上面</small></h2>
     <div class="drop" data-blooddrop tabindex="0">點這裡選檔、拖曳血檢 PDF／Excel／圖片進來，或在下方欄位 ⌘V 貼上截圖<input type="file" accept="image/*,application/pdf,.xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" multiple hidden data-bloodfile></div>
     <div class="thumbs" id="blood-thumbs"></div>
     <textarea id="blood-text" rows="2" placeholder="或貼上血檢文字，一行一項，例如：ALT 45 U/L 10-125"></textarea>
     <div class="airow"><button class="btn primary" data-bloodread="1">讀取血檢</button><button class="btn" data-bloodadd="1">新增一列</button><button class="btn danger" data-bloodclear="1">清空血檢</button><span class="aistatus" id="blood-status"></span></div>
     <div class="btwrap"><table class="btable"><thead><tr><th>類別</th><th>項目</th><th>結果</th><th>單位</th><th>參考範圍</th><th>判讀</th><th></th></tr></thead><tbody>
-    ${(st.blood||[]).map((r,i)=>`<tr><td><select data-brow="${i}" data-bk="cat" aria-label="類別">${['CBC','生化','快篩','其他'].map(o=>`<option${o===r.cat?' selected':''}>${o}</option>`).join('')}</select></td>
+    ${(st.blood||[]).map((r,i)=>({r,i})).sort((a,b)=>(!!bflag(b.r))-(!!bflag(a.r))).map(({r,i})=>`<tr class="${bflag(r)?'babn':''}"><td><select data-brow="${i}" data-bk="cat" aria-label="類別">${['CBC','生化','快篩','其他'].map(o=>`<option${o===r.cat?' selected':''}>${o}</option>`).join('')}</select></td>
       ${['name','val','unit','ref'].map(kk=>`<td><input data-brow="${i}" data-bk="${kk}" value="${esc(r[kk]||'')}" aria-label="${kk}"></td>`).join('')}
       <td class="bf" data-bfi="${i}">${flagTxt(bflag(r))}</td><td><button type="button" class="btn" data-bdel="${i}" aria-label="刪除">×</button></td></tr>`).join('')||'<tr><td colspan="7" class="hint">尚未加入血檢數值</td></tr>'}
     </tbody></table></div>
     ${ta('hc','bloodNote','例：檢體輕度溶血',1,'血檢備註（會印在血檢結果表下方）')}
-    <label class="chk"><input type="checkbox" data-hcb="incBlood"${st.incBlood?' checked':''}> 報告附上血檢結果表</label></div>`;
+    <label class="chk"><input type="checkbox" data-hcb="incBlood"${st.incBlood?' checked':''}> 報告附上血檢結果表（異常項目排在最上面）</label>
+    <label class="chk"><input type="checkbox" data-hcb="bloodAbnOnly"${st.bloodAbnOnly?' checked':''}> 報告只列出異常項目</label></div>`;
   const w=(st.wts||[]);
   h+=`<div class="card"><h2>體重紀錄 <small>本次體重取自基本資料；加入過去紀錄後，報告會畫出趨勢</small><button class="btn" data-wadd="1">新增過去體重</button></h2>
     ${w.map((r,i)=>`<div class="hcrow w"><input type="date" data-wrow="${i}" data-wk="date" value="${esc(r.date||'')}" aria-label="日期"><input data-wrow="${i}" data-wk="kg" value="${esc(r.kg||'')}" inputmode="decimal" placeholder="kg" aria-label="體重"><button type="button" class="btn" data-wdel="${i}" aria-label="刪除">×</button></div>`).join('')||'<p class="hint" style="margin:0">尚無過去紀錄</p>'}</div>`;
@@ -1544,10 +1548,13 @@ function blocksHc(){
   const hrefs=Object.values(REFS).filter(r=>rec.some(l=>l.includes(r.short)));
   // page 2: details
   const rows=(st.blood||[]).filter(r=>r.name);
+  const tbl=(title,rs,cls='')=>`<table class="bt ${cls}"><colgroup><col style="width:30%"><col style="width:16%"><col style="width:16%"><col style="width:22%"><col style="width:16%"></colgroup><tr><th colspan="5">${title}</th></tr><tr class="hd"><td>項目</td><td>結果</td><td>單位</td><td>參考範圍</td><td>判讀</td></tr>`+rs.map(r=>{const f=bflag(r);return `<tr class="${f?'f'+f:''}"><td>${esc(r.name)}</td><td class="v">${esc(r.val)}</td><td>${esc(r.unit)}</td><td>${esc(r.ref)}</td><td class="fl">${flagTxt(f)}</td></tr>`}).join('')+'</table>';
+  const abn=rows.filter(r=>bflag(r));
   if(st.incBlood&&rows.length){B.push({h:`<div class="hsec">血液檢查結果</div>`,keep:1});
-    for(const cat of ['CBC','生化','快篩','其他']){const rs=rows.filter(r=>(r.cat||'生化')===cat);if(!rs.length)continue;
-      B.push({h:`<table class="bt"><colgroup><col style="width:30%"><col style="width:16%"><col style="width:16%"><col style="width:22%"><col style="width:16%"></colgroup><tr><th colspan="5">${cat==='CBC'?'血球計數 CBC':cat==='生化'?'血液生化':cat}</th></tr><tr class="hd"><td>項目</td><td>結果</td><td>單位</td><td>參考範圍</td><td>判讀</td></tr>`
-        +rs.map(r=>{const f=bflag(r);return `<tr class="${f?'f'+f:''}"><td>${esc(r.name)}</td><td class="v">${esc(r.val)}</td><td>${esc(r.unit)}</td><td>${esc(r.ref)}</td><td class="fl">${flagTxt(f)}</td></tr>`}).join('')+'</table>'})}
+    if(abn.length)B.push({h:tbl(`異常項目（${abn.length} 項）`,abn,'abn')});
+    else B.push({h:'<p class="hnote">所有血檢項目皆在參考範圍內。</p>'});
+    for(const cat of (st.bloodAbnOnly?[]:['CBC','生化','快篩','其他'])){const rs=rows.filter(r=>(r.cat||'生化')===cat).sort((a,b)=>(!!bflag(b))-(!!bflag(a)));if(!rs.length)continue;
+      B.push({h:tbl(cat==='CBC'?'血球計數 CBC':cat==='生化'?'血液生化':cat,rs)})}
     if(st.bloodNote.trim())B.push({h:`<p class="hnote">備註：${esc(st.bloodNote.trim())}</p>`});
   }
   const pts=(st.wts||[]).filter(r=>r.date&&parseFloat(r.kg)>0).map(r=>({d:r.date,kg:parseFloat(r.kg)}));
