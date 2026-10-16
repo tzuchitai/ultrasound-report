@@ -154,6 +154,9 @@ details summary{cursor:pointer;font-weight:700}
 .btable td.bf{white-space:nowrap;color:var(--warn);font-weight:700}
 .btable tr.babn td{background:var(--warn-soft)}
 .btable select{min-width:5.2em}
+.lineedit{position:sticky;bottom:0;z-index:6;background:var(--panel);border:1.5px solid var(--ai);border-radius:10px;padding:10px 12px;margin-top:10px;box-shadow:0 -4px 16px rgba(0,0,0,.12)}
+.lineedit textarea{width:100%}
+#pages .le-sel{outline:2px solid #3d5a99!important;outline-offset:2px;background:rgba(61,90,153,.1)}
 .exporthost{position:fixed;left:0;top:0;z-index:-1}
 #pages [data-src]{cursor:pointer;border-radius:3px}
 #pages [data-src]:hover{outline:2px dashed #3d5a99;outline-offset:2px;background:rgba(61,90,153,.06)}
@@ -391,8 +394,10 @@ details summary{cursor:pointer;font-weight:700}
   </div>
 
   <aside class="pv" aria-label="報告預覽">
-    <p class="pvlabel"><span id="pv-count">報告預覽（A4）</span><span>點報告上的文字，可跳到左邊對應欄位修改</span></p>
+    <p class="pvlabel"><span id="pv-count">報告預覽（A4）</span><span>點報告上的句子，可直接修改文字</span></p>
     <div id="pages-scale"><div class="pages" id="pages"></div></div>
+    <div class="lineedit" id="lineedit" hidden><p class="hint" id="le-hint" style="margin:0 0 4px">修改這一句（只改報告上的文字）</p><textarea id="le-text" rows="2"></textarea>
+      <div class="airow"><button class="btn primary" id="le-apply">套用</button><button class="btn" id="le-reset" hidden>恢復自動產生的句子</button><button class="btn" id="le-jump">到左邊欄位</button><button class="btn" id="le-cancel">取消</button></div></div>
   </aside>
 </main>
 <div id="measure"></div>
@@ -712,7 +717,7 @@ let S,SET;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 const PUBLIC=!!window.US_PUBLIC;
 if(!S||!S.abd||!S.card) S=PUBLIC?{abd:blankK('abd'),card:blankK('card'),ex:{abd:false,card:false}}:{abd:exAbd(),card:exCard(),ex:{abd:true,card:true}};
-['abd','card'].forEach(k=>{if(!S[k].prev)S[k].prev=blankPrev()});S.hc={...blankHC(),...(S.hc||{})};S.ex.hc=false;S.pup={...blankPUP(),...(S.pup||{})};S.pup.tests=S.pup.tests||{fecal:{},fivfelv:{}};S.ex.pup=false;
+['abd','card'].forEach(k=>{if(!S[k].prev)S[k].prev=blankPrev();if(!S[k].ovr)S[k].ovr={}});S.hc={...blankHC(),...(S.hc||{})};S.ex.hc=false;S.pup={...blankPUP(),...(S.pup||{})};S.pup.tests=S.pup.tests||{fecal:{},fivfelv:{}};S.ex.pup=false;
 try{SET={...DEFSET,...JSON.parse(localStorage.getItem(SKEY)||'{}')}}catch(e){SET={...DEFSET}}
 let KIND='abd';
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
@@ -762,7 +767,7 @@ function secLines(k,sec,c){
   const st=S[k],ls=[],src=[],flags=[],at={};
   for(const it of sec.items){
     if(!fitsSp(it,k)) continue;
-    if(it.t==='g'){const i=selOf(k,it);if(i>=0&&it.opts[i]){ls.push(c?fillTpl(it.opts[i],c):it.opts[i]);src.push('g:'+it.id)}}
+    if(it.t==='g'){const i=selOf(k,it);if(i>=0&&it.opts[i]){const ov=(st.ovr||{})['g:'+it.id];ls.push(ov!=null?ov:(c?fillTpl(it.opts[i],c):it.opts[i]));src.push('g:'+it.id)}}
     else{
       const val=(st.vals[it.id]||'').trim();if(!val) continue;
       const tpl=typeof it.tpl==='string'?it.tpl:it.tpl[sp(k)];
@@ -770,8 +775,9 @@ function secLines(k,sec,c){
       let line=tpl.replace('{v}',val.replace(/\s*[-~–]\s*/g,'-').replace(/\s*[xX×*]\s*/g,' × '));
       if(it.ok&&j.ref&&j.ref.max!=null&&!j.flag) line+=it.ok;
       if(j.flag) flags.push(`${it.label} ${val} cm（參考 ${j.ref.txt}）`);
-      if(it.join){if(at[it.join]!=null){ls[at[it.join]]+=line;continue}line=it.solo.replace('{v}',val.replace(/\s*[-~–]\s*/g,'-'))}
+      if(it.join){if(at[it.join]!=null){if((st.ovr||{})['v:'+it.join]==null)ls[at[it.join]]+=line;continue}line=it.solo.replace('{v}',val.replace(/\s*[-~–]\s*/g,'-'))}
       if(k==='abd'&&!c)line+=cmpSuffix('abd',it.id);
+      {const ov=(st.ovr||{})['v:'+it.id];if(ov!=null)line=ov}
       at[it.id]=ls.length;ls.push(line);src.push('v:'+it.id);
     }
   }
@@ -785,7 +791,7 @@ function contentAbd(){
 }
 function contentCard(){
   const st=S.card,c=cardCalc(),find=[],fsrc=[],flags=[];
-  if(st.dis){find.push(st.dis+(st.stage?` 分期：${st.stage}期`:'')+(st.stageNote||''));fsrc.push('f:dis')}
+  if(st.dis){const ov=(st.ovr||{})['f:dis'];find.push(ov!=null?ov:st.dis+(st.stage?` 分期：${st.stage}期`:'')+(st.stageNote||''));fsrc.push('f:dis')}
   for(const sec of CARD){if(st.skip[sec.id])continue;const r=secLines('card',sec,c);find.push(...r.ls);fsrc.push(...r.src)}
   const meas=[];
   for(const g of CM){const rows=g.f.filter(f=>c[f.id]&&c[f.id].val).map(f=>({id:f.id,label:f.label,val:c[f.id].val+(f.unit?' '+f.unit:'')}));if(rows.length)meas.push({g:g.g,rows})}
@@ -885,8 +891,7 @@ function scalePreview(){const pv=$('.pv'),z=Math.min(1,(pv.clientWidth-32)/794);
 let rT;
 function renderReport(now){clearTimeout(rT);const go=()=>{PAGES=paginate(KIND);$('#pages').innerHTML=PAGES.join('');$('#pv-count').textContent=`報告預覽（A4，共 ${PAGES.length} 頁）`;scalePreview()};now?go():rT=setTimeout(go,120)}
 addEventListener('resize',()=>scalePreview());
-$('#pages').addEventListener('click',e=>{
-  const el=e.target.closest('[data-src]');if(!el)return;const k=KIND,src=el.dataset.src,ed=$('#ed-'+k);let t=null;
+function jumpTo(k,src){const ed=$('#ed-'+k);let t=null;
   if(src.startsWith('g:'))t=k==='hc'?ed.querySelector(`[data-hcst="${src.slice(2)}"]`)?.parentElement:ed.querySelector(`.grp[data-g="${src.slice(2)}"]`);
   else if(src.startsWith('v:'))t=document.getElementById(`f-${k}-${src.slice(2)}`);
   else if(src.startsWith('f:'))t=document.getElementById(`t-${k}-${src.slice(2)}`);
@@ -897,7 +902,32 @@ $('#pages').addEventListener('click',e=>{
   t.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
   t.classList.remove('flash');void t.offsetWidth;t.classList.add('flash');
   if(t.matches('input,textarea,select'))setTimeout(()=>t.focus({preventScroll:true}),350);
+}
+// Click a sentence in the preview: edit its wording in place (f: sources rewrite that line of the textarea; g:/v: sources store a per-report override).
+let LE=null;
+function leLines(k,src){return String(getP(S[k],src.slice(2))??'').split('\n').filter(x=>x.trim())}
+$('#pages').addEventListener('click',e=>{
+  const el=e.target.closest('[data-src]');if(!el)return;const k=KIND,src=el.dataset.src;
+  if(!el.matches('li,p')||k==='hc'&&src.startsWith('g:')){jumpTo(k,src);return}
+  const same=[...document.querySelectorAll(`#pages [data-src="${CSS.escape(src)}"]`)],idx=same.indexOf(el);
+  document.querySelectorAll('#pages .le-sel').forEach(x=>x.classList.remove('le-sel'));el.classList.add('le-sel');
+  LE={k,src,idx,whole:src.startsWith('f:')&&String(getP(S[k],src.slice(2))??'').trim()===el.textContent.trim()};const ovr=src.startsWith('g:')||src.startsWith('v:')||src==='f:dis';
+  $('#le-text').value=el.textContent.trim();$('#le-reset').hidden=!(ovr&&S[k].ovr&&S[k].ovr[src]!=null);
+  $('#le-hint').textContent=ovr?'修改這一句（只改報告文字；之後數值或選項變動，這句不會再自動更新，可按「恢復自動產生的句子」）':'修改這一句（會同步改到左邊對應的文字欄位）';
+  $('#lineedit').hidden=false;const ta=$('#le-text');autoGrow(ta);ta.focus();
 });
+function leClose(){$('#lineedit').hidden=true;document.querySelectorAll('#pages .le-sel').forEach(x=>x.classList.remove('le-sel'));LE=null}
+$('#le-cancel').onclick=leClose;
+$('#le-jump').onclick=()=>{if(LE)jumpTo(LE.k,LE.src);leClose()};
+$('#le-reset').onclick=()=>{if(!LE)return;delete S[LE.k].ovr[LE.src];const k=LE.k;leClose();renderEditor(k);changed(k);toast('已恢復自動產生的句子')};
+$('#le-apply').onclick=()=>{if(!LE)return;const {k,src,idx,whole}=LE,txt=$('#le-text').value.replace(/\n+/g,' ').trim();
+  if(src.startsWith('g:')||src.startsWith('v:')||src==='f:dis'){S[k].ovr=S[k].ovr||{};S[k].ovr[src]=txt}
+  else{const path=src.slice(2),cur=String(getP(S[k],path)??''),ls=leLines(k,src);
+    if(whole||(!cur.includes('\n')&&ls.length<=1))setP(S[k],path,txt);
+    else{if(idx>=0&&idx<ls.length){if(txt)ls[idx]=txt;else ls.splice(idx,1)}setP(S[k],path,ls.join('\n'))}}
+  leClose();renderEditor(k);changed(k);toast('已更新這一句')};
+$('#le-text').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)){e.preventDefault();$('#le-apply').click()}if(e.key==='Escape')leClose()});
+
 
 /* plain text + rich copy */
 function reportText(k){
