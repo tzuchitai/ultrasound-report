@@ -137,6 +137,9 @@ details summary{cursor:pointer;font-weight:700}
 .drow .dh .btn{font-size:12px;padding:3px 10px}
 .drow .dh .btn.primary{margin-left:auto}
 .exporthost{position:fixed;left:0;top:0;z-index:-1}
+#pages [data-src]{cursor:pointer;border-radius:3px}
+#pages [data-src]:hover{outline:2px dashed #3d5a99;outline-offset:2px;background:rgba(61,90,153,.06)}
+.flash{animation:flash 1.6s ease-out}@keyframes flash{0%,40%{box-shadow:0 0 0 4px var(--ai)}100%{box-shadow:0 0 0 0 transparent}}
 #measure{position:absolute;left:-10000px;top:0;visibility:hidden}
 </style>
 
@@ -268,7 +271,7 @@ details summary{cursor:pointer;font-weight:700}
   </div>
 
   <aside class="pv" aria-label="報告預覽">
-    <p class="pvlabel"><span id="pv-count">報告預覽（A4）</span><span>下載 PDF 與預覽分頁相同</span></p>
+    <p class="pvlabel"><span id="pv-count">報告預覽（A4）</span><span>點報告上的文字，可跳到左邊對應欄位修改</span></p>
     <div id="pages-scale"><div class="pages" id="pages"></div></div>
   </aside>
 </main>
@@ -573,10 +576,10 @@ function fillTpl(t,c){
 }
 const tplLabel=t=>esc(t.replace(/[\[\]]/g,'')).replace(/\{(\w+)\}/g,(m,id)=>`<span class="ph">‹${FL[id]||id}›</span>`);
 function secLines(k,sec,c){
-  const st=S[k],ls=[],flags=[],at={};
+  const st=S[k],ls=[],src=[],flags=[],at={};
   for(const it of sec.items){
     if(!fitsSp(it,k)) continue;
-    if(it.t==='g'){const i=selOf(k,it);if(i>=0&&it.opts[i]) ls.push(c?fillTpl(it.opts[i],c):it.opts[i])}
+    if(it.t==='g'){const i=selOf(k,it);if(i>=0&&it.opts[i]){ls.push(c?fillTpl(it.opts[i],c):it.opts[i]);src.push('g:'+it.id)}}
     else{
       const val=(st.vals[it.id]||'').trim();if(!val) continue;
       const tpl=typeof it.tpl==='string'?it.tpl:it.tpl[sp(k)];
@@ -585,25 +588,25 @@ function secLines(k,sec,c){
       if(it.ok&&j.ref&&j.ref.max!=null&&!j.flag) line+=it.ok;
       if(j.flag) flags.push(`${it.label} ${val} cm（參考 ${j.ref.txt}）`);
       if(it.join){if(at[it.join]!=null){ls[at[it.join]]+=line;continue}line=it.solo.replace('{v}',val.replace(/\s*[-~–]\s*/g,'-'))}
-      at[it.id]=ls.length;ls.push(line);
+      at[it.id]=ls.length;ls.push(line);src.push('v:'+it.id);
     }
   }
-  ls.push(...lines(st.extra[sec.id]));
-  return {ls,flags};
+  const ex=lines(st.extra[sec.id]);ls.push(...ex);ex.forEach(()=>src.push('f:extra.'+sec.id));
+  return {ls,src,flags};
 }
 function contentAbd(){
   const st=S.abd,secs=[],flags=[];
-  for(const sec of ABD){if(st.skip[sec.id])continue;const r=secLines('abd',sec);flags.push(...r.flags);if(r.ls.length)secs.push({title:secTitle('abd',sec),lines:r.ls})}
+  for(const sec of ABD){if(st.skip[sec.id])continue;const r=secLines('abd',sec);flags.push(...r.flags);if(r.ls.length)secs.push({title:secTitle('abd',sec),lines:r.ls,src:r.src})}
   return {secs,dx:lines(st.dx),rec:lines(st.rec),flags};
 }
 function contentCard(){
-  const st=S.card,c=cardCalc(),find=[],flags=[];
-  if(st.dis) find.push(st.dis+(st.stage?` 分期：${st.stage}期`:'')+(st.stageNote||''));
-  for(const sec of CARD){if(st.skip[sec.id])continue;find.push(...secLines('card',sec,c).ls)}
+  const st=S.card,c=cardCalc(),find=[],fsrc=[],flags=[];
+  if(st.dis){find.push(st.dis+(st.stage?` 分期：${st.stage}期`:'')+(st.stageNote||''));fsrc.push('f:dis')}
+  for(const sec of CARD){if(st.skip[sec.id])continue;const r=secLines('card',sec,c);find.push(...r.ls);fsrc.push(...r.src)}
   const meas=[];
   for(const g of CM){const rows=g.f.filter(f=>c[f.id]&&c[f.id].val).map(f=>({label:f.label,val:c[f.id].val+(f.unit?' '+f.unit:'')}));if(rows.length)meas.push({g:g.g,rows})}
   for(const id in c){const x=c[id];if(x.flag)flags.push(`${x.f.label} ${x.val}${x.f.unit?' '+x.f.unit:''}（參考 ${x.ref.txt}）`)}
-  return {find,meas,flags,xray:lines(st.xray),ecg:lines(st.ecg),dx:lines(st.dx),meds:lines(st.meds),notes:lines(st.notes),next:lines(st.next)};
+  return {find,fsrc,meas,flags,xray:lines(st.xray),ecg:lines(st.ecg),dx:lines(st.dx),meds:lines(st.meds),notes:lines(st.notes),next:lines(st.next)};
 }
 
 /* ================= report blocks & pagination ================= */
@@ -621,30 +624,30 @@ function measTable(meas){let h='<table class="ms">';
 function blocksAbd(){
   const m=contentAbd(),p=S.abd.p,B=[];
   B.push({h:`<h1>腹部超音波報告</h1>`},{h:hdrTable(p)},{h:ptTable(p)},{h:'<hr>'},{h:'<h2>超音波檢查結果</h2>',keep:1});
-  for(const s of m.secs){B.push({h:`<h3>${esc(s.title)}</h3>`,keep:1});s.lines.forEach(l=>B.push({h:`<ul><li>${esc(l)}</li></ul>`}))}
-  if(m.dx.length){B.push({h:'<hr>'},{h:'<h2>影像診斷</h2>',keep:1});m.dx.forEach((l,i)=>B.push({h:`<ol start="${i+1}"><li>${esc(l)}</li></ol>`}))}
-  if(m.rec.length){B.push({h:'<hr>'},{h:'<h2>建議</h2>',keep:1});m.rec.forEach((l,i)=>B.push({h:`<ol start="${i+1}"><li>${esc(l)}</li></ol>`}))}
+  for(const s of m.secs){B.push({h:`<h3>${esc(s.title)}</h3>`,keep:1});s.lines.forEach((l,i)=>B.push({h:`<ul><li data-src="${s.src[i]}">${esc(l)}</li></ul>`}))}
+  if(m.dx.length){B.push({h:'<hr>'},{h:'<h2>影像診斷</h2>',keep:1});m.dx.forEach((l,i)=>B.push({h:`<ol start="${i+1}"><li data-src="f:dx">${esc(l)}</li></ol>`}))}
+  if(m.rec.length){B.push({h:'<hr>'},{h:'<h2>建議</h2>',keep:1});m.rec.forEach((l,i)=>B.push({h:`<ol start="${i+1}"><li data-src="f:rec">${esc(l)}</li></ol>`}))}
   return B;
 }
 function blocksCard(){
   const m=contentCard(),st=S.card,p=st.p,pe=st.pe,B=[];
   B.push({h:hdrTable(p)},{h:ptTable(p)+'<div style="height:30px"></div>'});
-  if(st.hist.trim()){const bx={id:'hist',title:'就診原因與病史'};B.push({h:`<p class="tx">${esc(st.hist.trim())}</p>`,box:bx})}
+  if(st.hist.trim()){const bx={id:'hist',title:'就診原因與病史'};B.push({h:`<p class="tx" data-src="f:hist">${esc(st.hist.trim())}</p>`,box:bx})}
   const anyPe=Object.values(pe).some(x=>String(x).trim())||m.ecg.length;
   if(anyPe){const vhs=pe.vhs?esc(pe.vhs)+(pe.vlas?` (VLAS ${esc(pe.vlas)})`:''):(pe.vlas?'VLAS '+esc(pe.vlas):'');
     B.push({h:`<table class="pe"><colgroup><col style="width:11%"><col style="width:17%"><col style="width:17%"><col style="width:18%"><col style="width:37%"></colgroup><tr><th colspan="2">理學檢查</th><th colspan="2">放射線學檢查</th><th>心電圖檢查發現</th></tr>
-    <tr><td class="c">聽　診</td><td>${esc(pe.aus)}</td><td class="c">心臟輪廓大小</td><td>${esc(pe.heart)}</td><td class="e" rowspan="3">${esc(m.ecg.join('，'))}</td></tr>
-    <tr><td class="c">血　壓</td><td>${esc(pe.bp)}</td><td class="c">VHS</td><td>${vhs}</td></tr>
-    <tr><td class="c">心跳</td><td>${esc(pe.hr)}</td><td class="c">肺臟血管大小</td><td>${esc(pe.vessel)}</td></tr></table>`})}
-  if(st.table&&m.meas.length) B.push({h:measTable(m.meas),box:{id:'meas',title:'心臟超音波量測數值'}});
+    <tr><td class="c">聽　診</td><td data-src="f:pe.aus">${esc(pe.aus)}</td><td class="c">心臟輪廓大小</td><td data-src="f:pe.heart">${esc(pe.heart)}</td><td class="e" rowspan="3" data-src="f:ecg">${esc(m.ecg.join('，'))}</td></tr>
+    <tr><td class="c">血　壓</td><td data-src="f:pe.bp">${esc(pe.bp)}</td><td class="c">VHS</td><td data-src="f:pe.vhs">${vhs}</td></tr>
+    <tr><td class="c">心跳</td><td data-src="f:pe.hr">${esc(pe.hr)}</td><td class="c">肺臟血管大小</td><td data-src="f:pe.vessel">${esc(pe.vessel)}</td></tr></table>`})}
+  if(st.table&&m.meas.length) B.push({h:`<div data-src="v:la">${measTable(m.meas)}</div>`,box:{id:'meas',title:'心臟超音波量測數值'}});
   const ex={id:'echo',title:'心臟超音波檢查發現'};
-  if(m.xray.length){B.push({h:'<p class="sub">胸腔 <b>X</b> 光：</p>',keep:1,box:ex});m.xray.forEach(l=>B.push({h:`<ul><li>${esc(l)}</li></ul>`,box:ex}))}
-  if(m.find.length){B.push({h:'<p class="sub">超音波檢查結果 <b>(Findings)</b>：</p>',keep:1,box:ex});m.find.forEach(l=>B.push({h:`<ul><li>${esc(l)}</li></ul>`,box:ex}))}
-  const red=(id,title,arr)=>{if(!arr.length)return;const bx={id,title,cls:'red'};arr.forEach(l=>B.push({h:`<ul><li>${esc(l)}</li></ul>`,box:bx}))};
-  red('dx','診斷與結論',m.dx);red('med','建議用藥',m.meds);
-  if(m.notes.length){const bx={id:'note',title:'注意事項',cls:'red'};m.notes.forEach(l=>B.push({h:`<p class="tx">${esc(l)}</p>`,box:bx}))}
+  if(m.xray.length){B.push({h:'<p class="sub">胸腔 <b>X</b> 光：</p>',keep:1,box:ex});m.xray.forEach(l=>B.push({h:`<ul><li data-src="f:xray">${esc(l)}</li></ul>`,box:ex}))}
+  if(m.find.length){B.push({h:'<p class="sub">超音波檢查結果 <b>(Findings)</b>：</p>',keep:1,box:ex});m.find.forEach((l,i)=>B.push({h:`<ul><li data-src="${m.fsrc[i]}">${esc(l)}</li></ul>`,box:ex}))}
+  const red=(id,title,arr,f)=>{if(!arr.length)return;const bx={id,title,cls:'red'};arr.forEach(l=>B.push({h:`<ul><li data-src="f:${f}">${esc(l)}</li></ul>`,box:bx}))};
+  red('dx','診斷與結論',m.dx,'dx');red('med','建議用藥',m.meds,'meds');
+  if(m.notes.length){const bx={id:'note',title:'注意事項',cls:'red'};m.notes.forEach(l=>B.push({h:`<p class="tx" data-src="f:notes">${esc(l)}</p>`,box:bx}))}
   const used=Object.values(REFS).filter(r=>[...m.dx,...m.meds,...m.find,...m.notes].some(l=>l.includes(r.short)));
-  if(m.next.length) B.push({h:`<table class="nx"><tr><td class="l">下次建議回診時間</td><td class="r">${m.next.map(esc).join('<br>')}</td></tr></table><div style="height:30px"></div>`});
+  if(m.next.length) B.push({h:`<table class="nx"><tr><td class="l">下次建議回診時間</td><td class="r" data-src="f:next">${m.next.map(esc).join('<br>')}</td></tr></table><div style="height:30px"></div>`});
   if(used.length){const bx={id:'ref',title:'參考文獻',cls:'refs'};used.forEach(r=>B.push({h:`<p class="tx">${esc(r.full)}</p>`,box:bx}))}
   return B;
 }
@@ -687,6 +690,19 @@ function scalePreview(){const pv=$('.pv'),z=Math.min(1,(pv.clientWidth-32)/794);
 let rT;
 function renderReport(now){clearTimeout(rT);const go=()=>{PAGES=paginate(KIND);$('#pages').innerHTML=PAGES.join('');$('#pv-count').textContent=`報告預覽（A4，共 ${PAGES.length} 頁）`;scalePreview()};now?go():rT=setTimeout(go,120)}
 addEventListener('resize',()=>scalePreview());
+$('#pages').addEventListener('click',e=>{
+  const el=e.target.closest('[data-src]');if(!el)return;const k=KIND,src=el.dataset.src,ed=$('#ed-'+k);let t=null;
+  if(src.startsWith('g:'))t=ed.querySelector(`.grp[data-g="${src.slice(2)}"]`);
+  else if(src.startsWith('v:'))t=document.getElementById(`f-${k}-${src.slice(2)}`);
+  else if(src.startsWith('f:'))t=document.getElementById(`t-${k}-${src.slice(2)}`);
+  if(!t)return;
+  const sec=t.closest('.sec');if(sec&&sec.classList.contains('skipped'))return;
+  const det=t.closest('details');if(det)det.open=true;
+  if(document.body.dataset.view==='preview')setView('edit');
+  t.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
+  t.classList.remove('flash');void t.offsetWidth;t.classList.add('flash');
+  if(t.matches('input,textarea,select'))setTimeout(()=>t.focus({preventScroll:true}),350);
+});
 
 /* plain text + rich copy */
 function reportText(k){
