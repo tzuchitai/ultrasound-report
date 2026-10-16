@@ -91,7 +91,7 @@ textarea{resize:vertical;min-height:34px;line-height:1.55}
 .chip:hover{border-color:var(--accent)}
 .chip.on{background:var(--accent-soft);border-color:var(--accent);font-weight:700}
 .grp.alt .chip.on{background:var(--warn-soft);border-color:var(--warn)}
-.tchip.on{background:var(--lib-soft);border-color:var(--lib);font-weight:700}
+.tchip.on,.xchip.on{background:var(--lib-soft);border-color:var(--lib);font-weight:700}
 .chip .ph{color:var(--ai);font-weight:500}
 details.lib{border:1px dashed var(--lib);border-radius:8px;padding:6px 10px}
 details.lib summary{cursor:pointer;color:var(--lib);font-size:13px;font-weight:700}
@@ -140,7 +140,7 @@ details summary{cursor:pointer;font-weight:700}
 .hcrow.w{grid-template-columns:minmax(0,10em) minmax(0,7em) auto}
 .hcrow input,.btable input,.btable select,.hcrow select{border:1px solid var(--line);background:var(--bg);border-radius:7px;padding:5px 8px;width:100%;min-width:0}
 .autotag{display:block;font-size:11px;color:var(--ai);font-weight:500}
-.hcrow.pup{grid-template-columns:8.5em minmax(0,1fr) 10em auto minmax(0,10em)}
+.hcrow.pup{grid-template-columns:7.5em minmax(0,1.4fr) 9.5em auto minmax(0,8em)}
 @media (max-width:620px){.hcrow.pup{grid-template-columns:1fr 1fr}}
 .pcalc{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:8px;display:flex;flex-direction:column;gap:3px;font-size:13px}
 .pwarn{color:var(--warn);font-weight:700;font-size:13px}
@@ -1870,7 +1870,13 @@ const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+Math.round(n));r
 const md=d=>`${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
 function schedDate(st,row){if(!st.dob||!row.w)return '';return `${md(addDays(st.dob,row.w[0]*7))}–${md(addDays(st.dob,row.w[1]*7))}`}
 const rowSt=(st,rr)=>rr.st||(rr.done?(rr.done<=(st.p.date||today())?'done':'plan'):'');
-function vacLines(st,row){return row.vac.filter(v=>typeof v==='string'||st[v.opt]).map(v=>typeof v==='string'?v:v.t)}
+// Main dose = first entry, e.g. 第二劑（8 合一／10 合一／11 合一）→ dose + combo choices; the rest are add-on vaccines.
+function vacParts(row){const m=String(row.vac[0]).match(/^(.+?)（(.+)）$/);
+  return {dose:m?m[1]:row.vac[0],combos:m?m[2].split('／'):[],extras:row.vac.slice(1).map(v=>typeof v==='string'?{t:v,def:true}:{t:v.t,opt:v.opt})}}
+const extraOn=(st,rr,x)=>rr.x&&x.t in rr.x?!!rr.x[x.t]:(x.def?true:!!st[x.opt]);
+function vacLines(st,row,i){const rr=st.rows[i]||{},P=vacParts(row);
+  const main=rr.combo&&P.combos.includes(rr.combo)?`${P.dose}（${rr.combo}）`:row.vac[0];
+  return [main,...P.extras.filter(x=>extraOn(st,rr,x)).map(x=>x.t)]}
 function paraCalc(st,pr){const months=+st.months||0,pack=+(st.packs[pr.id]??pr.pack)||1;
   const doses=pr.days>=365?Math.max(1,Math.ceil(months/12)):pr.days===30?Math.max(1,Math.ceil(months)):Math.max(1,Math.ceil(months*30.44/pr.days));
   return {doses,pack,boxes:Math.ceil(doses/pack),unit:pr.unit||'盒'}}
@@ -1893,11 +1899,11 @@ function renderPup(){
     <p class="hint" style="margin:6px 0 0" id="pup-age">${isFinite(aw)?`目前約 ${Math.floor(aw)} 週齡（${Math.floor(aw/4.345)} 個月）`:'填入出生日期後，會自動算出週齡與各劑建議日期'}</p></div>`;
   h+=`<div class="card"><h2>預防時程 <small>依聯盟幼犬貓行程表；填入出生日期會自動算出建議日期</small></h2>
     <label class="chk"><input type="checkbox" data-pupb="${sp_===CAT?'felv':'lyme'}"${st[sp_===CAT?'felv':'lyme']?' checked':''}> 加入${sp_===CAT?'貓白血病':'萊姆病'}疫苗</label>
-    ${PUP_SCHED[sp_].map((r,i)=>`<div class="hcrow pup"><span><b>${r.age}</b><br><small class="hint">${schedDate(st,r)||'—'}</small></span><span class="hint">${vacLines(st,r).join('、')}</span>
+    ${PUP_SCHED[sp_].map((r,i)=>`<div class="hcrow pup"><span><b>${r.age}</b><br><small class="hint">${schedDate(st,r)||'—'}</small></span><span>${(()=>{const P=vacParts(r),rr=st.rows[i]||{};return `<span class="hint">${P.dose}</span><div class="grp">${P.combos.map(c=>`<button type="button" class="chip${rr.combo===c?' on':''}" data-pupcombo="${i}" data-v="${esc(c)}">${c}</button>`).join('')}${P.extras.map(x=>`<button type="button" class="chip xchip${extraOn(st,rr,x)?' on':''}" data-pupx="${i}" data-v="${esc(x.t)}">＋${x.t}</button>`).join('')}</div>`})()}</span>
       <input type="date" id="t-pup-rows.${i}.done" data-k="pup" data-f="rows.${i}.done" value="${esc(st.rows[i]?.done||'')}" aria-label="${r.age} 日期">
       <div class="grp">${[['plan','預計'],['done','完成']].map(([v,l])=>`<button type="button" class="chip${rowSt(st,st.rows[i]||{})===v?' on':''}${v==='plan'?' ab':''}" data-pupst="${i}" data-v="${v}">${l}</button>`).join('')}</div>
       <input id="t-pup-rows.${i}.note" data-k="pup" data-f="rows.${i}.note" value="${esc(st.rows[i]?.note||'')}" placeholder="施打品項／備註"></div>`).join('')}
-    <p class="hint" style="margin:6px 0 0">每列：建議日期｜疫苗內容｜日期｜預計或完成｜品項或備註。未選時，日期在今天以前視為完成、之後視為預計</p></div>`;
+    <p class="hint" style="margin:6px 0 0">每列：建議日期｜點選疫苗種類與加打項目（未選種類時報告列出全部選項）｜日期｜預計或完成｜品項或備註。未選時，日期在今天以前視為完成、之後視為預計</p></div>`;
   h+=`<div class="card"><h2>篩檢紀錄</h2>${PUP_TESTS.filter(x=>!x.s||x.s===sp_).map(x=>{const v=st.tests[x.id]||{};return `<div class="hcrow pup"><span><b>${x.label}</b></span>
     <div class="grp">${x.opts.map(([k,l])=>`<button type="button" class="chip${v.st===k?' on':''}${k==='a'?' ab':''}" data-puptest="${x.id}" data-v="${k}">${l}</button>`).join('')}</div>
     <input type="date" id="t-pup-tests.${x.id}.date" data-k="pup" data-f="tests.${x.id}.date" value="${esc(v.date||'')}" aria-label="${x.label}日期">
@@ -1935,7 +1941,7 @@ function blocksPup(){
   let t=`<div class="hsec">預防時程表</div><table class="ex pt2"><colgroup><col style="width:17%"><col style="width:35%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:18%"></colgroup>
     <tr><th>年齡／建議日期</th><th>預防針</th><th>腸道驅蟲</th><th>體外驅蟲</th><th>心絲蟲</th><th>預計／完成</th></tr>`;
   rows.forEach((r,i)=>{const rr=st.rows[i]||{},sd=schedDate(st,r);
-    t+=`<tr><td class="cat" data-src="f:rows.${i}.done">${r.age}${sd?`<br><span>${sd}</span>`:''}</td><td data-src="f:rows.${i}.note">${vacLines(st,r).map(v=>'◎'+esc(v)).join('<br>')}${rr.note?`<br><span class="pnote">${esc(rr.note)}</span>`:''}</td>
+    t+=`<tr><td class="cat" data-src="f:rows.${i}.done">${r.age}${sd?`<br><span>${sd}</span>`:''}</td><td data-src="f:rows.${i}.note">${vacLines(st,r,i).map(v=>'◎'+esc(v)).join('<br>')}${rr.note?`<br><span class="pnote">${esc(rr.note)}</span>`:''}</td>
       <td class="it">${r.gi}</td><td class="it">每個月</td><td class="it">每個月</td><td>${rr.done?(rowSt(st,rr)==='plan'?`<b class="pplan">預計 ${fmtDate(rr.done)}</b>`:`<b class="pdone">✓ 完成 ${fmtDate(rr.done)}</b>`):''}${r.neut?`<span class="pnote">${r.neut}</span>`:''}</td></tr>`});
   B.push({h:t+'</table>'});
   const tr=PUP_TESTS.filter(x=>!x.s||x.s===sp_).map(x=>{const v=st.tests[x.id]||{},o=x.opts.find(q=>q[0]===v.st);
@@ -1959,7 +1965,7 @@ function blocksPup(){
   return B;
 }
 function pupText(){const st=S.pup,p=st.p,o=[`${p.sp==='貓'?'幼貓':'幼犬'}疫苗與照護手冊`,`日期：${fmtDate(p.date)}　飼主：${p.owner}　寵物：${p.name}（${p.chart}）`,`${p.sp}　${p.breed}　${p.sex}　出生 ${fmtDate(st.dob)}　體重 ${p.wt?p.wt+' kg':''}`,'','【預防時程】'];
-  PUP_SCHED[p.sp].forEach((r,i)=>{const rr=st.rows[i]||{};o.push(`${r.age}${schedDate(st,r)?'（'+schedDate(st,r)+'）':''}：${vacLines(st,r).join('、')}${rr.done?(rowSt(st,rr)==='plan'?'　預計 ':'　✓ 完成 ')+fmtDate(rr.done):''}${rr.note?'　'+rr.note:''}`)});
+  PUP_SCHED[p.sp].forEach((r,i)=>{const rr=st.rows[i]||{};o.push(`${r.age}${schedDate(st,r)?'（'+schedDate(st,r)+'）':''}：${vacLines(st,r,i).join('、')}${rr.done?(rowSt(st,rr)==='plan'?'　預計 ':'　✓ 完成 ')+fmtDate(rr.done):''}${rr.note?'　'+rr.note:''}`)});
   o.push('','【篩檢紀錄】');PUP_TESTS.filter(x=>!x.s||x.s===p.sp).forEach(x=>{const v=st.tests[x.id]||{},q=x.opts.find(z=>z[0]===v.st);o.push(`${x.label}：${q?q[1]:'—'}${v.date?'（'+fmtDate(v.date)+'）':''}${v.note?'　'+v.note:''}`)});
   const sel=st.paras.map(id=>PARA[p.sp].find(x=>x.id===id)).filter(Boolean);
   if(sel.length){o.push('',`【驅蟲藥建議（${st.months} 個月）】`);sel.forEach(pr=>{const c=paraCalc(st,pr);o.push(`${pr.name}：${c.doses} 次，約 ${c.boxes} ${c.unit}（${pr.cov.join('、')}）`)})}
@@ -1969,6 +1975,10 @@ function pupText(){const st=S.pup,p=st.p,o=[`${p.sp==='貓'?'幼貓':'幼犬'}�
 /* ---- events ---- */
 const PACKKEY='usReportGen.packs';
 document.addEventListener('click',e=>{
+  const pc=e.target.closest('[data-pupcombo]');if(pc){const rr=S.pup.rows[+pc.dataset.pupcombo]=S.pup.rows[+pc.dataset.pupcombo]||{};rr.combo=rr.combo===pc.dataset.v?'':pc.dataset.v;
+    pc.parentElement.querySelectorAll('[data-pupcombo]').forEach(b=>b.classList.toggle('on',b.dataset.v===rr.combo));changed('pup');return}
+  const px=e.target.closest('[data-pupx]');if(px){const i=+px.dataset.pupx,rr=S.pup.rows[i]=S.pup.rows[i]||{},x=vacParts(PUP_SCHED[S.pup.p.sp][i]).extras.find(z=>z.t===px.dataset.v);
+    rr.x=rr.x||{};rr.x[x.t]=!extraOn(S.pup,rr,x);px.classList.toggle('on',rr.x[x.t]);changed('pup');return}
   const pt=e.target.closest('[data-puptest]');if(pt){const t=S.pup.tests[pt.dataset.puptest]=S.pup.tests[pt.dataset.puptest]||{};t.st=t.st===pt.dataset.v?'':pt.dataset.v;
     pt.parentElement.querySelectorAll('.chip').forEach(b=>b.classList.toggle('on',b.dataset.v===t.st));changed('pup');return}
   const ps=e.target.closest('[data-pupst]');if(ps){const i=+ps.dataset.pupst,rr=S.pup.rows[i]=S.pup.rows[i]||{};rr.st=rowSt(S.pup,rr)===ps.dataset.v&&rr.st?'':ps.dataset.v;
