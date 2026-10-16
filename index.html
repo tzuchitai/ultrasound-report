@@ -1420,11 +1420,11 @@ let DBH=null;
 
 /* ================= 健康檢查報告書 (third tab) ================= */
 const HCI=[
- {cat:'(A) 理學檢查',en:'Physical exam.',items:[['eye','眼'],['ear','耳'],['oral','口腔'],['skin','皮膚'],['aus','聽診'],['fecal','糞檢']]},
- {cat:'(A) 血液檢查',en:'Blood test',items:[['cbc','紅、白血球'],['chem','血液生化／特殊生化'],['snap','快篩']]},
- {cat:'(A) X光檢查',en:'X-ray',items:[['xth','胸腔'],['xab','腹腔'],['xms','骨骼肌肉系統']]},
- {cat:'(C) 尿液檢查',en:'Urinalysis',items:[['ustrip','尿液試紙'],['usg','尿比重'],['upro','尿蛋白']]},
- {cat:'(C) 超音波',en:'Ultrasound',items:[['ulg','肝、膽'],['ukd','腎臟'],['ubl','膀胱'],['ugi','腸道'],['uht','心臟'],['uot','其他']]}];
+ {cat:'理學檢查',en:'Physical exam.',items:[['eye','眼'],['ear','耳'],['oral','口腔'],['skin','皮膚'],['aus','聽診'],['fecal','糞檢']]},
+ {cat:'血液檢查',en:'Blood test',items:[['cbc','紅、白血球'],['chem','血液生化／特殊生化'],['snap','快篩']]},
+ {cat:'X光檢查',en:'X-ray',items:[['xth','胸腔'],['xab','腹腔'],['xms','骨骼肌肉系統']]},
+ {cat:'尿液檢查',en:'Urinalysis',items:[['ustrip','尿液試紙'],['usg','尿比重'],['upro','尿蛋白']]},
+ {cat:'超音波',en:'Ultrasound',items:[['ulg','肝、膽'],['ukd','腎臟'],['ubl','膀胱'],['ugi','腸道'],['uht','心臟'],['uot','其他']]}];
 const HC_LABEL={};HCI.forEach(c=>c.items.forEach(([id,l])=>HC_LABEL[id]=l));
 const CBC_RE=/^(RBC|HCT|HGB|HB\b|MCV|MCHC|MCH|RDW|RETIC|WBC|NEU|SEG|BAND|LYM|MONO|EOS|BASO|PLT|MPV|PCT|PDW|紅血球|白血球|血小板|血比容|血紅素|網狀)/i;
 const ABN_RE=/異常|增大|擴大|擴張|增厚|腫塊|結節|結石|逆流|不均|下降|升高|積液|腹水|囊腫|礦化|模糊|消失|偏高|偏低|較鈍|膽泥|沉積|阻塞|扭轉|梗塞|血栓|狹窄|肥厚|雜音/;
