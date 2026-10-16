@@ -180,6 +180,10 @@ details summary{cursor:pointer;font-weight:700}
 .rpt .ms th{background:#F9E3A1;color:#6E4E1F;padding:4px 10px;font-size:13px;text-align:left}
 .rpt .ms td{padding:4px 10px;font-size:13.5px}
 .rpt .ms .l{background:#FCF1D2;color:#8C6425;white-space:nowrap}
+.rpt .ms.cmp td.pv{color:#777}
+.rpt .ms.cmp td.dl{font-weight:500}
+.rpt .ms.cmp td.up{color:#B42318}
+.rpt .ms.cmp td.dn{color:#1D5FB4}
 .rpt .ms .v{background:#F2F2F2;text-align:center;font-variant-numeric:tabular-nums}
 
 /* abdominal template */
@@ -356,6 +360,7 @@ details summary{cursor:pointer;font-weight:700}
       <div class="thumbs" id="thumbs"></div>
       <textarea id="ai-text" placeholder="（可選）貼上文字量測結果，例如：LA Diam 3.23cm Ao 2.14cm IVSd 0.90cm…" style="margin-top:8px"></textarea>
       <div class="airow">
+        <label class="hint" id="imp-wrap" for="imp-target">帶入到 <select id="imp-target" style="border:1px solid var(--line);border-radius:7px;padding:4px 6px;background:var(--bg)"><option value="cur">本次檢查</option><option value="prev">前次檢查（比較用）</option></select></label>
         <button class="btn primary" id="ai-go" style="background:var(--ai);border-color:var(--ai)">讀取並帶入</button>
         <button class="btn" id="ai-stop" hidden>停止</button>
         <span class="aistatus" id="ai-status"></span>
@@ -677,8 +682,8 @@ const TITLES={abd:'腹部超音波報告',card:'心肺評估檢查報告',hc:'�
 const KEY='usReportGen.v2', SKEY='usReportGen.settings.v2';
 const today=()=>new Date().toISOString().slice(0,10);
 const blankP=()=>({owner:'',chip:'',name:'',chart:'',wt:'',sp:DOG,age:'',bcs:'',breed:'',sex:'',mcs:'',date:today()});
-const blankK=k=>k==='pup'?blankPUP():k==='hc'?blankHC():k==='abd'?{p:blankP(),vals:{},sel:{},extra:{},skip:{},dx:'',rec:'',ctx:''}
-  :{p:blankP(),vals:{},sel:{},extra:{},skip:{},dis:'',stage:'',stageNote:'',hist:'',pe:{aus:'',bp:'',hr:'',heart:'',vhs:'',vlas:'',vessel:''},ecg:'',xray:'',dx:'',meds:'',notes:NOTE_LIB[0],next:'',ctx:'',en:'',table:true};
+const blankK=k=>k==='pup'?blankPUP():k==='hc'?blankHC():k==='abd'?{p:blankP(),vals:{},sel:{},extra:{},skip:{},dx:'',rec:'',ctx:'',prev:blankPrev()}
+  :{p:blankP(),vals:{},sel:{},extra:{},skip:{},dis:'',stage:'',stageNote:'',hist:'',pe:{aus:'',bp:'',hr:'',heart:'',vhs:'',vlas:'',vessel:''},ecg:'',xray:'',dx:'',meds:'',notes:NOTE_LIB[0],next:'',ctx:'',en:'',table:true,prev:blankPrev()};
 function exAbd(){const s=blankK('abd');
   Object.assign(s.p,{name:'奇奇',chart:'115029401',wt:'6.3',sp:CAT,bcs:'4/9',breed:'混種',sex:'公',mcs:'輕微肌肉量流失',date:'2026-08-22'});
   Object.assign(s.vals,{cbd:'0.23',spt:'0.78',stw:'0.34',duo:'0.28-0.30',ile:'0.21-0.29',jej:'0.21-0.28',pap:'0.44',col:'0.11',pl:'0.48-0.65',rk:'4.22',lk:'4.49',adr:'0.76 x 0.26',adl:'0.78 x 0.24',blw:'0.11'});
@@ -704,7 +709,7 @@ let S,SET;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 const PUBLIC=!!window.US_PUBLIC;
 if(!S||!S.abd||!S.card) S=PUBLIC?{abd:blankK('abd'),card:blankK('card'),ex:{abd:false,card:false}}:{abd:exAbd(),card:exCard(),ex:{abd:true,card:true}};
-S.hc={...blankHC(),...(S.hc||{})};S.ex.hc=false;S.pup={...blankPUP(),...(S.pup||{})};S.pup.tests=S.pup.tests||{fecal:{},fivfelv:{}};S.ex.pup=false;
+['abd','card'].forEach(k=>{if(!S[k].prev)S[k].prev=blankPrev()});S.hc={...blankHC(),...(S.hc||{})};S.ex.hc=false;S.pup={...blankPUP(),...(S.pup||{})};S.pup.tests=S.pup.tests||{fecal:{},fivfelv:{}};S.ex.pup=false;
 try{SET={...DEFSET,...JSON.parse(localStorage.getItem(SKEY)||'{}')}}catch(e){SET={...DEFSET}}
 let KIND='abd';
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
@@ -800,7 +805,9 @@ function measTable(meas){let h='<table class="ms">';
   return h+'</table>'}
 function blocksAbd(){
   const m=contentAbd(),p=S.abd.p,B=[];
-  B.push({h:`<h1>腹部超音波報告</h1>`},{h:hdrTable(p)},{h:ptTable(p)},{h:'<hr>'},{h:'<h2>超音波檢查結果</h2>',keep:1});
+  B.push({h:`<h1>腹部超音波報告</h1>`},{h:hdrTable(p)},{h:ptTable(p)});
+  const cb=cmpBlock('abd');if(cb)B.push({h:`<h3 style="margin-top:18px">${esc(cb.title)}</h3>`,keep:1},{h:cb.table});
+  B.push({h:'<hr>'},{h:'<h2>超音波檢查結果</h2>',keep:1});
   for(const s of m.secs){B.push({h:`<h3>${esc(s.title)}</h3>`,keep:1});s.lines.forEach((l,i)=>B.push({h:`<ul><li data-src="${s.src[i]}">${esc(l)}</li></ul>`}))}
   if(m.dx.length){B.push({h:'<hr>'},{h:'<h2>影像診斷</h2>',keep:1});m.dx.forEach((l,i)=>B.push({h:`<ol start="${i+1}"><li data-src="f:dx">${esc(l)}</li></ol>`}))}
   if(m.rec.length){B.push({h:'<hr>'},{h:'<h2>建議</h2>',keep:1});m.rec.forEach((l,i)=>B.push({h:`<ol start="${i+1}"><li data-src="f:rec">${esc(l)}</li></ol>`}))}
@@ -811,6 +818,7 @@ function blocksAbd(){
 function blocksCard(){
   const m=contentCard(),st=S.card,p=st.p,pe=st.pe,B=[];
   B.push({h:hdrTable(p)},{h:ptTable(p)+'<div style="height:30px"></div>'});
+  const cbc=cmpBlock('card');if(cbc)B.push({h:cbc.table,box:{id:'cmp',title:cbc.title}});
   if(st.hist.trim()){const bx={id:'hist',title:'就診原因與病史'};B.push({h:`<p class="tx" data-src="f:hist">${esc(st.hist.trim())}</p>`,box:bx})}
   const anyPe=Object.values(pe).some(x=>String(x).trim())||m.ecg.length;
   if(anyPe){const vhs=pe.vhs?esc(pe.vhs)+(pe.vlas?` (VLAS ${esc(pe.vlas)})`:''):(pe.vlas?'VLAS '+esc(pe.vlas):'');
@@ -978,12 +986,14 @@ function renderEditor(k){
   if(k==='pup'){renderPup();return}
   const el=$('#ed-'+k),st=S[k];let h=patientHTML(k);
   if(k==='abd'){
+    h+=cmpCardHTML(k);
     h+=`<div class="card"><h2>腹部超音波檢查結果 <small>黃底為正常描述，橘底為異常描述，再點一次取消；綠框為書本專業描述</small></h2>${ABD.map(s=>secHTML(k,s)).join('')}</div>`;
     h+=`<div class="card"><h2>影像診斷與建議 <small>每行一點，報告自動編號</small></h2>${ta(k,'dx','',4,'影像診斷')}${ta(k,'rec','',4,'建議')}${aiDraftRow(k)}</div>`;
     h+=`<div class="card"><h2>指引證據引用 <small>AAHA 營養評估、高齡照護與 IRIS 2026 腎臟指引；點選後加入「建議」，句尾自動標註出處，報告最後附參考文獻</small></h2>${evidenceHTML('abd')}</div>`;
   }else{
     const c=cardCalc(),f=(path,l,list,ph='')=>`<div class="fld"><label for="t-card-${path}">${l}</label><input id="t-card-${path}" data-k="card" data-f="${path}" value="${esc(getP(st,path)||'')}"${list?` list="${list}"`:''} placeholder="${ph}"></div>`;
     h+=`<div class="card"><h2>就診原因與病史</h2>${ta(k,'hist','',2)}</div>`;
+    h+=cmpCardHTML(k);
     h+=`<div class="card"><h2>理學檢查・放射線學檢查・心電圖</h2><div class="pgrid">${f('pe.aus','聽診','dl-aus')}${f('pe.bp','血壓','','120mmHg')}${f('pe.hr','心跳','','108bpm')}${f('pe.heart','心臟輪廓大小','dl-size')}${f('pe.vhs','VHS')}${f('pe.vlas','VLAS')}${f('pe.vessel','肺臟血管大小','dl-vessel')}</div>
       <p class="sub">心電圖檢查發現</p>${tchips(k,'ecg',ECG_LIB,'')}${ta(k,'ecg','每行一項，報告以「，」連接',1)}
       <p class="sub">胸腔 X 光</p>${tchips(k,'xray',XR_LIB)}${ta(k,'xray','每行一點',2)}</div>`;
@@ -1065,6 +1075,7 @@ document.addEventListener('click',e=>{
 });
 function setKind(k){KIND=k;document.querySelectorAll('.top .tabs:not(.mobileswitch) .tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.kind===k));
   $('#ed-abd').hidden=k!=='abd';$('#ed-card').hidden=k!=='card';$('#ed-hc').hidden=k!=='hc';$('#ed-pup').hidden=k!=='pup';$('#ed-'+k).querySelectorAll('textarea').forEach(autoGrow);
+  $('#imp-wrap').hidden=!(k==='abd'||k==='card');if($('#imp-wrap').hidden)$('#imp-target').value='cur';
   updateBanner();renderReport(true);try{localStorage.setItem('usReportGen.tab',k)}catch(e){}}
 $('#tab-abd').onclick=()=>setKind('abd');$('#tab-card').onclick=()=>setKind('card');$('#tab-hc').onclick=()=>setKind('hc');$('#tab-pup').onclick=()=>setKind('pup');
 function setView(v){document.body.dataset.view=v;$('#v-edit').setAttribute('aria-selected',v==='edit');$('#v-prev').setAttribute('aria-selected',v==='preview');if(v==='preview')scalePreview()}
@@ -1263,10 +1274,11 @@ function applyPatientAll(pat,vit){
   }
   return {out,warn};
 }
-function applyImport(k,fields,pat){
+function applyImport(k,fields,pat,toPrev){
   const valid=new Set(k==='hc'?[]:k==='abd'?ABD.flatMap(s=>s.items.filter(i=>i.t==='n').map(i=>i.id)):CM.flatMap(g=>g.f.map(f=>f.id)));
   const hit=new Set(),ph=new Set(),P=S[k].p;
-  for(const [id,val] of Object.entries(fields||{}))if(valid.has(id)&&val!==''&&val!=null){S[k].vals[id]=String(val);hit.add(id)}
+  const tgt=toPrev?S[k].prev.vals:S[k].vals;
+  for(const [id,val] of Object.entries(fields||{}))if(valid.has(id)&&val!==''&&val!=null){tgt[id]=String(val);hit.add(id)}
   for(const [id,val] of Object.entries(pat||{})){if(!(id in P)||!val)continue;
     if(id==='sp'){if(val===CAT||val===DOG){P.sp=val;ph.add(id)}continue}
     if(id==='date'&&/^\d{4}-\d{2}-\d{2}$/.test(val)&&(S.ex[k]||!P.date||P.date===today())){P.date=val;ph.add(id);continue}
@@ -1275,7 +1287,7 @@ function applyImport(k,fields,pat){
 }
 let aiCtl;
 $('#ai-go').onclick=async()=>{
-  const k=KIND,txt=$('#ai-text').value.trim(),st=$('#ai-status');
+  const k=KIND,txt=$('#ai-text').value.trim(),st=$('#ai-status'),toPrev=$('#imp-target').value==='prev'&&(k==='abd'||k==='card');let pdate='';
   if(!FILES.length&&!txt){st.className='aistatus err';st.textContent='請先加入 PDF、截圖，或貼上文字。';return}
   $('#ai-go').disabled=true;st.className='aistatus';st.textContent='讀取中…';
   const hit=new Set(),ph=new Set(),msgs=[],PCH={abd:false,card:false,hc:false,pup:false};let notes='';
@@ -1322,15 +1334,22 @@ ${fieldList(k)}
 只回傳 JSON：{"fields":{"欄位代碼":"數值字串"},"patient":{"代碼":"值"},"vitals":{"hr":"","bp_s":"","bp_d":"","temp":"","rr":""},"notes":"有量測但沒有對應欄位的項目，用中文簡短列出；沒有就留空字串"}
 ${allT?'\n文字資料：\n'+allT.slice(0,12000):''}`;
         try{const r=await SAMPLE.json(prompt,{images:imgs.length?imgs:undefined,signal:aiCtl.signal});
-          const pa=applyPatientAll(r?.patient,r?.vitals);pa.out[k].forEach(x=>ph.add(x));for(const kk in pa.out)PCH[kk]=PCH[kk]||pa.out[kk].size>0;msgs.push(...pa.warn);
-          const a=applyImport(k,r?.fields,null);a.hit.forEach(x=>hit.add(x));notes=r?.notes||''}
+          if(toPrev)pdate=pdate||normPat({date:r?.patient?.date}).date||'';else{const pa=applyPatientAll(r?.patient,r?.vitals);pa.out[k].forEach(x=>ph.add(x));for(const kk in pa.out)PCH[kk]=PCH[kk]||pa.out[kk].size>0;msgs.push(...pa.warn)}
+          const a=applyImport(k,r?.fields,null,toPrev);a.hit.forEach(x=>hit.add(x));notes=r?.notes||''}
         catch(e){msgs.push(errMsg(e));if(e?.code==='not_granted')disableAI()}
       }
     }
-    const cmt=k==='card'?mindrayComments(allT):'';let enAuto=false;
+    const cmt=k==='card'&&!toPrev?mindrayComments(allT):'';let enAuto=false;
     if(cmt&&cmt!==S.card.en){S.card.en=cmt;enAuto=true;msgs.push('已讀到英文報告的 Comments，'+(SAMPLE?'正在轉成中文（見「英文報告轉中文」）':'請在 claude.ai 開啟後按「轉成中文報告」'))}
     if(enAuto){S.ex.card=false;setTimeout(()=>{renderEditor('card');save();if(SAMPLE)enTranslate()},0)}
-    if(mrN||Object.keys(mr.p).length){const pa=applyPatientAll(mr.p,null);pa.out[k].forEach(x=>ph.add(x));for(const kk in pa.out)PCH[kk]=PCH[kk]||pa.out[kk].size>0;msgs.push(...pa.warn);const a=applyImport(k,mr.f,null);a.hit.forEach(x=>hit.add(x));msgs.unshift(`從 Mindray 報告讀到 ${mrN} 項量測`)}
+    if(toPrev&&(mrN||mr.p.date)){pdate=mr.p.date||pdate;applyImport(k,mr.f,null,true).hit.forEach(x=>hit.add(x));if(mrN)msgs.unshift(`從 Mindray 報告讀到 ${mrN} 項量測`)}
+    else if(mrN||Object.keys(mr.p).length){const pa=applyPatientAll(mr.p,null);pa.out[k].forEach(x=>ph.add(x));for(const kk in pa.out)PCH[kk]=PCH[kk]||pa.out[kk].size>0;msgs.push(...pa.warn);const a=applyImport(k,mr.f,null);a.hit.forEach(x=>hit.add(x));msgs.unshift(`從 Mindray 報告讀到 ${mrN} 項量測`)}
+    if(toPrev){
+      if(!pdate)for(const x of FILES.filter(x=>!x.pdf&&!x.xls)){pdate=await exifDate(x.file);if(pdate)break}
+      if(pdate)S[k].prev.date=pdate;S[k].prev.on=true;renderEditor(k);changed(k);
+      st.className='aistatus'+(hit.size?'':' err');
+      st.textContent=(hit.size?`已帶入前次檢查 ${hit.size} 項量測${pdate?`（${fmtDate(pdate)}）`:'，未讀到日期，請在「與前次檢查比較」手動填寫'}。`:'沒有讀到可帶入的數值。')+(msgs.length?'\n'+msgs.join('\n'):'')+(notes?`\n未對應的量測：${notes}`:'');
+      return}
     const others=['abd','card','hc','pup'].filter(kk=>kk!==k&&PCH[kk]);others.forEach(kk=>renderEditor(kk));if(others.length)save();
     if(hit.size||ph.size){if(S.ex[k]){S.ex[k]=false}updateBanner();renderEditor(k);changed(k);
       hit.forEach(id=>document.querySelector(`#ed-${k} .num[data-n="${id}"]`)?.classList.add('hit'));
@@ -1995,6 +2014,68 @@ document.addEventListener('input',e=>{const t=e.target;
   const rm=t.dataset.k==='pup'&&/^rows\.(\d+)\.done$/.exec(t.dataset.f||'');if(rm){const rr=S.pup.rows[+rm[1]]||{};setTimeout(()=>document.querySelectorAll(`[data-pupst="${rm[1]}"]`).forEach(b=>b.classList.toggle('on',b.dataset.v===rowSt(S.pup,rr))),0)}
   if(t.dataset.pack){S.pup.packs[t.dataset.pack]=t.value;try{const pk=JSON.parse(localStorage.getItem(PACKKEY)||'{}');pk[t.dataset.pack]=t.value;localStorage.setItem(PACKKEY,JSON.stringify(pk))}catch(_){}changed('pup')}
   if(t.dataset.k==='pup'&&(t.dataset.f==='months'||t.dataset.f==='start'||t.dataset.f==='dob'||t.dataset.p==='wt'||t.dataset.p==='date')){clearTimeout(renderPup.t);renderPup.t=setTimeout(()=>{const a=document.activeElement,id=a&&a.id;renderPup();if(id){const n=document.getElementById(id);if(n){n.focus();try{const v=n.value;n.setSelectionRange&&n.type==='text'&&n.setSelectionRange(v.length,v.length)}catch(_){}}}},500)}});
+
+/* ================= 與前次檢查比較 (abdominal + cardiac) ================= */
+const HISTKEY='usReportGen.hist';
+function blankPrev(){return {date:'',vals:{},on:true}}
+function loadHist(){try{const h=JSON.parse(localStorage.getItem(HISTKEY)||'{}');return h&&typeof h==='object'?h:{}}catch(e){return {}}}
+function saveHist(h){try{localStorage.setItem(HISTKEY,JSON.stringify(h))}catch(e){toast('無法儲存紀錄（瀏覽器儲存空間不足或被封鎖）')}}
+function calcVals(vals){const s={vals};const out={...vals};for(const g of CM)for(const f of g.f){if(!String(out[f.id]||'').trim()&&f.auto){const x=f.auto(s,wt('card'));if(isFinite(x))out[f.id]=x.toFixed(f.dec)}}return out}
+function cmpFields(k){
+  if(k==='abd')return ABD.flatMap(sec=>sec.items.filter(it=>it.t==='n'&&fitsSp(it,'abd')).map(it=>({id:it.id,label:`${secTitle('abd',sec)}・${it.label}`,unit:'cm'})));
+  return CM.flatMap(g=>g.f.filter(f=>fitsSp(f,'card')).map(f=>({id:f.id,label:f.label,unit:f.unit})));
+}
+const numOf=v=>{const n=nums(v);return n.length?Math.max(...n):NaN};
+function cmpRows(k){
+  const st=S[k],pv=k==='card'?calcVals(st.prev.vals||{}):(st.prev.vals||{});
+  const cur=k==='card'?Object.fromEntries(Object.entries(cardCalc()).map(([id,x])=>[id,x.val])):st.vals;
+  return cmpFields(k).map(f=>{const a=String(pv[f.id]||'').trim(),b=String(cur[f.id]||'').trim();
+    const na=numOf(a),nb=numOf(b),d=nb-na,pct=na?d/na*100:NaN;
+    return {...f,prev:a,cur:b,d,pct,both:!!(a&&b&&isFinite(na)&&isFinite(nb))}}).filter(r=>r.prev||r.cur);
+}
+const fmtD=(r)=>{if(!r.both)return '';if(Math.abs(r.d)<1e-9)return '—';const dec=Math.max(...[r.prev,r.cur].map(v=>((String(v).match(/\.(\d+)/)||[,''])[1]).length),0);
+  return `${r.d>0?'↑ +':'↓ '}${r.d.toFixed(Math.min(dec||1,2))}${isFinite(r.pct)?`（${r.pct>0?'+':''}${r.pct.toFixed(0)}%）`:''}`};
+function cmpBlock(k){const st=S[k];if(!st.prev||!st.prev.on)return null;const rows=cmpRows(k).filter(r=>r.both);if(!rows.length)return null;
+  const pd=fmtDate(st.prev.date)||'前次',cd=fmtDate(st.p.date)||'本次';
+  const t=`<table class="ms cmp"><colgroup><col style="width:34%"><col style="width:20%"><col style="width:20%"><col style="width:26%"></colgroup><tr><th>項目</th><th>${esc(pd)}</th><th>${esc(cd)}</th><th>變化</th></tr>`+
+    rows.map(r=>`<tr><td class="l">${esc(r.label)}</td><td class="v pv">${esc(r.prev)}${r.unit?' '+r.unit:''}</td><td class="v">${esc(r.cur)}${r.unit?' '+r.unit:''}</td><td class="v dl ${r.d>0?'up':r.d<0?'dn':''}">${fmtD(r)}</td></tr>`).join('')+'</table>';
+  return {title:`與前次檢查比較（${pd} → ${cd}）`,table:t}}
+function cmpCardHTML(k){
+  const st=S[k],p=st.p,h=loadHist(),recs=((h[p.chart]||[]).filter(r=>r.k===k));
+  const rows=cmpRows(k);
+  return `<div class="card"><h2>與前次檢查比較 <small>比較表會顯示在報告上方</small></h2>
+    <label class="chk"><input type="checkbox" data-cmpon="${k}"${st.prev.on?' checked':''}> 報告顯示比較表</label>
+    <div class="pgrid" style="margin-top:8px"><div class="fld"><label for="t-${k}-prev.date">前次檢查日期</label><input type="date" id="t-${k}-prev.date" data-k="${k}" data-f="prev.date" value="${esc(st.prev.date||'')}"></div>
+    <div class="fld"><label for="cmp-rec-${k}">從檢查紀錄選擇（病歷號碼 ${esc(p.chart||'未填')}）</label><select id="cmp-rec-${k}"><option value="">${recs.length?'— 選擇紀錄 —':'尚無此病歷號碼的紀錄'}</option>${recs.map((r,i)=>`<option value="${i}">${fmtDate(r.date)}（${Object.keys(r.vals).length} 項）</option>`).join('')}</select></div></div>
+    <div class="airow"><button class="btn" data-cmpuse="${k}"${recs.length?'':' disabled'}>設為前次</button><button class="btn" data-cmpsave="${k}">把本次存入檢查紀錄</button><button class="btn danger" data-cmpclear="${k}">清除前次</button></div>
+    <p class="hint">也可以在上方「自動帶入數值」選「帶入到：前次檢查」，讀取舊的 Mindray／Soulvet PDF 或截圖；日期會從報告內容或照片拍攝日期讀出。紀錄只存在這台電腦。</p>
+    ${rows.length?`<div class="btwrap"><table class="btable cmpe"><thead><tr><th>項目</th><th>前次</th><th>本次</th><th>變化</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.label)}</td><td><input data-k="${k}" data-pv="${r.id}" value="${esc((st.prev.vals||{})[r.id]||'')}" aria-label="${esc(r.label)} 前次"></td><td>${esc(r.cur)}${r.unit&&r.cur?' '+r.unit:''}</td><td class="bf" data-cmpd="${r.id}">${fmtD(r)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="hint" style="margin:0">本次或前次有量測值後，這裡會列出可以比較的項目。</p>'}</div>`;
+}
+async function exifDate(file){
+  try{const b=new DataView(await file.slice(0,256*1024).arrayBuffer());
+    if(b.getUint16(0)===0xFFD8){let o=2;
+      while(o<b.byteLength-4){const m=b.getUint16(o),len=b.getUint16(o+2);
+        if(m===0xFFE1&&b.getUint32(o+4)===0x45786966){const t=o+10,le=b.getUint16(t)===0x4949,g16=q=>b.getUint16(q,le),g32=q=>b.getUint32(q,le);
+          const ifd=off=>{const base=t+off,n=g16(base),out={};for(let i=0;i<n;i++){const e=base+2+i*12;out[g16(e)]={count:g32(e+4),val:e+8}}return out};
+          const str=en=>{const off=en.count>4?t+g32(en.val):en.val;let s='';for(let i=0;i<en.count-1;i++)s+=String.fromCharCode(b.getUint8(off+i));return s};
+          const i0=ifd(g32(t+4));let d='';if(i0[0x8769]){const ex=ifd(g32(i0[0x8769].val));if(ex[0x9003])d=str(ex[0x9003])}if(!d&&i0[0x0132])d=str(i0[0x0132]);
+          const mm=d.match(/(\d{4}):(\d{2}):(\d{2})/);if(mm)return `${mm[1]}-${mm[2]}-${mm[3]}`;break}
+        if((m&0xFF00)!==0xFF00)break;o+=2+len}}
+  }catch(e){}
+  const fm=String(file.name||'').match(/(20\d{2})[-_.年]?(\d{1,2})[-_.月]?(\d{1,2})/);
+  return fm?`${fm[1]}-${fm[2].padStart(2,'0')}-${fm[3].padStart(2,'0')}`:'';
+}
+document.addEventListener('click',e=>{
+  const u=e.target.closest('[data-cmpuse]');if(u){const k=u.dataset.cmpuse,i=$('#cmp-rec-'+k).value;if(i==='')return;const r=(loadHist()[S[k].p.chart]||[]).filter(x=>x.k===k)[+i];if(!r)return;
+    S[k].prev={date:r.date,vals:{...r.vals},on:true};renderEditor(k);changed(k);toast('已設為前次檢查');return}
+  const sv=e.target.closest('[data-cmpsave]');if(sv){const k=sv.dataset.cmpsave,st=S[k];if(!st.p.chart){toast('請先填病歷號碼再存入紀錄');return}
+    const vals=Object.fromEntries(Object.entries(st.vals).filter(([,v])=>String(v).trim()));if(!Object.keys(vals).length){toast('本次還沒有量測值');return}
+    const h=loadHist(),list=(h[st.p.chart]||[]).filter(r=>!(r.k===k&&r.date===st.p.date));list.unshift({k,date:st.p.date,vals});h[st.p.chart]=list.slice(0,20);saveHist(h);renderEditor(k);toast(`已存入 ${fmtDate(st.p.date)} 的紀錄`);return}
+  const cl=e.target.closest('[data-cmpclear]');if(cl){const k=cl.dataset.cmpclear;if(!cl.classList.contains('armed')){cl.classList.add('armed');cl.textContent='再按一次清除';setTimeout(()=>{cl.classList.remove('armed');cl.textContent='清除前次'},3000);return}
+    S[k].prev=blankPrev();renderEditor(k);changed(k);return}
+});
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset.cmpon){S[t.dataset.cmpon].prev.on=t.checked;changed(t.dataset.cmpon)}});
+document.addEventListener('input',e=>{const t=e.target;if(t.dataset.pv){const k=t.dataset.k;S[k].prev.vals[t.dataset.pv]=t.value;const r=cmpRows(k).find(x=>x.id===t.dataset.pv),c=document.querySelector(`[data-cmpd="${t.dataset.pv}"]`);if(c&&r)c.textContent=fmtD(r);changed(k)}});
 
 /* ================= boot ================= */
 document.body.insertAdjacentHTML('beforeend',`<datalist id="dl-sex"><option>公</option><option>母</option><option>公（已結紮）</option><option>母（已結紮）</option></datalist>
