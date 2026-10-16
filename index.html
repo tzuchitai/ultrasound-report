@@ -139,6 +139,7 @@ details summary{cursor:pointer;font-weight:700}
 .hcrow{display:grid;grid-template-columns:7.5em auto minmax(0,1fr);gap:6px 10px;align-items:center;padding:3px 0}
 .hcrow.w{grid-template-columns:minmax(0,10em) minmax(0,7em) auto}
 .hcrow input,.btable input,.btable select,.hcrow select{border:1px solid var(--line);background:var(--bg);border-radius:7px;padding:5px 8px;width:100%;min-width:0}
+.autotag{display:block;font-size:11px;color:var(--ai);font-weight:500}
 .chip.ab.on{background:var(--warn-soft);border-color:var(--warn)}
 @media (max-width:520px){.hcrow{grid-template-columns:1fr}}
 .btwrap{overflow-x:auto;margin-top:8px}
@@ -964,7 +965,7 @@ document.addEventListener('input',e=>{
   if(!k) return;
   if(t.dataset.p&&t.dataset.p!=='sp'){S[k].p[t.dataset.p]=t.value;changed(k);return}
   if(t.dataset.v){S[k].vals[t.dataset.v]=t.value;changed(k);return}
-  if(t.dataset.f){setP(S[k],t.dataset.f,t.value);if(t.tagName==='TEXTAREA'){autoGrow(t);refreshTchips($('#ed-'+k))}changed(k)}
+  if(t.dataset.f){if(k==='hc'&&/^items\.(\w+)\.note$/.test(t.dataset.f)){const iid=t.dataset.f.split('.')[1];if(S.hc.items[iid])S.hc.items[iid].auto=false;const tg=document.getElementById('auto-'+iid);if(tg)tg.hidden=true}setP(S[k],t.dataset.f,t.value);if(t.tagName==='TEXTAREA'){autoGrow(t);refreshTchips($('#ed-'+k))}changed(k)}
 });
 document.addEventListener('change',e=>{
   const t=e.target,k=t.dataset.k;
@@ -1492,6 +1493,20 @@ function hcSummary(){
   }
   return {out,msg};
 }
+// Auto-fill the 紅、白血球 / 血液生化 rows from the blood table, unless the doctor has set them by hand.
+function autoBloodItems(){const B=(S.hc.blood||[]).filter(r=>r.name&&String(r.val).trim()),ch=[];
+  for(const [id,test] of [['cbc',r=>r.cat==='CBC'],['chem',r=>r.cat!=='CBC'&&r.cat!=='快篩']]){
+    const it=S.hc.items[id]||{};if(it.st&&!it.auto)continue;
+    const rows=B.filter(test);
+    if(!rows.length){if(it.auto){S.hc.items[id]={};ch.push(id)}continue}
+    const ab=rows.filter(r=>bflag(r)).map(r=>`${r.name} ${r.val}${bflag(r)==='H'?'↑':'↓'}`);
+    const nx=ab.length?{st:'a',note:shortJoin(ab,80),auto:true}:{st:'n',note:'',auto:true};
+    if(it.st!==nx.st||it.note!==nx.note){S.hc.items[id]=nx;ch.push(id)}}
+  return ch}
+function patchItemRows(ids){for(const id of ids){const it=S.hc.items[id]||{};
+  document.querySelectorAll(`[data-hcst="${id}"]`).forEach(b=>b.classList.toggle('on',b.dataset.v===it.st));
+  const inp=document.getElementById(`t-hc-items.${id}.note`);if(inp&&document.activeElement!==inp)inp.value=it.note||'';
+  const tag=document.getElementById(`auto-${id}`);if(tag)tag.hidden=!it.auto}}
 function blankHC(){return {p:blankP(),temp:'',plan:'',fast:'',doctor:'',hr:'',rr:'',bp:'',
   ecto:{reg:'',prod:'',last:''},endo:{reg:'',prod:'',last:''},vac:{reg:'',last:'',content:''},
   items:{},blood:[],bloodNote:'',bloodAbnOnly:false,wts:[],rec:'',ctx:'',incAbd:true,incCard:true,incBlood:true}}
@@ -1515,11 +1530,11 @@ function renderHc(){
     ${fSel('ecto.reg','體外寄生蟲預防',['','規律','不規律'])}${fIn('ecto.prod','使用產品')}${fIn('ecto.last','最後一次使用','2026/09')}
     ${fSel('endo.reg','體內寄生蟲預防',['','規律','不規律'])}${fIn('endo.prod','使用產品')}${fIn('endo.last','最後一次使用','2026/09')}
     ${fSel('vac.reg','預防針',['','規律','不規律'])}${fIn('vac.last','最後一次施打','2026/03')}${fIn('vac.content','內容','八合一、狂犬病')}</div></div>`;
-  h+=`<div class="card"><h2>檢查結果 <small>點「無明顯異常」或「異常」，再點一次取消；異常可寫說明</small><button class="btn" data-hcsum="1">從血檢與超音波匯總</button></h2>
+  h+=`<div class="card"><h2>檢查結果 <small>點「無明顯異常」或「異常」，再點一次取消；紅白血球與血液生化會依血檢自動判斷，手動修改後就不再自動覆蓋</small><button class="btn" data-hcsum="1">從血檢與超音波匯總</button></h2>
     <p class="hint" id="hcsum-status" style="margin:0 0 6px"></p>`;
   for(const c of HCI){h+=`<p class="sub">${c.cat} <span class="hint">${c.en}</span></p>`;
     for(const [id,l] of c.items){const it=st.items[id]||{};
-      h+=`<div class="hcrow"><span>${l}</span><div class="grp"><button type="button" class="chip${it.st==='n'?' on':''}" data-hcst="${id}" data-v="n">無明顯異常</button><button type="button" class="chip ab${it.st==='a'?' on':''}" data-hcst="${id}" data-v="a">異常</button></div>
+      h+=`<div class="hcrow"><span>${l}${id==="cbc"||id==="chem"?`<small class="autotag" id="auto-${id}"${it.auto?"":" hidden"}>依血檢自動判斷</small>`:""}</span><div class="grp"><button type="button" class="chip${it.st==='n'?' on':''}" data-hcst="${id}" data-v="n">無明顯異常</button><button type="button" class="chip ab${it.st==='a'?' on':''}" data-hcst="${id}" data-v="a">異常</button></div>
         <input id="t-hc-items.${id}.note" data-k="hc" data-f="items.${id}.note" value="${esc(it.note||'')}" placeholder="說明"></div>`}}
   h+=`</div>`;
   h+=`<div class="card"><h2>血液檢查 <small>上傳血檢報告（PDF／Excel／圖片）或貼上文字，讀出後可逐項修改；異常項目會排在最上面</small></h2>
@@ -1627,7 +1642,7 @@ function hcText(){const st=S.hc,p=st.p,o=['健康檢查報告書',`日期：${fm
 
 /* ---- events ---- */
 document.addEventListener('click',async e=>{
-  const s=e.target.closest('[data-hcst]');if(s){const id=s.dataset.hcst,v=s.dataset.v,it=S.hc.items[id]=S.hc.items[id]||{};it.st=it.st===v?'':v;
+  const s=e.target.closest('[data-hcst]');if(s){const id=s.dataset.hcst,v=s.dataset.v,it=S.hc.items[id]=S.hc.items[id]||{};if(it.auto&&v==='n'){it.note='';const ni=document.getElementById(`t-hc-items.${id}.note`);if(ni)ni.value=''}it.st=it.st===v?'':v;it.auto=false;const tg=document.getElementById('auto-'+id);if(tg)tg.hidden=true;
     s.parentElement.querySelectorAll('.chip').forEach(b=>b.classList.toggle('on',b.dataset.v===it.st));changed('hc');return}
   if(e.target.closest('[data-hcpull]')){const src=['card','abd'].find(k=>S[k].p.chart&&(!S.hc.p.chart||S[k].p.chart===S.hc.p.chart))||'card';
     const P=S[src].p;for(const f of ['name','chart','wt','sp','age','bcs','breed','sex','mcs'])if(P[f]&&!String(S.hc.p[f]||'').trim())S.hc.p[f]=P[f];
@@ -1638,8 +1653,8 @@ document.addEventListener('click',async e=>{
     const m=document.getElementById('hcsum-status');if(m)m.textContent=n?`已依${r.msg.filter(x=>!/未匯總/.test(x)).join('、')}更新 ${n} 項，請核對。${r.msg.filter(x=>/未匯總/.test(x)).join('；')}`:(r.msg.join('；')||'目前沒有可匯總的血檢或超音波資料。');return}
   if(e.target.closest('[data-bloodadd]')){S.hc.blood.push({cat:'生化',name:'',val:'',unit:'',ref:'',flag:''});renderHc();changed('hc');return}
   const bc=e.target.closest('[data-bloodclear]');if(bc){if(!bc.classList.contains('armed')){bc.classList.add('armed');bc.textContent='再按一次清空';setTimeout(()=>{bc.classList.remove('armed');bc.textContent='清空血檢'},3000);return}
-    S.hc.blood=[];BFILES.length=0;renderHc();changed('hc');return}
-  const bd=e.target.closest('[data-bdel]');if(bd){S.hc.blood.splice(+bd.dataset.bdel,1);renderHc();changed('hc');return}
+    S.hc.blood=[];BFILES.length=0;autoBloodItems();renderHc();changed('hc');return}
+  const bd=e.target.closest('[data-bdel]');if(bd){S.hc.blood.splice(+bd.dataset.bdel,1);autoBloodItems();renderHc();changed('hc');return}
   const br=e.target.closest('[data-brm]');if(br){const x=BFILES.splice(+br.dataset.brm,1)[0];x&&x.url&&URL.revokeObjectURL(x.url);renderBThumbs();return}
   const dz=e.target.closest('[data-blooddrop]');if(dz&&!e.target.matches('input')){dz.querySelector('input').click();return}
   if(e.target.closest('[data-wadd]')){S.hc.wts.push({date:'',kg:''});renderHc();changed('hc');return}
@@ -1648,7 +1663,7 @@ document.addEventListener('click',async e=>{
   if(e.target.closest('[data-hcapply]')){const D=DRAFT.hc;if(!D)return;for(const [id,v] of Object.entries(D.items))S.hc.items[id]=v;if(D.rec.length)S.hc.rec=D.rec.join('\n');renderHc();changed('hc');toast('已套用 AI 匯總');return}
 });
 document.addEventListener('input',e=>{const t=e.target;
-  if(t.dataset.brow!==undefined){const r=S.hc.blood[+t.dataset.brow];if(!r)return;r[t.dataset.bk]=t.value;const c=document.querySelector(`[data-bfi="${t.dataset.brow}"]`);if(c)c.textContent=flagTxt(bflag(r));changed('hc')}
+  if(t.dataset.brow!==undefined){const r=S.hc.blood[+t.dataset.brow];if(!r)return;r[t.dataset.bk]=t.value;const c=document.querySelector(`[data-bfi="${t.dataset.brow}"]`);if(c)c.textContent=flagTxt(bflag(r));patchItemRows(autoBloodItems());changed('hc')}
   if(t.dataset.wrow!==undefined){const r=S.hc.wts[+t.dataset.wrow];if(!r)return;r[t.dataset.wk]=t.value;changed('hc')}});
 document.addEventListener('change',e=>{const t=e.target;
   if(t.dataset.hcb){S.hc[t.dataset.hcb]=t.checked;changed('hc')}
@@ -1679,7 +1694,7 @@ ${t.trim()?'\n文字資料：\n'+t.slice(0,12000):''}`;
     catch(e){st.className='aistatus err';st.textContent=errMsg(e);if(!rows.length)return}
   }else if(imgs.length&&!SAMPLE){st.className='aistatus err';st.textContent=NOT_OWNER||PUBLIC?'圖片血檢需要 AI，此版本請改貼文字或上傳有文字的 PDF。':'圖片需要 AI，請在 claude.ai 開啟。';if(!rows.length)return}
   if(!rows.length&&!snap){st.className='aistatus err';st.textContent='沒有讀到血檢數值，請確認檔案或改貼文字（一行一項：項目 數值 單位 參考範圍）。';return}
-  S.hc.blood=rows;
+  S.hc.blood=rows;autoBloodItems();
   if(snap){S.hc.items.snap={st:/陽性|positive|異常/i.test(snap)?'a':'n',note:snap}}
   renderHc();changed('hc');
   const s2=$('#blood-status');s2.className='aistatus';s2.textContent=`已讀到 ${rows.length} 項（${via}），${rows.filter(r=>bflag(r)).length} 項超出參考範圍。請核對後按「從血檢與超音波匯總」。`;
