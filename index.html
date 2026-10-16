@@ -186,6 +186,7 @@ details summary{cursor:pointer;font-weight:700}
 .rpt-abd h2{font-size:32px;font-weight:900;margin:0 0 10px 20px;color:#111}
 .rpt-abd h3{font-size:17px;font-weight:900;margin:14px 0 6px 20px;color:#111}
 .rpt-abd ul,.rpt-abd ol{margin:0;padding-left:60px}
+.rpt-abd .refp{margin:2px 0 2px 20px;font-size:12.5px;color:#555;line-height:1.5}
 .rpt-abd li{font-weight:700;margin:0;line-height:1.75}
 
 /* cardiopulmonary template */
@@ -509,7 +510,9 @@ const NOTE_LIB=['如有呼吸次數變快、運動不耐、黏膜偏白，後腳
 const REFS={
  mmvd:{short:'ACVIM 2019 MMVD 共識',full:'Keene BW, et al. ACVIM consensus guidelines for the diagnosis and treatment of myxomatous mitral valve disease in dogs. J Vet Intern Med. 2019;33:1127-1140.',sp:DOG},
  ph:{short:'ACVIM 2020 犬肺高壓共識',full:'Reinero C, et al. ACVIM consensus statement guidelines for the diagnosis, classification, treatment, and monitoring of pulmonary hypertension in dogs. J Vet Intern Med. 2020;34:549-573.',sp:DOG},
- fcm:{short:'ACVIM 2020 貓心肌病共識',full:'Luis Fuentes V, et al. ACVIM consensus statement guidelines for the classification, diagnosis, and management of cardiomyopathies in cats. J Vet Intern Med. 2020;34:1062-1077.',sp:CAT}};
+ fcm:{short:'ACVIM 2020 貓心肌病共識',full:'Luis Fuentes V, et al. ACVIM consensus statement guidelines for the classification, diagnosis, and management of cardiomyopathies in cats. J Vet Intern Med. 2020;34:1062-1077.',sp:CAT},
+ nut:{short:'AAHA 2010 營養評估指引',full:'Baldwin K, et al. AAHA nutritional assessment guidelines for dogs and cats. J Am Anim Hosp Assoc. 2010;46:285-296.',sp:null},
+ senior:{short:'AAHA 2023 高齡照護指引',full:'Dhaliwal R, et al. 2023 AAHA senior care guidelines for dogs and cats. J Am Anim Hosp Assoc. 2023;59:1-21.',sp:null}};
 const EVID={
  mmvd:[
   ['dx','B2 期需同時符合：心雜音 ≥3/6、右短軸舒張早期 LA/Ao ≥1.6、LVIDDN ≥1.7、品種校正 VHS >10.5；其中以超音波顯示左心房與左心室擴大最具代表性'],
@@ -546,7 +549,33 @@ const EVID={
   ['meds','具 ATE 風險（中重度左心房擴大、左心房縮短率低、左心耳流速低、自發性顯影）建議使用 clopidogrel 18.75 mg/cat PO q24h（與食物同服）'],
   ['meds','有心衰竭病史且合併中重度左心房擴大者，建議預防性給予 clopidogrel 18.75 mg/cat PO q24h'],
   ['meds','慢性心衰竭：furosemide 0.5–2 mg/kg PO q8–12h，依在家呼吸次數 <30 次/分調整；開始後 3–7 天檢查腎指數與電解質'],
-  ['meds','D 期：furosemide >6 mg/kg/day 仍持續心衰竭時，可改用 torsemide 0.1–0.2 mg/kg PO q24h 起始；spironolactone 1–2 mg/kg PO q12–24h 也可考慮']]};
+  ['meds','D 期：furosemide >6 mg/kg/day 仍持續心衰竭時，可改用 torsemide 0.1–0.2 mg/kg PO q24h 起始；spironolactone 1–2 mg/kg PO q12–24h 也可考慮']],
+ nut:[
+  ['rec','每次就診都應進行營養篩檢（體重、BCS、MCS 與飲食史），有風險因子時再做延伸營養評估'],
+  ['rec','營養風險因子包括：BCS（9 分制）低於 4 或高於 5、肌肉量流失、非預期體重下降超過 10%、牙齒疾病、皮毛狀況差及新診斷的疾病'],
+  ['rec','飲食史的風險因子包括：生食、自製或素食等非傳統飲食，零食與人類食物超過每日總熱量 10%，以及正在使用保健品或藥物'],
+  ['rec','建議固定使用同一套 BCS 與 MCS 評分系統追蹤，以便及早發現體態與肌肉量變化'],
+  ['rec','多數急慢性疾病造成的肌肉流失比脂肪流失更明顯，且會影響肌力、免疫功能與傷口癒合，需特別留意肌肉量'],
+  ['rec','建議提供具體的餵食計畫，包括主食、零食、份量、餐次與餵食地點，零食熱量也要計入每日總熱量'],
+  ['rec','若有肥胖，建議擬定完整減重計畫（飲食調整、增加活動、行為與環境調整），並安排電話追蹤與回診再評估'],
+  ['rec','高齡、成長期、懷孕或哺乳中的動物需要更頻繁地進行營養評估'],
+  ['rec','可教導飼主在家自行評估 BCS 與 MCS，提高參與度與執行成效']],
+ senior:[
+  ['rec','高齡的定義：犬為預估壽命的最後 25%，貓為 10 歲以上'],
+  ['rec','高齡犬貓建議每 6–12 個月檢查 CBC、血液生化（含 SDMA）與尿液分析'],
+  ['rec','高齡犬貓建議每年檢測甲狀腺素（T4）與血壓；健康的高齡貓建議每 6–12 個月量血壓'],
+  ['rec','建議每年檢測 NT-proBNP，麻醉前尤其應考慮'],
+  ['rec','糞便寄生蟲檢查：犬每年 1–4 次、貓每年 1–2 次，依預防用藥與生活型態調整；犬每年檢測心絲蟲與壁蝨傳播疾病'],
+  ['rec','高齡犬理想 BCS 約 4.5–5/9，適度限制熱量與較長壽命相關；貓的理想 BCS 可到 6/9，過瘦的貓罹病與死亡風險較高'],
+  ['rec','高齡貓對蛋白質與脂肪的消化率可能下降，容易出現體重與肌肉量流失，需定期追蹤 BCS 與 MCS'],
+  ['rec','年齡本身不是麻醉的禁忌，牙科治療等處置常能明顯改善生活品質；麻醉前建議評估腎功能（creatinine）與心臟（NT-proBNP）'],
+  ['rec','超過 60% 的貓至少一個關節有退化性關節炎，即使理學檢查沒有明顯異常，也建議留意活動力並評估慢性疼痛'],
+  ['rec','長鏈 omega-3 脂肪酸對退化性關節炎具有抗發炎效果'],
+  ['rec','認知功能障礙常見日夜顛倒、互動減少、在家迷失方向與焦慮（DISHAA），建議以問卷定期追蹤；治療飲食搭配環境豐富化效果最佳'],
+  ['rec','慢性腎病自 IRIS 第 2 期起建議補充長鏈 omega-3；健康與早期腎病不需限制蛋白質，IRIS 第 3 期建議限制蛋白質並控制磷攝取'],
+  ['rec','皮膚腫塊建議測量三個維度、細針採樣，並記錄位置以追蹤變化'],
+  ['rec','居家環境調整：鋪設防滑墊或地毯、樓梯與泳池加裝護欄、調整食碗高度，以提升行動安全與生活品質'],
+  ['rec','建議及早與飼主討論生活品質評估與安寧照護，規劃照護目標']]};
 const evLine=(g,t)=>`${t}〔${REFS[g].short}〕`;
 const PFIELDS=[['name','動物名字'],['chart','病歷號碼'],['wt','體重 (kg)'],['sp','種別'],['age','年紀'],['bcs','體態評分'],['breed','品種'],['sex','性別'],['mcs','肌肉量評分'],['date','檢查日期']];
 const TITLES={abd:'腹部超音波報告',card:'心肺評估檢查報告',hc:'健康檢查報告書'};
@@ -682,6 +711,8 @@ function blocksAbd(){
   for(const s of m.secs){B.push({h:`<h3>${esc(s.title)}</h3>`,keep:1});s.lines.forEach((l,i)=>B.push({h:`<ul><li data-src="${s.src[i]}">${esc(l)}</li></ul>`}))}
   if(m.dx.length){B.push({h:'<hr>'},{h:'<h2>影像診斷</h2>',keep:1});m.dx.forEach((l,i)=>B.push({h:`<ol start="${i+1}"><li data-src="f:dx">${esc(l)}</li></ol>`}))}
   if(m.rec.length){B.push({h:'<hr>'},{h:'<h2>建議</h2>',keep:1});m.rec.forEach((l,i)=>B.push({h:`<ol start="${i+1}"><li data-src="f:rec">${esc(l)}</li></ol>`}))}
+  const refs=Object.values(REFS).filter(r=>[...m.dx,...m.rec].some(l=>l.includes(r.short)));
+  if(refs.length){B.push({h:'<h3 style="margin-top:22px">參考文獻</h3>',keep:1});refs.forEach(r=>B.push({h:`<p class="refp">${esc(r.full)}</p>`}))}
   return B;
 }
 function blocksCard(){
@@ -829,12 +860,16 @@ document.addEventListener('dragleave',e=>{const d=e.target.closest&&e.target.clo
 document.addEventListener('drop',e=>{const d=e.target.closest&&e.target.closest('[data-ctxdrop]');if(d){e.preventDefault();d.classList.remove('over');addCtx(d.dataset.ctxdrop,e.dataTransfer.files)}});
 function ym(n){const d=(S.card.p.date||today()).split('-').map(Number),x=new Date(d[0],d[1]-1+n,1);return `${x.getFullYear()}/${String(x.getMonth()+1).padStart(2,'0')}`}
 const nextOpts=()=>[`心臟超音波 1 個月後追蹤（${ym(1)}）`,`心臟超音波 3 個月內複查（${ym(3)} 前）`,`心臟超音波 6 個月後追蹤（${ym(6)}）`,`心臟超音波 1 年後追蹤（${ym(12)}）`,`胸腔 X 光 3 個月後追蹤（${ym(3)}）`,'血檢於調整藥物後 2–4 週追蹤','血壓於 2–4 週後複查'];
-function evidenceHTML(){
-  const gs=Object.keys(REFS).sort((a,b)=>(REFS[b].sp===sp('card'))-(REFS[a].sp===sp('card')));
-  return gs.map(g=>{const R_=REFS[g],mine=R_.sp===sp('card');
-    const chips=t=>`<div class="grp">${EVID[g].filter(x=>x[0]===t).map(x=>`<button type="button" class="chip tchip" data-tk="card" data-tf="${x[0]}" data-line="${esc(evLine(g,x[1]))}">${esc(x[1])}</button>`).join('')}</div>`;
-    return `<details class="lib"${OPEN.has('ev'+g)||(mine&&!OPEN.has('evx'+g))?' open':''} data-lib="ev${g}"><summary>${R_.short}${mine?'':'（'+R_.sp+'）'}</summary><p class="hint" style="margin:6px 0 0">${esc(R_.full)}</p>
-      <p class="sub">→ 診斷與結論</p>${chips('dx')}<p class="sub">→ 建議用藥</p>${chips('meds')}</details>`}).join('');
+function evidenceHTML(k='card'){
+  const spc=sp(k),tgt=t=>t==='rec'?(k==='card'?'dx':'rec'):t;
+  const lab={dx:'→ 診斷與結論',meds:'→ 建議用藥',rec:k==='card'?'→ 診斷與結論':k==='hc'?'→ 建議及注意事項':'→ 建議'};
+  const gs=Object.keys(REFS).filter(g=>k==='card'||REFS[g].sp===null).sort((a,b)=>((REFS[b].sp===spc)*2+(REFS[b].sp===null))-((REFS[a].sp===spc)*2+(REFS[a].sp===null)));
+  return gs.map(g=>{const R_=REFS[g],mine=R_.sp===spc||R_.sp===null;
+    const kinds=[...new Set(EVID[g].map(x=>x[0]))];
+    const chips=t=>`<div class="grp">${EVID[g].filter(x=>x[0]===t).map(x=>`<button type="button" class="chip tchip" data-tk="${k}" data-tf="${tgt(x[0])}" data-line="${esc(evLine(g,x[1]))}">${esc(x[1])}</button>`).join('')}</div>`;
+    const id=k+'ev'+g;
+    return `<details class="lib"${OPEN.has(id)||(mine&&R_.sp!==null&&!OPEN.has(id+'x'))?' open':''} data-lib="${id}"><summary>${R_.short}${R_.sp&&R_.sp!==spc?'（'+R_.sp+'）':''}</summary><p class="hint" style="margin:6px 0 0">${esc(R_.full)}</p>
+      ${kinds.map(t=>`<p class="sub">${lab[t]}</p>${chips(t)}`).join('')}</details>`}).join('');
 }
 const aiDraftRow=k=>`<div class="ai-only" style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">
    ${ta(k,'ctx','例：主訴食慾下降、嘔吐 3 天；血檢 CREA 1.9、HCT 26%（可在這裡 ⌘V 貼上圖片）',2,'臨床背景（給 AI 參考，不會印在報告上）')}
@@ -848,6 +883,7 @@ function renderEditor(k){
   if(k==='abd'){
     h+=`<div class="card"><h2>腹部超音波檢查結果 <small>黃底為正常描述，橘底為異常描述，再點一次取消；綠框為書本專業描述</small></h2>${ABD.map(s=>secHTML(k,s)).join('')}</div>`;
     h+=`<div class="card"><h2>影像診斷與建議 <small>每行一點，報告自動編號</small></h2>${ta(k,'dx','',4,'影像診斷')}${ta(k,'rec','',4,'建議')}${aiDraftRow(k)}</div>`;
+    h+=`<div class="card"><h2>指引證據引用 <small>AAHA 營養評估與高齡照護指引；點選後加入「建議」，句尾自動標註出處，報告最後附參考文獻</small></h2>${evidenceHTML('abd')}</div>`;
   }else{
     const c=cardCalc(),f=(path,l,list,ph='')=>`<div class="fld"><label for="t-card-${path}">${l}</label><input id="t-card-${path}" data-k="card" data-f="${path}" value="${esc(getP(st,path)||'')}"${list?` list="${list}"`:''} placeholder="${ph}"></div>`;
     h+=`<div class="card"><h2>就診原因與病史</h2>${ta(k,'hist','',2)}</div>`;
@@ -868,7 +904,7 @@ function renderEditor(k){
     h+=`<div class="card"><h2>超音波檢查結果 (Findings) <small>依序列成條列；黃底正常、橘底異常、綠框書本專業描述</small></h2>${CARD.map(s=>secHTML(k,s)).join('')}</div>`;
     h+=`<div class="card"><h2>診斷與結論・用藥・注意事項</h2>${ta(k,'dx','每行一點',4,'診斷與結論')}${ta(k,'meds','每行一點',3,'建議用藥')}
       <p class="sub">注意事項</p>${tchips(k,'notes',NOTE_LIB)}${ta(k,'notes','',2)}<p class="sub">下次建議回診時間（點選或自行輸入，每行一項；日期依檢查日期推算）</p><div id="next-chips">${tchips(k,'next',nextOpts())}</div>${ta(k,'next','例：心臟超音波 2027/01 月',2)}${aiDraftRow(k)}</div>`;
-    h+=`<div class="card"><h2>ACVIM 指引證據引用 <small>點選後加入「診斷與結論」或「建議用藥」，句尾自動標註出處，報告最後附參考文獻</small></h2>${evidenceHTML()}</div>`;
+    h+=`<div class="card"><h2>指引證據引用 <small>ACVIM 心臟指引與 AAHA 營養、高齡照護指引；點選後加入「診斷與結論」或「建議用藥」，句尾自動標註出處，報告最後附參考文獻</small></h2>${evidenceHTML('card')}</div>`;
   }
   el.innerHTML=h;
   el.querySelectorAll('textarea').forEach(autoGrow);
@@ -908,7 +944,7 @@ document.addEventListener('change',e=>{
   if(t.dataset.skip){S[k].skip[t.dataset.skip]=t.checked;t.closest('.sec').classList.toggle('skipped',t.checked);changed(k)}
   if(t.dataset.fb){S.card[t.dataset.fb]=t.checked;changed('card')}
 });
-document.addEventListener('toggle',e=>{const d=e.target;if(d.dataset&&d.dataset.lib){const id=d.dataset.lib;if(d.open){OPEN.add(id);OPEN.delete(id.replace(/^ev/,'evx'))}else{OPEN.delete(id);if(id.startsWith('ev'))OPEN.add(id.replace(/^ev/,'evx'))}}},true);
+document.addEventListener('toggle',e=>{const d=e.target;if(d.dataset&&d.dataset.lib){const id=d.dataset.lib;if(d.open){OPEN.add(id);OPEN.delete(id+'x')}else{OPEN.delete(id);if(/ev/.test(id))OPEN.add(id+'x')}}},true);
 document.addEventListener('click',e=>{
   const tc=e.target.closest('.tchip');
   if(tc){const k=tc.dataset.tk,path=tc.dataset.tf,line=tc.dataset.line,cur=String(getP(S[k],path)||'').split('\n').filter(x=>x.trim());
@@ -1213,13 +1249,13 @@ async function aiDraft(k){
   const st=$('#'+k+'-dstatus'),box=$('#'+k+'-draft'),p=S[k].p;
   if(!SAMPLE){st.className='aistatus err';st.textContent='AI 尚未就緒，請稍候幾秒再試。';return}
   let body,flags,want;
-  if(k==='abd'){const m=contentAbd();flags=m.flags;body=m.secs.map(s=>`【${s.title}】\n`+s.lines.map(l=>'・'+l).join('\n')).join('\n');want='{"dx":["影像診斷…"],"rec":["建議…"]}，影像診斷 2–5 點、建議 2–4 點'}
+  if(k==='abd'){const m=contentAbd();flags=m.flags;body=m.secs.map(s=>`【${s.title}】\n`+s.lines.map(l=>'・'+l).join('\n')).join('\n');want='{"dx":["影像診斷…"],"rec":["建議…"]}，影像診斷 2–5 點、建議 2–4 點';body+=AAHA_EV()}
   else{const m=contentCard(),pe=S.card.pe;flags=m.flags;
     body=`就診原因與病史：${S.card.hist}\n理學檢查：聽診 ${pe.aus}、血壓 ${pe.bp}、心跳 ${pe.hr}\n放射線：心臟輪廓 ${pe.heart}、VHS ${pe.vhs}、VLAS ${pe.vlas}、肺血管 ${pe.vessel}\n心電圖：${m.ecg.join('，')}\n胸腔X光：${m.xray.join('；')}\n心臟超音波：\n`+m.find.map(l=>'・'+l).join('\n')+(m.meas.length?'\n量測：'+m.meas.map(g=>g.rows.map(r=>r.label+' '+r.val).join('、')).join('；'):'');
     want='{"dx":["診斷與結論…"]}，3–6 點，包含追蹤時程建議';
     const enDx=(S.card.en||'').split(/Diagnosis\s*:/i)[1];if(enDx&&enDx.trim())body+='\n\n英文報告中醫師的初步診斷（請以此為主要依據撰寫，忠實轉成中文，修正錯字與矛盾）：\n'+enDx.trim().slice(0,3000);
-    const ev=Object.keys(REFS).filter(g=>REFS[g].sp===sp('card')).flatMap(g=>EVID[g].filter(x=>x[0]==='dx').map(x=>'- '+evLine(g,x[1])));
-    body+='\n\n可引用的 ACVIM 指引重點（只在與本病例相符時引用，引用時句尾保留〔〕出處標註，不要改寫數字）：\n'+ev.join('\n')}
+    const ev=Object.keys(REFS).filter(g=>REFS[g].sp===sp('card')||REFS[g].sp===null).flatMap(g=>EVID[g].filter(x=>x[0]==='dx'||x[0]==='rec').map(x=>'- '+evLine(g,x[1])));
+    body+='\n\n可引用的 ACVIM／AAHA 指引重點（只在與本病例相符時引用，引用時句尾保留〔〕出處標註，不要改寫數字）：\n'+ev.join('\n')}
   if(!body.trim()){st.textContent='目前沒有檢查發現可以草擬。';return}
   const prompt=`你是台灣小動物醫院影像科獸醫師的報告助理。請依下列「${TITLES[k]}」的檢查發現，用繁體中文（台灣用語）草擬報告結論，寫給主治醫師與飼主看。
 風格範例：「胃腸道的厚度與分層皆正常，胰臟實質均勻且周圍脂肪無發炎反應，目前沒有強烈證據支持急性胰臟炎。」「因為左心房明顯擴張，隨時有嚴重肺積水可能性，建議需要密切注意呼吸次數。」「建議於 3-4 個月內再次安排心臟超音波追蹤，必要時提早。」
@@ -1247,6 +1283,7 @@ let NOT_OWNER=false;
 /* ================= English report -> Chinese ================= */
 function mindrayComments(t){const m=String(t||'').match(/Comments:\s*([\s\S]*?)(?:Signature\s*\(seal\)|Signature|$)/);return m?m[1].trim():''}
 let EN=null,POL=null;
+const AAHA_EV=()=>'\n\n可引用的 AAHA 營養評估／高齡照護指引重點（只在與本病例相符時用於建議，引用時句尾保留〔〕出處標註，不要改寫數字）：\n'+['nut','senior'].flatMap(g=>EVID[g].map(x=>'- '+evLine(g,x[1]))).join('\n');
 async function enPolish(){
   const st=$('#en-status'),box=$('#en-draft'),src=(S.card.en||'').trim();
   if(!src){st.className='aistatus err';st.textContent='請先貼上英文報告文字。';return}
@@ -1467,6 +1504,8 @@ function renderHc(){
     <label class="chk"><input type="checkbox" data-hcb="incAbd"${st.incAbd?' checked':''}> 附上腹部超音波摘要：${stat('abd')}</label>
     <label class="chk"><input type="checkbox" data-hcb="incCard"${st.incCard?' checked':''}> 附上心臟超音波摘要：${stat('card')}</label></div>`;
   h+=`<div class="card"><h2>建議及注意事項</h2>${ta('hc','rec','每行一點',4)}${aiDraftRow('hc')}</div>`;
+  h+=`<div class="card"><h2>指引證據引用 <small>AAHA 營養評估與高齡照護指引；點選後加入「建議及注意事項」，句尾自動標註出處，報告附參考文獻</small></h2>${evidenceHTML('hc')}</div>`;
+  setTimeout(()=>refreshTchips(el),0);
   el.innerHTML=h;el.querySelectorAll('textarea').forEach(autoGrow);
   if(!AI_ON)el.querySelectorAll('.ai-only').forEach(x=>x.hidden=true);
   renderCtxThumbs('hc');renderBThumbs();
@@ -1502,6 +1541,7 @@ function blocksHc(){
   B.push({h:`<div class="hsec rec">建議及注意事項</div>`,keep:1});
   if(rec.length)rec.forEach(l=>B.push({h:`<ul class="hrec"><li data-src="f:rec">${esc(l)}</li></ul>`}));else B.push({h:'<div style="height:40px"></div>'});
   B.push({h:'<div class="hend"></div>'});
+  const hrefs=Object.values(REFS).filter(r=>rec.some(l=>l.includes(r.short)));
   // page 2: details
   const rows=(st.blood||[]).filter(r=>r.name);
   if(st.incBlood&&rows.length){B.push({h:`<div class="hsec">血液檢查結果</div>`,keep:1});
@@ -1522,6 +1562,7 @@ function blocksHc(){
     if(c.dis)ls.push(c.dis+(c.stage?` 分期：${c.stage}期`:'')+(c.stageNote||''));
     ls.push(...(m.dx.length?m.dx:m.find.filter((l,i)=>m.fsrc[i]!=='f:dis'&&lineAbn(l,m.fsrc[i],'card'))));
     if(!ls.length)ls=['心臟結構與功能未見明顯異常'];usSec('card','心臟超音波摘要',ls)}
+  if(hrefs.length){B.push({h:'<div class="hsec">參考文獻</div>',keep:1});hrefs.forEach(r=>B.push({h:`<p class="hnote">${esc(r.full)}</p>`}))}
   return B;
 }
 function weightChart(pts){
@@ -1538,6 +1579,7 @@ function hcText(){const st=S.hc,p=st.p,o=['健康檢查報告書',`日期：${fm
   HCI.forEach(c=>{o.push(`【${c.cat}】`);c.items.forEach(([id,l])=>{const it=st.items[id]||{};o.push(`${l}：${it.st==='n'?'無明顯異常':it.st==='a'?'異常：'+(it.note||''):'—'}`)})});
   const rows=(st.blood||[]).filter(r=>r.name);if(rows.length){o.push('','【血液檢查結果】');rows.forEach(r=>o.push(`${r.name} ${r.val} ${r.unit}（${r.ref}）${flagTxt(bflag(r))}`))}
   const rec=lines(st.rec);if(rec.length){o.push('','【建議及注意事項】');rec.forEach(l=>o.push('・'+l))}
+  const hr_=Object.values(REFS).filter(r=>rec.some(l=>l.includes(r.short)));if(hr_.length){o.push('','【參考文獻】');hr_.forEach(r=>o.push(r.full))}
   return o.join('\n')}
 
 /* ---- events ---- */
@@ -1610,7 +1652,7 @@ async function hcDraft(){
 體重紀錄：${(hc.wts||[]).map(r=>`${r.date} ${r.kg}kg`).join('、')||'無'}
 腹部超音波：${am?am.secs.map(s=>s.title+'：'+s.lines.join('，')).join('；')+(am.dx.length?'；影像診斷：'+am.dx.join('；'):''):'無'}
 心臟超音波：${cm?(S.card.dis?S.card.dis+' '+S.card.stage+'；':'')+cm.find.join('；')+(cm.dx.length?'；結論：'+cm.dx.join('；'):''):'無'}
-臨床背景：${hc.ctx||'無'}`;
+臨床背景：${hc.ctx||'無'}`+AAHA_EV();
   const prompt=`你是台灣小動物醫院的健康檢查報告助理。請依下列資料完成「健康檢查報告書」的檢查結果勾選與「建議及注意事項」，寫給飼主看，用語專業但易懂（繁體中文、台灣用語）。
 規則：
 - items 只填有資料可判斷的項目（代碼：${HCI.flatMap(c=>c.items.map(([id,l])=>id+'='+l)).join('、')}）；st 為 n（無明顯異常）或 a（異常）；異常時 note 用 25 字內說明；沒有資料的項目不要填。
