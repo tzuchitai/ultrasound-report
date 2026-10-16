@@ -184,6 +184,7 @@ details summary{cursor:pointer;font-weight:700}
 .rpt .ms.cmp td.dl{font-weight:500}
 .rpt .ms.cmp td.up{color:#B42318}
 .rpt .ms.cmp td.dn{color:#1D5FB4}
+.rpt .ms.cmp td.nsc{color:#555}
 .rpt .ms .v{background:#F2F2F2;text-align:center;font-variant-numeric:tabular-nums}
 
 /* abdominal template */
@@ -2017,28 +2018,29 @@ document.addEventListener('input',e=>{const t=e.target;
 
 /* ================= 與前次檢查比較 (abdominal + cardiac) ================= */
 const HISTKEY='usReportGen.hist';
-function blankPrev(){return {date:'',vals:{},on:true}}
+function blankPrev(){return {date:'',vals:{},on:true,ns:{}}}
 function loadHist(){try{const h=JSON.parse(localStorage.getItem(HISTKEY)||'{}');return h&&typeof h==='object'?h:{}}catch(e){return {}}}
 function saveHist(h){try{localStorage.setItem(HISTKEY,JSON.stringify(h))}catch(e){toast('無法儲存紀錄（瀏覽器儲存空間不足或被封鎖）')}}
 function calcVals(vals){const s={vals};const out={...vals};for(const g of CM)for(const f of g.f){if(!String(out[f.id]||'').trim()&&f.auto){const x=f.auto(s,wt('card'));if(isFinite(x))out[f.id]=x.toFixed(f.dec)}}return out}
 function cmpFields(k){
-  if(k==='abd')return ABD.flatMap(sec=>sec.items.filter(it=>it.t==='n'&&fitsSp(it,'abd')).map(it=>({id:it.id,label:`${secTitle('abd',sec)}・${it.label}`,unit:'cm'})));
+  if(k==='abd')return ABD.flatMap(sec=>sec.items.filter(it=>it.t==='n'&&fitsSp(it,'abd')).map(it=>({id:it.id,label:`${secTitle('abd',sec)}・${it.label}`,unit:'cm',on:it.on})));
   return CM.flatMap(g=>g.f.filter(f=>fitsSp(f,'card')).map(f=>({id:f.id,label:f.label,unit:f.unit})));
 }
-const numOf=v=>{const n=nums(v);return n.length?Math.max(...n):NaN};
+// Ranges compare their upper value; thickness-type fields (on:'min', e.g. adrenal L x W) compare the smaller dimension.
+const numOf=(v,on)=>{const n=nums(v);return n.length?(on==='min'?Math.min(...n):Math.max(...n)):NaN};
 function cmpRows(k){
   const st=S[k],pv=k==='card'?calcVals(st.prev.vals||{}):(st.prev.vals||{});
   const cur=k==='card'?Object.fromEntries(Object.entries(cardCalc()).map(([id,x])=>[id,x.val])):st.vals;
   return cmpFields(k).map(f=>{const a=String(pv[f.id]||'').trim(),b=String(cur[f.id]||'').trim();
-    const na=numOf(a),nb=numOf(b),d=nb-na,pct=na?d/na*100:NaN;
-    return {...f,prev:a,cur:b,d,pct,both:!!(a&&b&&isFinite(na)&&isFinite(nb))}}).filter(r=>r.prev||r.cur);
+    const na=numOf(a,f.on),nb=numOf(b,f.on),d=nb-na,pct=na?d/na*100:NaN;
+    return {...f,prev:a,cur:b,d,pct,ns:!!(st.prev.ns||{})[f.id],both:!!(a&&b&&isFinite(na)&&isFinite(nb))}}).filter(r=>r.prev||r.cur);
 }
-const fmtD=(r)=>{if(!r.both)return '';if(Math.abs(r.d)<1e-9)return '—';const dec=Math.max(...[r.prev,r.cur].map(v=>((String(v).match(/\.(\d+)/)||[,''])[1]).length),0);
+const fmtD=(r)=>{if(!r.both)return '';if(r.ns)return '無顯著變化';if(Math.abs(r.d)<1e-9)return '—';const dec=Math.max(...[r.prev,r.cur].map(v=>((String(v).match(/\.(\d+)/)||[,''])[1]).length),0);
   return `${r.d>0?'↑ +':'↓ '}${r.d.toFixed(Math.min(dec||1,2))}${isFinite(r.pct)?`（${r.pct>0?'+':''}${r.pct.toFixed(0)}%）`:''}`};
 function cmpBlock(k){const st=S[k];if(!st.prev||!st.prev.on)return null;const rows=cmpRows(k).filter(r=>r.both);if(!rows.length)return null;
   const pd=fmtDate(st.prev.date)||'前次',cd=fmtDate(st.p.date)||'本次';
   const t=`<table class="ms cmp"><colgroup><col style="width:34%"><col style="width:20%"><col style="width:20%"><col style="width:26%"></colgroup><tr><th>項目</th><th>${esc(pd)}</th><th>${esc(cd)}</th><th>變化</th></tr>`+
-    rows.map(r=>`<tr><td class="l">${esc(r.label)}</td><td class="v pv">${esc(r.prev)}${r.unit?' '+r.unit:''}</td><td class="v">${esc(r.cur)}${r.unit?' '+r.unit:''}</td><td class="v dl ${r.d>0?'up':r.d<0?'dn':''}">${fmtD(r)}</td></tr>`).join('')+'</table>';
+    rows.map(r=>`<tr><td class="l">${esc(r.label)}</td><td class="v pv">${esc(r.prev)}${r.unit?' '+r.unit:''}</td><td class="v">${esc(r.cur)}${r.unit?' '+r.unit:''}</td><td class="v dl ${r.ns?'nsc':r.d>0?'up':r.d<0?'dn':''}">${fmtD(r)}</td></tr>`).join('')+'</table>';
   return {title:`與前次檢查比較（${pd} → ${cd}）`,table:t}}
 function cmpCardHTML(k){
   const st=S[k],p=st.p,h=loadHist(),recs=((h[p.chart]||[]).filter(r=>r.k===k));
@@ -2049,7 +2051,7 @@ function cmpCardHTML(k){
     <div class="fld"><label for="cmp-rec-${k}">從檢查紀錄選擇（病歷號碼 ${esc(p.chart||'未填')}）</label><select id="cmp-rec-${k}"><option value="">${recs.length?'— 選擇紀錄 —':'尚無此病歷號碼的紀錄'}</option>${recs.map((r,i)=>`<option value="${i}">${fmtDate(r.date)}（${Object.keys(r.vals).length} 項）</option>`).join('')}</select></div></div>
     <div class="airow"><button class="btn" data-cmpuse="${k}"${recs.length?'':' disabled'}>設為前次</button><button class="btn" data-cmpsave="${k}">把本次存入檢查紀錄</button><button class="btn danger" data-cmpclear="${k}">清除前次</button></div>
     <p class="hint">也可以在上方「自動帶入數值」選「帶入到：前次檢查」，讀取舊的 Mindray／Soulvet PDF 或截圖；日期會從報告內容或照片拍攝日期讀出。紀錄只存在這台電腦。</p>
-    ${rows.length?`<div class="btwrap"><table class="btable cmpe"><thead><tr><th>項目</th><th>前次</th><th>本次</th><th>變化</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.label)}</td><td><input data-k="${k}" data-pv="${r.id}" value="${esc((st.prev.vals||{})[r.id]||'')}" aria-label="${esc(r.label)} 前次"></td><td>${esc(r.cur)}${r.unit&&r.cur?' '+r.unit:''}</td><td class="bf" data-cmpd="${r.id}">${fmtD(r)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="hint" style="margin:0">本次或前次有量測值後，這裡會列出可以比較的項目。</p>'}</div>`;
+    ${rows.length?`<div class="btwrap"><table class="btable cmpe"><thead><tr><th>項目</th><th>前次</th><th>本次</th><th>變化</th><th><button type="button" class="btn" data-nsall="${k}" style="font-size:11px;padding:1px 6px">無顯著變化（全選）</button></th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.label)}</td><td><input data-k="${k}" data-pv="${r.id}" value="${esc((st.prev.vals||{})[r.id]||'')}" aria-label="${esc(r.label)} 前次"></td><td>${esc(r.cur)}${r.unit&&r.cur?' '+r.unit:''}</td><td class="bf" data-cmpd="${r.id}">${fmtD(r)}</td><td>${r.both?`<label class="chk" style="margin:0"><input type="checkbox" data-ns="${r.id}" data-k="${k}"${r.ns?' checked':''}> 無顯著變化</label>`:''}</td></tr>`).join('')}</tbody></table></div>`:'<p class="hint" style="margin:0">本次或前次有量測值後，這裡會列出可以比較的項目。</p>'}</div>`;
 }
 async function exifDate(file){
   try{const b=new DataView(await file.slice(0,256*1024).arrayBuffer());
@@ -2074,7 +2076,10 @@ document.addEventListener('click',e=>{
   const cl=e.target.closest('[data-cmpclear]');if(cl){const k=cl.dataset.cmpclear;if(!cl.classList.contains('armed')){cl.classList.add('armed');cl.textContent='再按一次清除';setTimeout(()=>{cl.classList.remove('armed');cl.textContent='清除前次'},3000);return}
     S[k].prev=blankPrev();renderEditor(k);changed(k);return}
 });
-document.addEventListener('change',e=>{const t=e.target;if(t.dataset.cmpon){S[t.dataset.cmpon].prev.on=t.checked;changed(t.dataset.cmpon)}});
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset.cmpon){S[t.dataset.cmpon].prev.on=t.checked;changed(t.dataset.cmpon)}
+  if(t.dataset.ns){const k=t.dataset.k,pv=S[k].prev;pv.ns=pv.ns||{};pv.ns[t.dataset.ns]=t.checked;const r=cmpRows(k).find(x=>x.id===t.dataset.ns),c=document.querySelector(`[data-cmpd="${t.dataset.ns}"]`);if(c&&r)c.textContent=fmtD(r);changed(k)}});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-nsall]');if(!b)return;const k=b.dataset.nsall,pv=S[k].prev,rows=cmpRows(k).filter(r=>r.both);pv.ns=pv.ns||{};
+  const all=rows.every(r=>pv.ns[r.id]);rows.forEach(r=>pv.ns[r.id]=!all);renderEditor(k);changed(k)});
 document.addEventListener('input',e=>{const t=e.target;if(t.dataset.pv){const k=t.dataset.k;S[k].prev.vals[t.dataset.pv]=t.value;const r=cmpRows(k).find(x=>x.id===t.dataset.pv),c=document.querySelector(`[data-cmpd="${t.dataset.pv}"]`);if(c&&r)c.textContent=fmtD(r);changed(k)}});
 
 /* ================= boot ================= */
