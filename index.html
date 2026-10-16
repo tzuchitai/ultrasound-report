@@ -759,6 +759,16 @@ function secHTML(k,sec){
    ${ta(k,'extra.'+sec.id,'其他發現，每行一點',1)}</div></section>`;
 }
 const OPEN=new Set();
+const CTXIMG={abd:[],card:[]};
+function renderCtxThumbs(k){const el=document.getElementById(k+'-ctxthumbs');if(!el)return;
+  el.innerHTML=CTXIMG[k].map((x,i)=>`<div class="thumb"><img src="${x.url}" alt="臨床背景圖片 ${i+1}"><button type="button" data-ctxrm="${k}:${i}" aria-label="移除">×</button></div>`).join('')}
+function addCtx(k,fs){for(const f of fs){if(!f.type.startsWith('image/'))continue;if(CTXIMG[k].length>=6){toast('臨床背景圖片最多 6 張');break}CTXIMG[k].push({blob:f,url:URL.createObjectURL(f)})}renderCtxThumbs(k);toast('已加入臨床背景圖片')}
+document.addEventListener('click',e=>{const d=e.target.closest('[data-ctxdrop]');if(d&&!e.target.matches('input')){d.querySelector('input').click();return}
+  const r=e.target.closest('[data-ctxrm]');if(r){const [k,i]=r.dataset.ctxrm.split(':');const x=CTXIMG[k].splice(+i,1)[0];x&&URL.revokeObjectURL(x.url);renderCtxThumbs(k)}});
+document.addEventListener('change',e=>{const f=e.target.closest('[data-ctxfile]');if(f){addCtx(f.dataset.ctxfile,f.files);f.value=''}});
+document.addEventListener('dragover',e=>{const d=e.target.closest&&e.target.closest('[data-ctxdrop]');if(d){e.preventDefault();d.classList.add('over')}});
+document.addEventListener('dragleave',e=>{const d=e.target.closest&&e.target.closest('[data-ctxdrop]');if(d)d.classList.remove('over')});
+document.addEventListener('drop',e=>{const d=e.target.closest&&e.target.closest('[data-ctxdrop]');if(d){e.preventDefault();d.classList.remove('over');addCtx(d.dataset.ctxdrop,e.dataTransfer.files)}});
 function ym(n){const d=(S.card.p.date||today()).split('-').map(Number),x=new Date(d[0],d[1]-1+n,1);return `${x.getFullYear()}/${String(x.getMonth()+1).padStart(2,'0')}`}
 const nextOpts=()=>[`心臟超音波 1 個月後追蹤（${ym(1)}）`,`心臟超音波 3 個月內複查（${ym(3)} 前）`,`心臟超音波 6 個月後追蹤（${ym(6)}）`,`心臟超音波 1 年後追蹤（${ym(12)}）`,`胸腔 X 光 3 個月後追蹤（${ym(3)}）`,'血檢於調整藥物後 2–4 週追蹤','血壓於 2–4 週後複查'];
 function evidenceHTML(){
@@ -769,7 +779,9 @@ function evidenceHTML(){
       <p class="sub">→ 診斷與結論</p>${chips('dx')}<p class="sub">→ 建議用藥</p>${chips('meds')}</details>`}).join('');
 }
 const aiDraftRow=k=>`<div class="ai-only" style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">
-   ${ta(k,'ctx','例：主訴食慾下降、嘔吐 3 天；血檢 CREA 1.9、HCT 26%',2,'臨床背景（給 AI 參考，不會印在報告上）')}
+   ${ta(k,'ctx','例：主訴食慾下降、嘔吐 3 天；血檢 CREA 1.9、HCT 26%（可在這裡 ⌘V 貼上圖片）',2,'臨床背景（給 AI 參考，不會印在報告上）')}
+   <div class="drop" data-ctxdrop="${k}" tabindex="0" style="margin-top:6px;padding:10px;font-size:13px">加入臨床背景圖片（血檢報告、X 光、病歷截圖）：點這裡選檔、拖曳進來，或在上方欄位 ⌘V 貼上<input type="file" accept="image/*" multiple hidden data-ctxfile="${k}"></div>
+   <div class="thumbs" id="${k}-ctxthumbs"></div>
    <div class="airow"><button class="btn aib" data-draft="${k}">AI 依目前發現草擬${k==='abd'?'診斷與建議':'診斷與結論'}</button><span class="aistatus" id="${k}-dstatus"></span></div>
    <div id="${k}-draft"></div></div>`;
 function renderEditor(k){
@@ -801,6 +813,7 @@ function renderEditor(k){
   }
   el.innerHTML=h;
   el.querySelectorAll('textarea').forEach(autoGrow);
+  renderCtxThumbs(k);
   if(!AI_ON) el.querySelectorAll('.ai-only').forEach(x=>x.hidden=true);
   refreshTchips(el);refreshFlags();
 }
@@ -916,7 +929,7 @@ drop.onclick=()=>$('#file').click();drop.onkeydown=e=>{if(e.key==='Enter'||e.key
 $('#file').onchange=e=>{addFiles(e.target.files);e.target.value=''};
 drop.ondragover=e=>{e.preventDefault();drop.classList.add('over')};drop.ondragleave=()=>drop.classList.remove('over');
 drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');addFiles(e.dataTransfer.files)};
-document.addEventListener('paste',e=>{const fs=[...(e.clipboardData?.files||[])].filter(f=>f.type.startsWith('image/')||f.type==='application/pdf');if(fs.length){e.preventDefault();addFiles(fs);toast(`已加入 ${fs.length} 個檔案`)}});
+document.addEventListener('paste',e=>{const ae=document.activeElement;if(ae&&/^t-(abd|card)-ctx$/.test(ae.id)){const im=[...(e.clipboardData?.files||[])].filter(f=>f.type.startsWith('image/'));if(im.length){e.preventDefault();addCtx(ae.id.split('-')[1],im)}return}const fs=[...(e.clipboardData?.files||[])].filter(f=>f.type.startsWith('image/')||f.type==='application/pdf');if(fs.length){e.preventDefault();addFiles(fs);toast(`已加入 ${fs.length} 個檔案`)}});
 
 const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
 async function ensurePdfjs(){if(!window.pdfjsLib){await loadScript(PDFJS+'pdf.min.js');await loadScript(PDFJS+'pdf.worker.min.js');pdfjsLib.GlobalWorkerOptions.workerSrc=PDFJS+'pdf.worker.min.js'}}
@@ -1131,12 +1144,14 @@ async function aiDraft(k){
 只回傳 JSON：${want}
 
 病患：${p.sp}，${p.breed}，${p.sex}，${p.age}，${p.wt?p.wt+' kg':''}，體態 ${p.bcs}，${p.mcs}
-臨床背景：${S[k].ctx||'（未提供）'}
+臨床背景：${S[k].ctx||'（未提供）'}${CTXIMG[k].length?`\n另附 ${CTXIMG[k].length} 張臨床背景圖片（如血檢報告、X 光、病歷截圖）：請讀出與本次判讀相關的數值與發現作為參考，超出參考範圍的項目可在結論中提及；不要讀取或寫出飼主姓名、電話等個資。`:''}
 超出參考範圍：${flags.join('；')||'無'}
 檢查資料：
 ${body}`;
   st.className='aistatus';st.textContent='AI 草擬中，約需 10–60 秒…';box.innerHTML='';
-  try{const r=await SAMPLE.json(prompt);const dx=(r?.dx||[]).map(String),rec=(r?.rec||[]).map(String);
+  const cimg=CTXIMG[k].map(x=>x.blob);
+  if(cimg.length&&!IMG_OK){st.className='aistatus err';st.textContent=ERR.images_unavailable;return}
+  try{const r=await SAMPLE.json(prompt,cimg.length?{images:cimg.slice(0,LIM?.images?.maxCount||cimg.length)}:undefined);const dx=(r?.dx||[]).map(String),rec=(r?.rec||[]).map(String);
     if(!dx.length)throw {code:'invalid_json'};DRAFT[k]={dx,rec};st.textContent='';
     box.innerHTML=`<div class="draft"><b>${k==='abd'?'影像診斷':'診斷與結論'}草稿</b><ol>${dx.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>${rec.length&&k==='abd'?`<b>建議草稿</b><ol>${rec.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
       <div class="airow"><button class="btn primary" data-apply="${k}" style="background:var(--ai);border-color:var(--ai)">取代上方內容</button><span class="hint">套用後可再手動修改</span></div></div>`}
