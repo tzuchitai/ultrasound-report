@@ -140,6 +140,10 @@ details summary{cursor:pointer;font-weight:700}
 .hcrow.w{grid-template-columns:minmax(0,10em) minmax(0,7em) auto}
 .hcrow input,.btable input,.btable select,.hcrow select{border:1px solid var(--line);background:var(--bg);border-radius:7px;padding:5px 8px;width:100%;min-width:0}
 .autotag{display:block;font-size:11px;color:var(--ai);font-weight:500}
+.hcrow.pup{grid-template-columns:9em minmax(0,1fr) 10em minmax(0,12em)}
+@media (max-width:620px){.hcrow.pup{grid-template-columns:1fr 1fr}}
+.pcalc{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:8px;display:flex;flex-direction:column;gap:3px;font-size:13px}
+.pwarn{color:var(--warn);font-weight:700;font-size:13px}
 .chip.ab.on{background:var(--warn-soft);border-color:var(--warn)}
 @media (max-width:520px){.hcrow{grid-template-columns:1fr}}
 .btwrap{overflow-x:auto;margin-top:8px}
@@ -225,46 +229,93 @@ details summary{cursor:pointer;font-weight:700}
 .rpt-card .nx .l{background:#FEF3CF;text-align:center;width:38%}
 .rpt-card .nx .r{text-align:center}
 .rpt-hc{font-size:12.5px;color:#222}
+.rpt-pup{font-size:12.5px;color:#222}
 .rpt-hc .pbody{left:44px;right:44px}
+.rpt-pup .pbody{left:44px;right:44px}
 #measure .rpt-hc .pbody{width:706px}
+#measure .rpt-pup .pbody{width:706px}
 .rpt-hc .phd{position:absolute;top:30px;left:44px;right:44px;display:flex;justify-content:space-between;align-items:center}
+.rpt-pup .phd{position:absolute;top:30px;left:44px;right:44px;display:flex;justify-content:space-between;align-items:center}
 .rpt-hc .phd .lg{background:#F6F6F4;padding:18px 20px}
+.rpt-pup .phd .lg{background:#F6F6F4;padding:18px 20px}
 .rpt-hc .phd .lg img{height:36px;display:block}
+.rpt-pup .phd .lg img{height:36px;display:block}
 .rpt-hc .phd .t{text-align:right}
+.rpt-pup .phd .t{text-align:right}
 .rpt-hc .phd .t b{display:block;font-size:30px;font-weight:500;color:#1a1a1a;letter-spacing:.04em}
+.rpt-pup .phd .t b{display:block;font-size:30px;font-weight:500;color:#1a1a1a;letter-spacing:.04em}
 .rpt-hc .phd .t span{font-size:10.5px;letter-spacing:.04em;color:#444}
+.rpt-pup .phd .t span{font-size:10.5px;letter-spacing:.04em;color:#444}
 .rpt-hc .rule{position:absolute;top:138px;left:44px;right:44px;border-top:4px solid #F2A500;border-bottom:1px solid #F2A500;height:4px}
+.rpt-pup .rule{position:absolute;top:138px;left:44px;right:44px;border-top:4px solid #F2A500;border-bottom:1px solid #F2A500;height:4px}
 .rpt-hc .pft{position:absolute;bottom:26px;left:58px;right:58px;display:flex;justify-content:space-between;font-size:9px;color:#555}
+.rpt-pup .pft{position:absolute;bottom:26px;left:58px;right:58px;display:flex;justify-content:space-between;font-size:9px;color:#555}
 .rpt-hc .hsec{color:#E89A00;font-size:14px;padding:2px 10px 4px;border-bottom:1px solid #F3DDB0;margin-top:4px}
+.rpt-pup .hsec{color:#E89A00;font-size:14px;padding:2px 10px 4px;border-bottom:1px solid #F3DDB0;margin-top:4px}
 .rpt-hc .hsec.rec{margin-top:10px;border-top:3px solid #F2A500;padding-top:8px}
+.rpt-pup .hsec.rec{margin-top:10px;border-top:3px solid #F2A500;padding-top:8px}
 .rpt-hc .hend{border-top:3px solid #F2A500;margin-top:8px}
+.rpt-pup .hend{border-top:3px solid #F2A500;margin-top:8px}
 .rpt-hc .bi .r{display:flex;padding:4px 10px;line-height:1.5;font-size:12px;border-bottom:1px solid #F3E6C8;white-space:nowrap}
+.rpt-pup .bi .r{display:flex;padding:4px 10px;line-height:1.5;font-size:12px;border-bottom:1px solid #F3E6C8;white-space:nowrap}
 .rpt-hc .bi .r span{flex:none}
+.rpt-pup .bi .r span{flex:none}
 .rpt-hc .bi .r span:last-child{flex:1}
+.rpt-pup .bi .r span:last-child{flex:1}
 .rpt-hc .bi .r.c{background:#FFF7E6;border-bottom-color:#F7DFA6}
+.rpt-pup .bi .r.c{background:#FFF7E6;border-bottom-color:#F7DFA6}
 .rpt-hc .bi b{font-weight:700}
+.rpt-pup .bi b{font-weight:700}
 .rpt-hc table.ex{border-collapse:collapse;border-spacing:0;table-layout:fixed;width:100%}
+.rpt-pup table.ex{border-collapse:collapse;border-spacing:0;table-layout:fixed;width:100%}
 .rpt-hc .ex th{background:#F5A800;color:#fff;font-weight:500;padding:4px;font-size:12px}
+.rpt-pup .ex th{background:#F5A800;color:#fff;font-weight:500;padding:4px;font-size:12px}
 .rpt-hc .ex td{border-bottom:1px solid #F3E2B8;padding:3px 8px;font-size:11.5px;line-height:1.4}
+.rpt-pup .ex td{border-bottom:1px solid #F3E2B8;padding:3px 8px;font-size:11.5px;line-height:1.4}
 .rpt-hc .ex td.cat{background:#FFF7E6;color:#B97700;text-align:center;vertical-align:middle;border-right:1px solid #fff}
+.rpt-pup .ex td.cat{background:#FFF7E6;color:#B97700;text-align:center;vertical-align:middle;border-right:1px solid #fff}
 .rpt-hc .ex td.cat span{font-size:11px}
+.rpt-pup .ex td.cat span{font-size:11px}
 .rpt-hc .ex td.it{text-align:center}
+.rpt-pup .ex td.it{text-align:center}
 .rpt-hc .ex td.ok,.rpt-hc .ex td.abn{color:#9a9a9a}
+.rpt-pup .ex td.ok,.rpt-pup .ex td.abn{color:#9a9a9a}
 .rpt-hc .ex td.on{color:#111;font-weight:700}
+.rpt-pup .ex td.on{color:#111;font-weight:700}
 .rpt-hc .ex td.abn.on{color:#B42318}
+.rpt-pup .ex td.abn.on{color:#B42318}
 .rpt-hc img.pw{width:13px;height:12px;vertical-align:-1px;margin-right:6px;opacity:.45}
+.rpt-pup img.pw{width:13px;height:12px;vertical-align:-1px;margin-right:6px;opacity:.45}
 .rpt-hc img.pw.on{opacity:1}
+.rpt-pup img.pw.on{opacity:1}
 .rpt-hc ul.hrec{margin:0;padding-left:28px}
+.rpt-pup ul.hrec{margin:0;padding-left:28px}
 .rpt-hc ul.hrec li{padding:2px 0;line-height:1.55}
+.rpt-pup ul.hrec li{padding:2px 0;line-height:1.55}
 .rpt-hc table.bt{border-collapse:collapse;border-spacing:0;width:100%;table-layout:fixed;margin-top:8px}
+.rpt-pup table.bt{border-collapse:collapse;border-spacing:0;width:100%;table-layout:fixed;margin-top:8px}
 .rpt-hc .bt th{background:#FFF0CC;color:#8C6425;text-align:left;padding:5px 10px;font-weight:700}
+.rpt-pup .bt th{background:#FFF0CC;color:#8C6425;text-align:left;padding:5px 10px;font-weight:700}
 .rpt-hc .bt td{border-bottom:1px solid #F3E6C8;padding:4px 10px;font-size:12px}
+.rpt-pup .bt td{border-bottom:1px solid #F3E6C8;padding:4px 10px;font-size:12px}
 .rpt-hc .bt tr.hd td{color:#8C6425;font-size:11px}
+.rpt-pup .bt tr.hd td{color:#8C6425;font-size:11px}
 .rpt-hc .bt td.v{font-weight:700;font-variant-numeric:tabular-nums}
+.rpt-pup .bt td.v{font-weight:700;font-variant-numeric:tabular-nums}
 .rpt-hc .bt tr.fH td.v,.rpt-hc .bt tr.fH td.fl{color:#B42318}
+.rpt-pup .bt tr.fH td.v,.rpt-pup .bt tr.fH td.fl{color:#B42318}
 .rpt-hc .bt tr.fL td.v,.rpt-hc .bt tr.fL td.fl{color:#1D5FB4}
+.rpt-pup .bt tr.fL td.v,.rpt-pup .bt tr.fL td.fl{color:#1D5FB4}
 .rpt-hc .bt.abn th{background:#FBE1DC;color:#9A2A1A}
+.rpt-pup .bt.abn th{background:#FBE1DC;color:#9A2A1A}
+.rpt-hc .ex.pt2 td{font-size:11.5px}
+.rpt-hc .pnote{display:block;font-size:10.5px;color:#8C6425;font-weight:400}
+.rpt-hc .pdone{color:#2F7D4F}
+.rpt-pup .ex.pt2 td{font-size:11.5px}
+.rpt-pup .pnote{display:block;font-size:10.5px;color:#8C6425;font-weight:400}
+.rpt-pup .pdone{color:#2F7D4F}
 .rpt-hc .hnote{font-size:11px;color:#666;margin:6px 10px}
+.rpt-pup .hnote{font-size:11px;color:#666;margin:6px 10px}
 .rpt-card .refs .tx{font-size:12.5px;color:#555;line-height:1.55;margin:0 0 6px}
 </style>
 
@@ -277,6 +328,7 @@ details summary{cursor:pointer;font-weight:700}
     <button class="tab" role="tab" id="tab-abd" data-kind="abd" aria-selected="true">腹部超音波</button>
     <button class="tab" role="tab" id="tab-card" data-kind="card" aria-selected="false">心臟超音波</button>
     <button class="tab" role="tab" id="tab-hc" data-kind="hc" aria-selected="false">健康檢查</button>
+    <button class="tab" role="tab" id="tab-pup" data-kind="pup" aria-selected="false">幼犬貓手冊</button>
   </div>
   <div class="actions">
     <button class="btn primary" id="btn-pdf" hidden>下載 PDF</button>
@@ -312,6 +364,7 @@ details summary{cursor:pointer;font-weight:700}
     <div id="ed-abd"></div>
     <div id="ed-card" hidden></div>
     <div id="ed-hc" hidden></div>
+    <div id="ed-pup" hidden></div>
 
     <div class="card">
       <details id="settings">
@@ -517,6 +570,7 @@ const REFS={
  fcm:{short:'ACVIM 2020 貓心肌病共識',full:'Luis Fuentes V, et al. ACVIM consensus statement guidelines for the classification, diagnosis, and management of cardiomyopathies in cats. J Vet Intern Med. 2020;34:1062-1077.',sp:CAT},
  nut:{short:'AAHA 2010 營養評估指引',full:'Baldwin K, et al. AAHA nutritional assessment guidelines for dogs and cats. J Am Anim Hosp Assoc. 2010;46:285-296.',sp:null},
  senior:{short:'AAHA 2023 高齡照護指引',full:'Dhaliwal R, et al. 2023 AAHA senior care guidelines for dogs and cats. J Am Anim Hosp Assoc. 2023;59:1-21.',sp:null},
+ wsava:{short:'WSAVA 2024 疫苗指引',full:'Squires RA, Crawford C, Marcondes M, Whitley N. 2024 guidelines for the vaccination of dogs and cats – compiled by the Vaccination Guidelines Group (VGG) of the World Small Animal Veterinary Association (WSAVA). J Small Anim Pract. 2024.',sp:null},
  iris:{short:'IRIS 2026 指引',full:'International Renal Interest Society (IRIS). IRIS Staging of CKD; Treatment Recommendations for CKD in Dogs and Cats; Grading of Acute Kidney Injury (modified 2026). https://www.iris-kidney.com/iris-guidelines-1',sp:null}};
 const EVID={
  mmvd:[
@@ -581,6 +635,13 @@ const EVID={
   ['rec','皮膚腫塊建議測量三個維度、細針採樣，並記錄位置以追蹤變化'],
   ['rec','居家環境調整：鋪設防滑墊或地毯、樓梯與泳池加裝護欄、調整食碗高度，以提升行動安全與生活品質'],
   ['rec','建議及早與飼主討論生活品質評估與安寧照護，規劃照護目標']],
+ wsava:[
+  ['rec','幼犬幼貓需每 2–4 週補強核心疫苗，最後一劑在 16 週齡以後；26 週齡以後再補強一劑'],
+  ['rec','犬核心疫苗為犬瘟熱、犬腺病毒、犬小病毒；貓核心疫苗為貓瘟、貓皰疹病毒、貓卡里西病毒；狂犬病流行或法規要求地區，狂犬病疫苗亦屬核心'],
+  ['rec','貓白血病流行地區，1 歲以下幼貓及會外出或與外出貓同住的成貓應視為核心疫苗'],
+  ['rec','高齡犬貓對新抗原的反應較弱，核心疫苗可每三年或依需要更頻繁補強'],
+  ['rec','可在最後一劑幼年疫苗 4 週後（約 20 週齡以後）以抗體檢測確認免疫反應'],
+  ['rec','非核心疫苗（如鉤端螺旋體、萊姆病、犬咳）保護期約 1 年，需依生活型態每年評估施打']],
  iris:[
   ['rec','慢性腎病須先確診才進行分期：以禁食下的血中 creatinine 和／或 SDMA，在水合充足且穩定的狀態下至少測量兩次'],
   ['rec','單次 creatinine 或 SDMA 升高本身不足以診斷慢性腎病'],
@@ -608,13 +669,13 @@ const EVID={
   ['rec','IRIS 急性腎損傷分級（creatinine mg/dl）：I <1.6、II 1.7–2.5、III 2.6–5.0、IV 5.1–10.0、V >10.0；48 小時內上升 ≥0.3 mg/dl 即符合，再依尿量（<1 ml/kg/h 持續 6 小時為寡尿）與是否需腎臟替代療法細分']]};
 const evLine=(g,t)=>`${t}〔${REFS[g].short}〕`;
 const PFIELDS=[['name','動物名字'],['chart','病歷號碼'],['wt','體重 (kg)'],['sp','種別'],['age','年紀'],['bcs','體態評分'],['breed','品種'],['sex','性別'],['mcs','肌肉量評分'],['date','檢查日期']];
-const TITLES={abd:'腹部超音波報告',card:'心肺評估檢查報告',hc:'健康檢查報告書'};
+const TITLES={abd:'腹部超音波報告',card:'心肺評估檢查報告',hc:'健康檢查報告書',pup:'幼犬貓疫苗與照護手冊'};
 
 /* ================= state ================= */
 const KEY='usReportGen.v2', SKEY='usReportGen.settings.v2';
 const today=()=>new Date().toISOString().slice(0,10);
 const blankP=()=>({owner:'',chip:'',name:'',chart:'',wt:'',sp:DOG,age:'',bcs:'',breed:'',sex:'',mcs:'',date:today()});
-const blankK=k=>k==='hc'?blankHC():k==='abd'?{p:blankP(),vals:{},sel:{},extra:{},skip:{},dx:'',rec:'',ctx:''}
+const blankK=k=>k==='pup'?blankPUP():k==='hc'?blankHC():k==='abd'?{p:blankP(),vals:{},sel:{},extra:{},skip:{},dx:'',rec:'',ctx:''}
   :{p:blankP(),vals:{},sel:{},extra:{},skip:{},dis:'',stage:'',stageNote:'',hist:'',pe:{aus:'',bp:'',hr:'',heart:'',vhs:'',vlas:'',vessel:''},ecg:'',xray:'',dx:'',meds:'',notes:NOTE_LIB[0],next:'',ctx:'',en:'',table:true};
 function exAbd(){const s=blankK('abd');
   Object.assign(s.p,{name:'奇奇',chart:'115029401',wt:'6.3',sp:CAT,bcs:'4/9',breed:'混種',sex:'公',mcs:'輕微肌肉量流失',date:'2026-08-22'});
@@ -641,7 +702,7 @@ let S,SET;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 const PUBLIC=!!window.US_PUBLIC;
 if(!S||!S.abd||!S.card) S=PUBLIC?{abd:blankK('abd'),card:blankK('card'),ex:{abd:false,card:false}}:{abd:exAbd(),card:exCard(),ex:{abd:true,card:true}};
-S.hc={...blankHC(),...(S.hc||{})};S.ex.hc=false;
+S.hc={...blankHC(),...(S.hc||{})};S.ex.hc=false;S.pup={...blankPUP(),...(S.pup||{})};S.ex.pup=false;
 try{SET={...DEFSET,...JSON.parse(localStorage.getItem(SKEY)||'{}')}}catch(e){SET={...DEFSET}}
 let KIND='abd';
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
@@ -722,9 +783,9 @@ function contentCard(){
 }
 
 /* ================= report blocks & pagination ================= */
-const PH=1123, GEO={abd:{head:108,foot:100},card:{head:182,foot:92},hc:{head:154,head2:44,foot:56}};
+const PH=1123, GEO={abd:{head:108,foot:100},card:{head:182,foot:92},hc:{head:154,head2:44,foot:56},pup:{head:154,head2:44,foot:56}};
 const headH=(k,n)=>n>1&&GEO[k].head2?GEO[k].head2:GEO[k].head;
-const blocksFor=k=>k==='abd'?blocksAbd():k==='card'?blocksCard():blocksHc();
+const blocksFor=k=>k==='abd'?blocksAbd():k==='card'?blocksCard():k==='pup'?blocksPup():blocksHc();
 function ptTable(p){const d=x=>esc(x)||'&nbsp;';
   return `<table class="pt"><tr><th colspan="6">病患基本資料</th></tr>
   <tr><td class="l">動物名字</td><td class="v">${d(p.name)}</td><td class="l">病歷號碼</td><td class="v">${d(p.chart)}</td><td class="l">體　　重</td><td class="v">${p.wt?esc(p.wt)+'kg':'&nbsp;'}</td></tr>
@@ -769,6 +830,8 @@ function blocksCard(){
 }
 const boxHead=t=>`<img src="${IMG.heart}" alt="">${esc(t)}`;
 function chrome(k,n,total){
+  if(k==='pup'){const cat=S.pup.p.sp===CAT;return {head:n>1?'':`<div class="phd"><div class="lg"><img src="${IMG.logoH}" alt="聯盟動物醫院"></div><div class="t"><b>${cat?'幼貓':'幼犬'}疫苗與照護手冊</b><span>${cat?'KITTEN':'PUPPY'} VACCINATION &amp; CARE GUIDE</span></div></div><div class="rule"></div>`,
+    foot:`<div class="pft"><span>實際接種、檢查及用藥，仍由醫師依個別狀況判斷</span><span>聯盟動物醫院／聯盟教育中心</span></div>`}}
   if(k==='hc') return {head:n>1?'':`<div class="phd"><div class="lg"><img src="${IMG.logoH}" alt="聯盟動物醫院"></div><div class="t"><b>健康檢查報告書</b><span>HEALTH EXAMINATION REPORT</span></div></div><div class="rule"></div>`,
     foot:`<div class="pft"><span>實際檢查內容由醫師依動物年齡、健康狀況及健檢方案評估</span><span>聯盟動物醫院／聯盟教育中心</span></div>`};
   if(k==='abd') return {head:`<div class="phd"><img src="${IMG.logoH}" alt="聯盟動物醫院"></div>`,
@@ -825,6 +888,7 @@ $('#pages').addEventListener('click',e=>{
 /* plain text + rich copy */
 function reportText(k){
   if(k==='hc')return hcText();
+  if(k==='pup')return pupText();
   const p=S[k].p,o=[TITLES[k],`主治醫師：${SET.doctor}　檢查日期：${fmtDate(p.date)}`,'','【病患基本資料】',
     `動物名字：${p.name}　病歷號碼：${p.chart}　體重：${p.wt?p.wt+'kg':''}`,`種別：${p.sp}　年紀：${p.age}　體態評分：${p.bcs}`,`品種：${p.breed}　性別：${p.sex}　肌肉量評分：${p.mcs}`,''];
   if(k==='abd'){const m=contentAbd();o.push('【超音波檢查結果】');m.secs.forEach(s=>{o.push(s.title);s.lines.forEach(l=>o.push('・'+l))});
@@ -909,6 +973,7 @@ const aiDraftRow=k=>`<div class="ai-only" style="margin-top:10px;border-top:1px 
    <div id="${k}-draft"></div></div>`;
 function renderEditor(k){
   if(k==='hc'){renderHc();return}
+  if(k==='pup'){renderPup();return}
   const el=$('#ed-'+k),st=S[k];let h=patientHTML(k);
   if(k==='abd'){
     h+=`<div class="card"><h2>腹部超音波檢查結果 <small>黃底為正常描述，橘底為異常描述，再點一次取消；綠框為書本專業描述</small></h2>${ABD.map(s=>secHTML(k,s)).join('')}</div>`;
@@ -997,9 +1062,9 @@ document.addEventListener('click',e=>{
     S[k].dx=D.dx.join('\n');if(k==='abd')S.abd.rec=D.rec.join('\n');renderEditor(k);changed(k);toast('已套用草稿');return}
 });
 function setKind(k){KIND=k;document.querySelectorAll('.top .tabs:not(.mobileswitch) .tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.kind===k));
-  $('#ed-abd').hidden=k!=='abd';$('#ed-card').hidden=k!=='card';$('#ed-hc').hidden=k!=='hc';$('#ed-'+k).querySelectorAll('textarea').forEach(autoGrow);
+  $('#ed-abd').hidden=k!=='abd';$('#ed-card').hidden=k!=='card';$('#ed-hc').hidden=k!=='hc';$('#ed-pup').hidden=k!=='pup';$('#ed-'+k).querySelectorAll('textarea').forEach(autoGrow);
   updateBanner();renderReport(true);try{localStorage.setItem('usReportGen.tab',k)}catch(e){}}
-$('#tab-abd').onclick=()=>setKind('abd');$('#tab-card').onclick=()=>setKind('card');$('#tab-hc').onclick=()=>setKind('hc');
+$('#tab-abd').onclick=()=>setKind('abd');$('#tab-card').onclick=()=>setKind('card');$('#tab-hc').onclick=()=>setKind('hc');$('#tab-pup').onclick=()=>setKind('pup');
 function setView(v){document.body.dataset.view=v;$('#v-edit').setAttribute('aria-selected',v==='edit');$('#v-prev').setAttribute('aria-selected',v==='preview');if(v==='preview')scalePreview()}
 $('#v-edit').onclick=()=>setView('edit');$('#v-prev').onclick=()=>setView('preview');
 
@@ -1175,10 +1240,10 @@ function normPat(p){const o={};if(!p||typeof p!=='object')return o;
   return o}
 // Fill patient data into BOTH reports. A different chart number means a new patient: overwrite; otherwise only fill blanks.
 function applyPatientAll(pat,vit){
-  const P0=normPat(pat),out={abd:new Set(),card:new Set(),hc:new Set()},warn=[];
+  const P0=normPat(pat),out={abd:new Set(),card:new Set(),hc:new Set(),pup:new Set()},warn=[];
   const hr=parseFloat(vit?.hr),bs=parseFloat(vit?.bp_s),bd=parseFloat(vit?.bp_d),tp=parseFloat(vit?.temp),rr=parseFloat(vit?.rr);
   if(!Object.keys(P0).length&&!(hr>0)&&!(bs>0))return {out,warn};
-  for(const k of ['abd','card','hc']){
+  for(const k of ['abd','card','hc','pup']){
     let P=S[k].p;const fresh=!!P0.chart&&P0.chart!==P.chart;
     if(fresh&&S.ex[k]){S[k]=blankK(k);S.ex[k]=false;P=S[k].p}
     else if(fresh&&Object.values(S[k].vals||{}).some(x=>String(x).trim()))warn.push(`${k==='abd'?'腹部':'心臟'}報告的檢查內容仍是前一位病患的，若是新報告請先按「新報告」清空內容`);
@@ -1211,7 +1276,7 @@ $('#ai-go').onclick=async()=>{
   const k=KIND,txt=$('#ai-text').value.trim(),st=$('#ai-status');
   if(!FILES.length&&!txt){st.className='aistatus err';st.textContent='請先加入 PDF、截圖，或貼上文字。';return}
   $('#ai-go').disabled=true;st.className='aistatus';st.textContent='讀取中…';
-  const hit=new Set(),ph=new Set(),msgs=[],PCH={abd:false,card:false,hc:false};let notes='';
+  const hit=new Set(),ph=new Set(),msgs=[],PCH={abd:false,card:false,hc:false,pup:false};let notes='';
   try{
     let pdfT='';const sheets=[];
     for(const x of FILES.filter(x=>x.xls)){try{pdfT+=`\n【Excel：${x.file.name}】\n`+await sheetText(x.file)+'\n'}catch(e){msgs.push(`無法讀取 ${x.file.name}`)}}
@@ -1264,12 +1329,12 @@ ${allT?'\n文字資料：\n'+allT.slice(0,12000):''}`;
     if(cmt&&cmt!==S.card.en){S.card.en=cmt;enAuto=true;msgs.push('已讀到英文報告的 Comments，'+(SAMPLE?'正在轉成中文（見「英文報告轉中文」）':'請在 claude.ai 開啟後按「轉成中文報告」'))}
     if(enAuto){S.ex.card=false;setTimeout(()=>{renderEditor('card');save();if(SAMPLE)enTranslate()},0)}
     if(mrN||Object.keys(mr.p).length){const pa=applyPatientAll(mr.p,null);pa.out[k].forEach(x=>ph.add(x));for(const kk in pa.out)PCH[kk]=PCH[kk]||pa.out[kk].size>0;msgs.push(...pa.warn);const a=applyImport(k,mr.f,null);a.hit.forEach(x=>hit.add(x));msgs.unshift(`從 Mindray 報告讀到 ${mrN} 項量測`)}
-    const others=['abd','card','hc'].filter(kk=>kk!==k&&PCH[kk]);others.forEach(kk=>renderEditor(kk));if(others.length)save();
+    const others=['abd','card','hc','pup'].filter(kk=>kk!==k&&PCH[kk]);others.forEach(kk=>renderEditor(kk));if(others.length)save();
     if(hit.size||ph.size){if(S.ex[k]){S.ex[k]=false}updateBanner();renderEditor(k);changed(k);
       hit.forEach(id=>document.querySelector(`#ed-${k} .num[data-n="${id}"]`)?.classList.add('hit'));
       ph.forEach(id=>document.getElementById(id.startsWith('p-')?`p-${k}-${id.slice(2)}`:`t-${k}-${id.slice(2)}`)?.parentElement.classList.add('hit'))}
     st.className='aistatus'+(hit.size||ph.size?'':' err');
-    st.textContent=(hit.size||ph.size?`已帶入${hit.size?` ${hit.size} 項量測`:''}${hit.size&&ph.size?'、':''}${ph.size?` ${ph.size} 項病患資料`:''}（藍框）${others.length?`，${others.map(kk=>({abd:'腹部',card:'心臟',hc:'健檢'})[kk]).join('、')}報告的病患資料也已同步`:''}，請逐一核對。`:'沒有讀到可帶入的數值。')+(msgs.length?'\n'+msgs.join('\n'):'')+(notes?`\n未對應的量測：${notes}`:'');
+    st.textContent=(hit.size||ph.size?`已帶入${hit.size?` ${hit.size} 項量測`:''}${hit.size&&ph.size?'、':''}${ph.size?` ${ph.size} 項病患資料`:''}（藍框）${others.length?`，${others.map(kk=>({abd:'腹部',card:'心臟',hc:'健檢',pup:'幼犬貓手冊'})[kk]).join('、')}報告的病患資料也已同步`:''}，請逐一核對。`:'沒有讀到可帶入的數值。')+(msgs.length?'\n'+msgs.join('\n'):'')+(notes?`\n未對應的量測：${notes}`:'');
   }finally{$('#ai-go').disabled=false;$('#ai-stop').hidden=true}
 };
 $('#ai-stop').onclick=()=>aiCtl?.abort();
@@ -1730,6 +1795,177 @@ ${body}`;
   catch(e){st.className='aistatus err';st.textContent=errMsg(e);if(e?.code==='not_granted')disableAI()}
 }
 
+/* ================= 幼犬貓疫苗與照護手冊 (fourth tab) ================= */
+// Clinic schedule (幼犬貓行程表) — opt marks the +/- vaccines that the doctor switches on.
+const PUP_SCHED={
+ [CAT]:[{age:'6–8 週',w:[6,8],vac:['第一劑（3 合一）',{opt:'felv',t:'貓白血病疫苗'}],gi:'✓'},
+  {age:'10–12 週',w:[10,12],vac:['第二劑（3 合一／4 合一／5 合一）',{opt:'felv',t:'貓白血病疫苗'}],gi:'✓'},
+  {age:'14–16 週',w:[14,16],vac:['第三劑（3 合一／4 合一／5 合一）','狂犬病疫苗'],gi:'視情況'},
+  {age:'6 個月齡～1 歲',w:[26,52],vac:['補強一劑（3 合一／4 合一／5 合一）'],gi:'視情況',neut:'最後一次補強疫苗後約一週可安排絕育手術'},
+  {age:'每年',w:null,vac:['年度補強一劑（3 合一／4 合一／5 合一）','狂犬病疫苗',{opt:'felv',t:'貓白血病疫苗'}],gi:'✓'}],
+ [DOG]:[{age:'6–8 週',w:[6,8],vac:['第一劑（5 合一）'],gi:'✓'},
+  {age:'10–12 週',w:[10,12],vac:['第二劑（8 合一／10 合一／11 合一）',{opt:'lyme',t:'萊姆病疫苗'}],gi:'✓'},
+  {age:'14–16 週',w:[14,16],vac:['第三劑（8 合一／10 合一／11 合一）','狂犬病疫苗',{opt:'lyme',t:'萊姆病疫苗'}],gi:'視情況'},
+  {age:'6 個月齡～1 歲',w:[26,52],vac:['補強一劑（8 合一／10 合一／11 合一）'],gi:'視情況',neut:'最後一次補強疫苗約一週後可安排絕育手術'},
+  {age:'每年',w:null,vac:['年度補強一劑（8 合一／10 合一／11 合一）','狂犬病疫苗',{opt:'lyme',t:'萊姆病疫苗'}],gi:'✓'}]};
+// 驅蟲藥品比一比 (2026/5). days = dosing interval; age in weeks; wt in kg; pack = default doses per box (editable).
+const PARA_COV=['跳蚤','壁蝨','耳疥蟲','疥癬蟲','毛囊蟲','心絲蟲','蛔蟲','鉤蟲','鞭蟲','條蟲'];
+const PARA={
+ [DOG]:[
+  {id:'d_fl_spray',name:'蚤不到（噴）劑',type:'外用',days:30,bath:'用後 48 小時',age:2/7,wt:0,preg:1,cov:['跳蚤','壁蝨'],pack:1,unit:'瓶'},
+  {id:'d_fl_spot',name:'蚤不到（滴）劑',type:'外用',days:30,bath:'用後 48 小時',age:8,wt:0,preg:1,cov:['跳蚤','壁蝨'],note:'蚤卵、跳蚤幼蟲、蚤蛹',pack:3},
+  {id:'d_rev',name:'寵愛滴劑',type:'外用',days:30,bath:'用後 2 小時',age:6,wt:0,preg:1,cov:['跳蚤','壁蝨','耳疥蟲','疥癬蟲','心絲蟲'],note:'犬貓防護不同',pack:3},
+  {id:'d_adv',name:'心疥爽滴劑',type:'外用',days:30,bath:'用後 24 小時',age:7,wt:1,preg:0,cov:['跳蚤','耳疥蟲','疥癬蟲','毛囊蟲','心絲蟲','蛔蟲','鉤蟲','鞭蟲'],note:'犬蝨；心絲蟲陽性可用',pack:3},
+  {id:'d_milpro',name:'免操心',type:'口服',days:30,bath:'無限制',age:2,wt:0.5,preg:1,cov:['心絲蟲','蛔蟲','鉤蟲','鞭蟲','條蟲'],pack:2},
+  {id:'d_hg',name:'犬新寶',type:'口服',days:30,bath:'無限制',age:6,wt:0,preg:1,cov:['心絲蟲','蛔蟲','鉤蟲'],pack:6},
+  {id:'d_brav',name:'一錠除',type:'口服',days:84,bath:'無限制',age:8,wt:2,preg:1,cov:['跳蚤','壁蝨','疥癬蟲','毛囊蟲'],pack:1},
+  {id:'d_cred3',name:'寵愛食剋 3D',type:'口服',days:30,bath:'無限制',age:8,wt:1.25,preg:0,cov:['跳蚤','壁蝨','心絲蟲','蛔蟲','鉤蟲'],note:'肺蟲',pack:3},
+  {id:'d_cred',name:'寵愛食剋',type:'口服',days:30,bath:'無限制',age:8,wt:1.3,preg:0,cov:['跳蚤','壁蝨','耳疥蟲','疥癬蟲','毛囊蟲'],pack:3},
+  {id:'d_nex',name:'全能狗',type:'口服',days:30,bath:'無限制',age:8,wt:2,preg:1,cov:['跳蚤','壁蝨','耳疥蟲','疥癬蟲','毛囊蟲'],pack:3},
+  {id:'d_nexs',name:'全能狗 S',type:'口服',days:30,bath:'無限制',age:8,wt:1.35,preg:1,cov:['跳蚤','壁蝨','耳疥蟲','疥癬蟲','毛囊蟲','心絲蟲','蛔蟲','鉤蟲','鞭蟲'],note:'肺蟲、眼蟲',pack:3},
+  {id:'d_trio',name:'多重奏 S 狗',type:'口服',days:30,bath:'無限制',age:8,wt:1.4,preg:0,cov:['跳蚤','壁蝨','毛囊蟲','心絲蟲','蛔蟲','鉤蟲','鞭蟲'],note:'蛔蟲及鉤蟲之幼蟲、肺蟲；毛囊蟲 2026.4 通過台灣核准',pack:3},
+  {id:'d_ph12',name:'寵愛心思',type:'針劑',days:365,bath:'—',age:13,wt:0,preg:1,cov:['心絲蟲','鉤蟲'],note:'低於 9 月齡有不同計畫',pack:1,unit:'劑'}],
+ [CAT]:[
+  {id:'c_fla',name:'蚤安滴劑',type:'外用',days:30,bath:'用後 12 小時',age:8,wt:0,preg:0,cov:['跳蚤'],pack:3},
+  {id:'c_fl_spray',name:'蚤不到（噴）劑',type:'外用',days:30,bath:'用後 48 小時',age:2/7,wt:0,preg:1,cov:['跳蚤','壁蝨'],pack:1,unit:'瓶'},
+  {id:'c_fl_spot',name:'蚤不到（滴）劑',type:'外用',days:30,bath:'用後 48 小時',age:8,wt:1,preg:1,cov:['跳蚤','壁蝨'],note:'蚤卵、跳蚤幼蟲、蚤蛹',pack:3},
+  {id:'c_rev',name:'寵愛滴劑',type:'外用',days:30,bath:'用後 2 小時',age:8,wt:0,preg:1,cov:['跳蚤','耳疥蟲','心絲蟲','蛔蟲','鉤蟲'],note:'犬貓防護不同',pack:3},
+  {id:'c_revp',name:'寵愛 PLUS',type:'外用',days:30,bath:'用後 24 小時',age:8,wt:1.25,preg:0,cov:['跳蚤','壁蝨','耳疥蟲','心絲蟲','蛔蟲','鉤蟲'],pack:3},
+  {id:'c_adv',name:'心疥爽',type:'外用',days:30,bath:'用後 24 小時',age:9,wt:1,preg:0,cov:['跳蚤','耳疥蟲','疥癬蟲','心絲蟲','蛔蟲','鉤蟲'],note:'蛔蟲及鉤蟲之幼蟲',pack:3},
+  {id:'c_bravp',name:'一錠除',type:'外用',days:84,bath:'用後 48 小時',age:9,wt:1.2,preg:0,cov:['跳蚤','壁蝨','耳疥蟲','心絲蟲','蛔蟲','鉤蟲'],pack:1},
+  {id:'c_nexs',name:'全能貓 S',type:'外用',days:30,bath:'用後 48 小時',age:8,wt:0.8,preg:1,cov:['跳蚤','壁蝨','耳疥蟲','疥癬蟲','心絲蟲','蛔蟲','鉤蟲','條蟲'],note:'肺蟲／膀胱蟲',pack:3},
+  {id:'c_trio',name:'多重奏貓',type:'口服',days:30,bath:'無限制',age:8,wt:0.5,preg:0,cov:['跳蚤','壁蝨'],pack:3},
+  {id:'c_milpro',name:'免操心',type:'口服',days:30,bath:'無限制',age:6,wt:0.5,preg:1,cov:['心絲蟲','蛔蟲','鉤蟲','條蟲'],pack:2},
+  {id:'c_milq',name:'倍脈心全效貓',type:'口服',days:30,bath:'無限制',age:6,wt:0.5,preg:1,cov:['心絲蟲','蛔蟲','鉤蟲','條蟲'],pack:2}]};
+const NEED={[DOG]:['跳蚤','壁蝨','心絲蟲','蛔蟲','鉤蟲'],[CAT]:['跳蚤','心絲蟲','蛔蟲','鉤蟲']};
+const WREF='WSAVA 2024 疫苗指引';
+const PUP_ADV=[
+ ['vac',`幼犬幼貓體內的母源抗體會干擾疫苗效果，因此需每 2–4 週補強一次，最後一劑應在 16 週齡以後〔${WREF}〕`],
+ ['vac',`建議在 26 週齡（約 6 個月）以後再補強一劑，讓少數仍受母源抗體影響的寶貝也能完成免疫〔${WREF}〕`],
+ ['vac',`狂犬病流行或法規要求的地區，狂犬病疫苗屬於核心疫苗，請依規定按時施打〔${WREF}〕`],
+ ['vac',`貓白血病流行地區，1 歲以下幼貓、會外出或與外出貓同住的貓，建議施打貓白血病疫苗〔${WREF}〕`,CAT],
+ ['vac',`完成全部疫苗前，可在乾淨、可控的環境開始社會化（例如家中、幼犬課程），但避免接觸來路不明的動物與公共場所地面〔${WREF}〕`],
+ ['vac','施打疫苗後請在院內觀察至少 15 分鐘再離開'],
+ ['vac','疫苗後 1–2 天可能出現輕微精神、食慾下降或注射部位腫脹，多半會自行緩解；若出現臉部腫脹、嘔吐、腹瀉、呼吸困難或虛弱，請立即回院'],
+ ['vac','疫苗後一週內避免洗澡、劇烈運動與長途外出'],
+ ['vac','請保留疫苗紀錄，每次回診攜帶，以便醫師安排後續時程'],
+ ['par','腸道驅蟲依時程表進行，回診時可攜帶新鮮糞便檢查'],
+ ['par','體外寄生蟲與心絲蟲預防需每月規律使用，請在月曆或手機設定提醒'],
+ ['par','犬隻心絲蟲預防若漏用超過一個月，需由醫師評估並篩檢心絲蟲後，再決定後續預防用藥',DOG],
+ ['care','選擇幼犬／幼貓專用飼料，少量多餐，並定期量體重，記錄成長情形'],
+ ['care','4–6 個月大為換牙期，注意乳牙是否殘留；從小開始練習摸嘴巴與刷牙'],
+ ['care','最後一次補強疫苗約一週後可安排絕育手術，術前會再評估身體狀況'],
+ ['care','依規定辦理寵物登記並植入晶片'],
+ ['care','從小練習剪指甲、梳毛、洗澡與搭乘外出籠，減少日後就診與照護的壓力']];
+const ADV_GROUP={vac:'疫苗與注意事項',par:'驅蟲',care:'日常照護'};
+function loadPacks(){try{const pk=JSON.parse(localStorage.getItem('usReportGen.packs')||'{}');return pk&&typeof pk==='object'?pk:{}}catch(e){return {}}}
+function blankPUP(){return {p:blankP(),doctor:'',felv:false,lyme:false,rows:[{},{},{},{},{}],paras:[],months:6,start:today(),packs:loadPacks(),adv:'',next:'',dob:''}}
+const ageWeeks=st=>{if(!st.dob)return NaN;const a=new Date(st.dob),b=new Date(st.p.date||today());return (b-a)/864e5/7};
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+Math.round(n));return x};
+const md=d=>`${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+function schedDate(st,row){if(!st.dob||!row.w)return '';return `${md(addDays(st.dob,row.w[0]*7))}–${md(addDays(st.dob,row.w[1]*7))}`}
+function vacLines(st,row){return row.vac.filter(v=>typeof v==='string'||st[v.opt]).map(v=>typeof v==='string'?v:v.t)}
+function paraCalc(st,pr){const months=+st.months||0,pack=+(st.packs[pr.id]??pr.pack)||1;
+  const doses=pr.days>=365?Math.max(1,Math.ceil(months/12)):pr.days===30?Math.max(1,Math.ceil(months)):Math.max(1,Math.ceil(months*30.44/pr.days));
+  return {doses,pack,boxes:Math.ceil(doses/pack),unit:pr.unit||'盒'}}
+function paraWarn(st,pr){const w=[],aw=ageWeeks(st),kg=parseFloat(st.p.wt);
+  if(isFinite(aw)&&pr.age&&aw<pr.age)w.push(`未達年齡限制（需 >${pr.age<1?Math.round(pr.age*7)+' 日':pr.age+' 週'}）`);
+  if(isFinite(kg)&&pr.wt&&kg<pr.wt)w.push(`未達體重限制（需 >${pr.wt} kg）`);return w}
+function paraDates(st,pr){const n=paraCalc(st,pr).doses,out=[];for(let i=0;i<Math.min(n,12);i++)out.push(addDays(st.start||today(),i*pr.days));return out}
+
+function renderPup(){
+  const st=S.pup,p=st.p,el=$('#ed-pup'),sp_=p.sp,list=PARA[sp_];
+  const pIn=(f,l,x='')=>`<div class="fld"><label for="p-pup-${f}">${l}</label><input id="p-pup-${f}" data-k="pup" data-p="${f}" value="${esc(p[f]||'')}" ${x}></div>`;
+  const fIn=(path,l,ph='',type='')=>`<div class="fld"><label for="t-pup-${path}">${l}</label><input id="t-pup-${path}" data-k="pup" data-f="${path}" value="${esc(getP(st,path)||'')}" placeholder="${ph}"${type?` type="${type}"`:''}></div>`;
+  const aw=ageWeeks(st);
+  let h=`<div class="card"><h2>基本資料<button class="btn" data-puppull="1">從其他報告帶入</button></h2><div class="pgrid">
+    ${pIn('name','寵物姓名')}${pIn('chart','病歷號碼')}${pIn('owner','飼主姓名')}
+    <div class="fld"><label for="p-pup-sp">種類</label><select id="p-pup-sp" data-k="pup" data-p="sp"><option${sp_===DOG?' selected':''}>${DOG}</option><option${sp_===CAT?' selected':''}>${CAT}</option></select></div>
+    ${pIn('breed','品種')}${pIn('sex','性別','list="dl-sex"')}${fIn('dob','出生日期','','date')}${pIn('wt','體重 (kg)','inputmode="decimal"')}
+    <div class="fld"><label for="p-pup-date">日期</label><input type="date" id="p-pup-date" data-k="pup" data-p="date" value="${esc(p.date)}"></div>
+    ${pIn('chip','晶片號碼')}${fIn('doctor','執行醫師',SET.doctor||'')}</div>
+    <p class="hint" style="margin:6px 0 0" id="pup-age">${isFinite(aw)?`目前約 ${Math.floor(aw)} 週齡（${Math.floor(aw/4.345)} 個月）`:'填入出生日期後，會自動算出週齡與各劑建議日期'}</p></div>`;
+  h+=`<div class="card"><h2>預防時程 <small>依聯盟幼犬貓行程表；填入出生日期會自動算出建議日期</small></h2>
+    <label class="chk"><input type="checkbox" data-pupb="${sp_===CAT?'felv':'lyme'}"${st[sp_===CAT?'felv':'lyme']?' checked':''}> 加入${sp_===CAT?'貓白血病':'萊姆病'}疫苗</label>
+    ${PUP_SCHED[sp_].map((r,i)=>`<div class="hcrow pup"><span><b>${r.age}</b><br><small class="hint">${schedDate(st,r)||'—'}</small></span><span class="hint">${vacLines(st,r).join('、')}</span>
+      <input type="date" id="t-pup-rows.${i}.done" data-k="pup" data-f="rows.${i}.done" value="${esc(st.rows[i]?.done||'')}" aria-label="${r.age} 完成日期">
+      <input id="t-pup-rows.${i}.note" data-k="pup" data-f="rows.${i}.note" value="${esc(st.rows[i]?.note||'')}" placeholder="施打品項／備註"></div>`).join('')}
+    <p class="hint" style="margin:6px 0 0">每列：建議日期｜疫苗內容｜完成日期｜品項或備註</p></div>`;
+  const cov=new Set(st.paras.flatMap(id=>(list.find(x=>x.id===id)||{cov:[]}).cov)),gap=NEED[sp_].filter(c=>!cov.has(c));
+  h+=`<div class="card"><h2>驅蟲藥建議 <small>依「${sp_==='犬'?'犬':'貓'}用驅蟲藥品比一比（2026/5）」；點選產品，選擇預防期間，自動換算購買盒數</small></h2>
+    <div class="grp">${list.map(pr=>`<button type="button" class="chip${st.paras.includes(pr.id)?' on':''}" data-para="${pr.id}">${esc(pr.name)} <span class="hint">${pr.type}・${pr.days>=365?'1 年':pr.days===84?'12 週':'30 天'}</span></button>`).join('')}</div>
+    <div class="airow"><span class="sub" style="margin:0">預防期間</span>${[1,3,6,12].map(m=>`<button type="button" class="chip${+st.months===m?' on':''}" data-months="${m}">${m} 個月</button>`).join('')}
+      <input id="t-pup-months" data-k="pup" data-f="months" value="${esc(st.months)}" inputmode="numeric" style="width:5em;border:1px solid var(--line);border-radius:7px;padding:4px 8px;background:var(--bg)" aria-label="自訂月數"> 個月
+      <label class="hint" for="t-pup-start" style="margin-left:8px">第一次用藥日</label><input type="date" id="t-pup-start" data-k="pup" data-f="start" value="${esc(st.start)}" style="border:1px solid var(--line);border-radius:7px;padding:4px 8px;background:var(--bg)"></div>
+    ${st.paras.map(id=>{const pr=list.find(x=>x.id===id);if(!pr)return '';const c=paraCalc(st,pr),w=paraWarn(st,pr);
+      return `<div class="pcalc"><b>${esc(pr.name)}</b>：${st.months} 個月需 <b>${c.doses}</b> ${pr.days>=365?'劑':'次'}，約 <b>${c.boxes}</b> ${c.unit}
+        <label class="hint">（每${c.unit} <input data-pack="${pr.id}" value="${c.pack}" inputmode="numeric" style="width:3em;border:1px solid var(--line);border-radius:6px;padding:1px 4px;background:var(--bg)" aria-label="每盒劑數"> 劑）</label>
+        <span class="hint">防護：${pr.cov.join('、')}${pr.note?`；${esc(pr.note)}`:''}；洗澡：${pr.bath}</span>
+        ${w.length?`<span class="pwarn">${w.join('；')}</span>`:''}</div>`}).join('')}
+    ${st.paras.length?(gap.length?`<p class="pwarn">目前組合尚未涵蓋：${gap.join('、')}</p>`:'<p class="hint">目前組合已涵蓋：'+NEED[sp_].join('、')+'</p>'):''}
+    <p class="hint">每盒劑數為預設值，請依實際包裝修改（會記住在這台電腦）。</p></div>`;
+  h+=`<div class="card"><h2>照顧建議 <small>點選加入，可再修改；標註〔WSAVA〕的句子報告最後會附參考文獻</small></h2>
+    ${Object.entries(ADV_GROUP).map(([g,l])=>`<p class="sub">${l}</p>${tchips('pup','adv',PUP_ADV.filter(a=>a[0]===g&&(!a[2]||a[2]===sp_)).map(a=>a[1]))}`).join('')}
+    ${ta('pup','adv','每行一點',4)}
+    ${ta('pup','next','例：2026/11/14 第二劑疫苗',1,'下次回診')}
+    <div class="airow"><button class="btn" data-advall="1">加入全部建議</button></div></div>`;
+  el.innerHTML=h;el.querySelectorAll('textarea').forEach(autoGrow);refreshTchips(el);
+}
+
+/* ---- report ---- */
+function blocksPup(){
+  const st=S.pup,p=st.p,sp_=p.sp,B=[],sx=sexSplit(p.sex),aw=ageWeeks(st);
+  B.push({h:`<div class="hsec">基本資料</div><div class="bi">
+    <div class="r"><span style="width:31%">日期：${hcDate(p.date)}</span><span style="width:31%">飼主姓名：${blank(p.owner)}</span><span>寵物姓名：${blank(p.name)}</span></div>
+    <div class="r"><span style="width:31%">種類：${blank(sp_)}</span><span style="width:31%">品種：${blank(p.breed)}</span><span style="width:16%">性別：${blank(sx.g,3)}</span><span>體重：${p.wt?`<b>${esc(p.wt)} kg</b>`:'＿＿ kg'}</span></div>
+    <div class="r"><span style="width:31%">出生日期：${st.dob?`<b>${fmtDate(st.dob)}</b>`:'＿＿＿＿'}</span><span style="width:31%">目前年齡：${isFinite(aw)?`<b>${Math.floor(aw)} 週齡</b>`:'＿＿＿'}</span><span>晶片號碼：${blank(p.chip)}</span></div>
+    <div class="r"><span style="width:31%">病歷號碼：${blank(p.chart)}</span><span>執行醫師：${blank(st.doctor||SET.doctor)}</span></div></div>`});
+  const rows=PUP_SCHED[sp_];
+  let t=`<div class="hsec">預防時程表</div><table class="ex pt2"><colgroup><col style="width:17%"><col style="width:35%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:18%"></colgroup>
+    <tr><th>年齡／建議日期</th><th>預防針</th><th>腸道驅蟲</th><th>體外驅蟲</th><th>心絲蟲</th><th>完成／絕育</th></tr>`;
+  rows.forEach((r,i)=>{const rr=st.rows[i]||{},sd=schedDate(st,r);
+    t+=`<tr><td class="cat" data-src="f:rows.${i}.done">${r.age}${sd?`<br><span>${sd}</span>`:''}</td><td data-src="f:rows.${i}.note">${vacLines(st,r).map(v=>'◎'+esc(v)).join('<br>')}${rr.note?`<br><span class="pnote">${esc(rr.note)}</span>`:''}</td>
+      <td class="it">${r.gi}</td><td class="it">每個月</td><td class="it">每個月</td><td>${rr.done?`<b class="pdone">✓ ${fmtDate(rr.done)}</b>`:''}${r.neut?`<span class="pnote">${r.neut}</span>`:''}</td></tr>`});
+  B.push({h:t+'</table>'});
+  const list=PARA[sp_],sel=st.paras.map(id=>list.find(x=>x.id===id)).filter(Boolean);
+  if(sel.length){
+    let q=`<div class="hsec">驅蟲藥建議（預防 ${st.months} 個月）</div><table class="ex pt2"><colgroup><col style="width:19%"><col style="width:9%"><col style="width:11%"><col style="width:33%"><col style="width:16%"><col style="width:12%"></colgroup>
+      <tr><th>產品</th><th>劑型</th><th>使用間隔</th><th>防護範圍</th><th>建議用量</th><th>洗澡間隔</th></tr>`;
+    sel.forEach(pr=>{const c=paraCalc(st,pr);q+=`<tr><td class="it" style="font-weight:700">${esc(pr.name)}</td><td class="it">${pr.type}</td><td class="it">${pr.days>=365?'1 年':pr.days===84?'12 週':'30 天'}</td><td>${pr.cov.join('、')}${pr.note?`<br><span class="pnote">${esc(pr.note)}</span>`:''}</td><td class="it"><b>${c.doses}</b> ${pr.days>=365?'劑':'次'}／約 <b>${c.boxes}</b> ${c.unit}</td><td class="it">${pr.bath}</td></tr>`});
+    B.push({h:q+'</table>'});
+    const dl=sel.filter(pr=>pr.days<365).map(pr=>`<b>${esc(pr.name)}</b>：${paraDates(st,pr).map(d=>`${d.getMonth()+1}/${d.getDate()}`).join('、')}`);
+    if(dl.length)B.push({h:`<p class="hnote" style="font-size:12px">用藥日期提醒　${dl.join('　｜　')}</p>`});
+  }
+  const adv=lines(st.adv);
+  if(adv.length){B.push({h:'<div class="hsec">照顧建議</div>',keep:1});adv.forEach(l=>B.push({h:`<ul class="hrec"><li data-src="f:adv">${esc(l)}</li></ul>`}))}
+  if(st.next.trim())B.push({h:`<div class="hsec">下次回診</div><p class="hnote" style="font-size:13px;color:#222" data-src="f:next"><b>${esc(st.next.trim())}</b></p>`});
+  B.push({h:'<div class="hend"></div>'});
+  const refs=Object.values(REFS).filter(r=>adv.some(l=>l.includes(r.short)));
+  if(refs.length){B.push({h:'<div class="hsec">參考文獻</div>',keep:1});refs.forEach(r=>B.push({h:`<p class="hnote">${esc(r.full)}</p>`}))}
+  return B;
+}
+function pupText(){const st=S.pup,p=st.p,o=[`${p.sp==='貓'?'幼貓':'幼犬'}疫苗與照護手冊`,`日期：${fmtDate(p.date)}　飼主：${p.owner}　寵物：${p.name}（${p.chart}）`,`${p.sp}　${p.breed}　${p.sex}　出生 ${fmtDate(st.dob)}　體重 ${p.wt?p.wt+' kg':''}`,'','【預防時程】'];
+  PUP_SCHED[p.sp].forEach((r,i)=>{const rr=st.rows[i]||{};o.push(`${r.age}${schedDate(st,r)?'（'+schedDate(st,r)+'）':''}：${vacLines(st,r).join('、')}${rr.done?'　✓ '+fmtDate(rr.done):''}${rr.note?'　'+rr.note:''}`)});
+  const sel=st.paras.map(id=>PARA[p.sp].find(x=>x.id===id)).filter(Boolean);
+  if(sel.length){o.push('',`【驅蟲藥建議（${st.months} 個月）】`);sel.forEach(pr=>{const c=paraCalc(st,pr);o.push(`${pr.name}：${c.doses} 次，約 ${c.boxes} ${c.unit}（${pr.cov.join('、')}）`)})}
+  const adv=lines(st.adv);if(adv.length){o.push('','【照顧建議】');adv.forEach(l=>o.push('・'+l))}
+  if(st.next.trim())o.push('','下次回診：'+st.next.trim());return o.join('\n')}
+
+/* ---- events ---- */
+const PACKKEY='usReportGen.packs';
+document.addEventListener('click',e=>{
+  const pa=e.target.closest('[data-para]');if(pa){const id=pa.dataset.para,a=S.pup.paras,i=a.indexOf(id);i>=0?a.splice(i,1):a.push(id);renderPup();changed('pup');return}
+  const mo=e.target.closest('[data-months]');if(mo){S.pup.months=+mo.dataset.months;renderPup();changed('pup');return}
+  if(e.target.closest('[data-advall]')){const cur=lines(S.pup.adv);PUP_ADV.filter(a=>!a[2]||a[2]===S.pup.p.sp).forEach(a=>{if(!cur.includes(a[1]))cur.push(a[1])});S.pup.adv=cur.join('\n');renderPup();changed('pup');return}
+  if(e.target.closest('[data-puppull]')){const src=['hc','card','abd'].find(k=>S[k].p.name)||'hc',P=S[src].p;
+    for(const f of ['name','chart','owner','chip','wt','sp','breed','sex'])if(P[f]&&!String(S.pup.p[f]||'').trim())S.pup.p[f]=P[f];
+    renderPup();changed('pup');toast(`已從${({hc:'健檢',card:'心臟',abd:'腹部'})[src]}報告帶入（只補空白欄位）`);return}
+});
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset.pupb){S.pup[t.dataset.pupb]=t.checked;renderPup();changed('pup')}});
+document.addEventListener('input',e=>{const t=e.target;
+  if(t.dataset.pack){S.pup.packs[t.dataset.pack]=t.value;try{const pk=JSON.parse(localStorage.getItem(PACKKEY)||'{}');pk[t.dataset.pack]=t.value;localStorage.setItem(PACKKEY,JSON.stringify(pk))}catch(_){}changed('pup')}
+  if(t.dataset.k==='pup'&&(t.dataset.f==='months'||t.dataset.f==='start'||t.dataset.f==='dob'||t.dataset.p==='wt'||t.dataset.p==='date')){clearTimeout(renderPup.t);renderPup.t=setTimeout(()=>{const a=document.activeElement,id=a&&a.id;renderPup();if(id){const n=document.getElementById(id);if(n){n.focus();try{const v=n.value;n.setSelectionRange&&n.type==='text'&&n.setSelectionRange(v.length,v.length)}catch(_){}}}},500)}});
+
 /* ================= boot ================= */
 document.body.insertAdjacentHTML('beforeend',`<datalist id="dl-sex"><option>公</option><option>母</option><option>公（已結紮）</option><option>母（已結紮）</option></datalist>
 <datalist id="dl-mcs"><option>無明顯肌肉量流失</option><option>輕微肌肉量流失</option><option>中度肌肉量流失</option><option>嚴重肌肉量流失</option></datalist>
@@ -1737,9 +1973,9 @@ document.body.insertAdjacentHTML('beforeend',`<datalist id="dl-sex"><option>公<
 <datalist id="dl-aus">${['無明顯心雜音','I/VI','II/VI','III/VI','IV/VI','V/VI','VI/VI','IV-V/VI','奔馬律'].map(x=>`<option>${x}</option>`).join('')}</datalist>
 <datalist id="dl-size"><option>正常</option><option>輕度偏大</option><option>明顯偏大</option></datalist>
 <datalist id="dl-vessel"><option>正常</option><option>些微變粗</option><option>明顯變粗</option></datalist>`);
-renderEditor('abd');renderEditor('card');renderEditor('hc');
+renderEditor('abd');renderEditor('card');renderEditor('hc');renderEditor('pup');
 let tab='abd';try{tab=localStorage.getItem('usReportGen.tab')||'abd'}catch(e){}
-setKind(['abd','card','hc'].includes(tab)?tab:'abd');setView('edit');
+setKind(['abd','card','hc','pup'].includes(tab)?tab:'abd');setView('edit');
 document.fonts&&document.fonts.ready.then(()=>renderReport(true));
 (async()=>{
   const use=window.claude&&window.claude.use?window.claude.use.bind(window.claude):null;
