@@ -293,7 +293,7 @@ details summary{cursor:pointer;font-weight:700}
 
     <div class="card ai" id="ai-box">
       <h2>自動帶入數值 <small>病歷系統截圖、Mindray 量測 PDF、機器畫面、舊報告</small></h2>
-      <div class="drop" id="drop" tabindex="0">點這裡選檔，或把 PDF／圖片拖進來，或直接 ⌘V 貼上截圖<input type="file" id="file" accept="image/*,application/pdf" multiple hidden></div>
+      <div class="drop" id="drop" tabindex="0">點這裡選檔，或把 PDF／Excel／圖片拖進來，或直接 ⌘V 貼上截圖<input type="file" id="file" accept="image/*,application/pdf,.xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" multiple hidden></div>
       <div class="thumbs" id="thumbs"></div>
       <textarea id="ai-text" placeholder="（可選）貼上文字量測結果，例如：LA Diam 3.23cm Ao 2.14cm IVSd 0.90cm…" style="margin-top:8px"></textarea>
       <div class="airow">
@@ -301,7 +301,7 @@ details summary{cursor:pointer;font-weight:700}
         <button class="btn" id="ai-stop" hidden>停止</button>
         <span class="aistatus" id="ai-status"></span>
       </div>
-      <p class="hint" style="margin:6px 0 0" id="ai-hint">丟入病歷系統畫面截圖，會自動填入病患基本資料，腹部與心臟兩份報告同步（心臟報告另帶入脈搏、血壓）。Mindray 心臟量測 PDF 直接讀文字，不用 AI；Soulvet 影像匯出 PDF 會自動挑出有量測的影像交給 AI；截圖與其他格式也由 AI 讀取。帶入的欄位會以藍框標示，請逐一核對。圖片連結無法直接讀取，請存檔後拖進來。</p>
+      <p class="hint" style="margin:6px 0 0" id="ai-hint">丟入病歷系統畫面截圖，會自動填入病患基本資料，腹部與心臟兩份報告同步（心臟報告另帶入脈搏、血壓）。Mindray 心臟量測 PDF 直接讀文字，不用 AI；Excel（.xlsx／.xls／.csv）會讀出表格內容；Soulvet 影像匯出 PDF 會自動挑出有量測的影像交給 AI；截圖與其他格式也由 AI 讀取。帶入的欄位會以藍框標示，請逐一核對。圖片連結無法直接讀取，請存檔後拖進來。</p>
     </div>
 
     <div id="ed-abd"></div>
@@ -979,10 +979,26 @@ $('#btn-pdf').onclick=async()=>{
 /* ================= import: Mindray PDF / AI ================= */
 let AI_ON=true,SAMPLE=null,IMG_OK=false,LIM=null;
 const FILES=[],DRAFT={};
-function renderThumbs(){$('#thumbs').innerHTML=FILES.map((x,i)=>`<div class="thumb">${x.url?`<img src="${x.url}" alt="截圖 ${i+1}">`:`<span>PDF<br>${esc(x.file.name.slice(0,28))}</span>`}<button type="button" data-rm="${i}" aria-label="移除">×</button></div>`).join('')}
+function renderThumbs(){$('#thumbs').innerHTML=FILES.map((x,i)=>`<div class="thumb">${x.url?`<img src="${x.url}" alt="截圖 ${i+1}">`:`<span>${x.xls?'Excel':'PDF'}<br>${esc(x.file.name.slice(0,28))}</span>`}<button type="button" data-rm="${i}" aria-label="移除">×</button></div>`).join('')}
 $('#thumbs').onclick=e=>{const b=e.target.closest('[data-rm]');if(b){const x=FILES[+b.dataset.rm];x.url&&URL.revokeObjectURL(x.url);FILES.splice(+b.dataset.rm,1);renderThumbs()}};
-function addFiles(fs){for(const f of fs){const pdf=f.type==='application/pdf'||/\.pdf$/i.test(f.name);if(!pdf&&!f.type.startsWith('image/'))continue;
-  if(FILES.length>=8){toast('一次最多 8 個檔案');break}FILES.push({file:f,pdf,url:pdf?null:URL.createObjectURL(f)})}renderThumbs()}
+const isXls=f=>/\.(xlsx|xlsm|xls|csv)$/i.test(f.name)||/spreadsheet|ms-excel|text\/csv/.test(f.type);
+function addFiles(fs){for(const f of fs){const xls=isXls(f),pdf=!xls&&(f.type==='application/pdf'||/\.pdf$/i.test(f.name));if(!pdf&&!xls&&!f.type.startsWith('image/'))continue;
+  if(FILES.length>=8){toast('一次最多 8 個檔案');break}FILES.push({file:f,pdf,xls,url:pdf||xls?null:URL.createObjectURL(f)})}renderThumbs()}
+async function ensureXlsx(){if(!window.XLSX)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js')}
+async function readBook(file){await ensureXlsx();const buf=new Uint8Array(await file.arrayBuffer());
+  return /\.csv$/i.test(file.name)?XLSX.read(new TextDecoder('utf-8').decode(buf),{type:'string'}):XLSX.read(buf,{type:'array'})}
+async function sheetText(file){const wb=await readBook(file);
+  return wb.SheetNames.map(n=>`【${n}】\n`+XLSX.utils.sheet_to_csv(wb.Sheets[n],{FS:'\t',blankrows:false})).join('\n').slice(0,40000)}
+// Lab-result spreadsheets: find the header row (項目／結果／單位／參考範圍) and read one test per row.
+async function sheetBlood(file){const wb=await readBook(file),out=[];
+  for(const n of wb.SheetNames){const A=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:false,defval:''});
+    const hi=A.findIndex(r=>r.some(c=>/項目|檢驗|test|item|name|analyte/i.test(c))&&r.some(c=>/結果|數值|result|value/i.test(c)));if(hi<0)continue;
+    const H=A[hi].map(c=>String(c)),col=re=>H.findIndex(c=>re.test(c));
+    const ci={name:col(/項目|檢驗|test|item|name|analyte/i),val:col(/結果|數值|result|value/i),unit:col(/單位|unit/i),ref:col(/參考|範圍|ref|range|normal/i),lo:col(/下限|low|min/i),hi:col(/上限|high|max/i),flag:col(/判讀|flag|H\/L|異常/i)};
+    for(const r of A.slice(hi+1)){const name=String(r[ci.name]||'').trim(),val=String(r[ci.val]??'').trim();if(!name||!val)continue;
+      const ref=ci.ref>=0&&String(r[ci.ref]).trim()?String(r[ci.ref]).replace(/\s/g,''):(ci.lo>=0&&ci.hi>=0&&String(r[ci.lo]).trim()?`${r[ci.lo]}-${r[ci.hi]}`:'');
+      out.push({cat:CBC_RE.test(name)?'CBC':'生化',name,val,unit:ci.unit>=0?String(r[ci.unit]).trim():'',ref,flag:ci.flag>=0?String(r[ci.flag]).trim():''})}}
+  return out}
 const drop=$('#drop');
 drop.onclick=()=>$('#file').click();drop.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('#file').click()}};
 $('#file').onchange=e=>{addFiles(e.target.files);e.target.value=''};
@@ -1132,6 +1148,7 @@ $('#ai-go').onclick=async()=>{
   const hit=new Set(),ph=new Set(),msgs=[],PCH={abd:false,card:false,hc:false};let notes='';
   try{
     let pdfT='';const sheets=[];
+    for(const x of FILES.filter(x=>x.xls)){try{pdfT+=`\n【Excel：${x.file.name}】\n`+await sheetText(x.file)+'\n'}catch(e){msgs.push(`無法讀取 ${x.file.name}`)}}
     for(const x of FILES.filter(x=>x.pdf)){try{const t=await pdfText(x.file);
       if((t.match(/\d+\.\d+/g)||[]).length<10){const r=await soulvetSheets(x.file,m=>st.textContent=m);
         if(r.n){sheets.push(...r.blobs);msgs.push(`${x.file.name}：${r.total} 張影像中有 ${r.n} 張含量測，已交給 AI 判讀`)}else{pdfT+=t+'\n';if(r.total)msgs.push(`${x.file.name}：${r.total} 張影像中沒有找到量測框`)}}
@@ -1139,7 +1156,7 @@ $('#ai-go').onclick=async()=>{
     const allT=(pdfT+'\n'+txt).trim();
     let mr={f:{},p:{}};if(k==='card'&&allT)mr=parseMindray(allT);
     const mrN=Object.keys(mr.f).length;
-    let imgs=[...FILES.filter(x=>!x.pdf).map(x=>x.file),...sheets];
+    let imgs=[...FILES.filter(x=>!x.pdf&&!x.xls).map(x=>x.file),...sheets];
     const maxImg=LIM?.images?.maxCount||imgs.length;if(imgs.length>maxImg){msgs.push(`影像太多，只送出前 ${maxImg} 張給 AI`);imgs=imgs.slice(0,maxImg)}
     const needAI=imgs.length>0||(allT&&(k==='abd'||mrN<3));
     if(needAI){
@@ -1431,7 +1448,7 @@ function renderHc(){
         <input id="t-hc-items.${id}.note" data-k="hc" data-f="items.${id}.note" value="${esc(it.note||'')}" placeholder="說明"></div>`}}
   h+=`</div>`;
   h+=`<div class="card"><h2>血液檢查 <small>上傳血檢報告（PDF／圖片）或貼上文字，讀出後可逐項修改</small></h2>
-    <div class="drop" data-blooddrop tabindex="0">點這裡選檔、拖曳血檢 PDF 或圖片進來，或在下方欄位 ⌘V 貼上截圖<input type="file" accept="image/*,application/pdf" multiple hidden data-bloodfile></div>
+    <div class="drop" data-blooddrop tabindex="0">點這裡選檔、拖曳血檢 PDF／Excel／圖片進來，或在下方欄位 ⌘V 貼上截圖<input type="file" accept="image/*,application/pdf,.xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" multiple hidden data-bloodfile></div>
     <div class="thumbs" id="blood-thumbs"></div>
     <textarea id="blood-text" rows="2" placeholder="或貼上血檢文字，一行一項，例如：ALT 45 U/L 10-125"></textarea>
     <div class="airow"><button class="btn primary" data-bloodread="1">讀取血檢</button><button class="btn" data-bloodadd="1">新增一列</button><button class="btn danger" data-bloodclear="1">清空血檢</button><span class="aistatus" id="blood-status"></span></div>
@@ -1455,8 +1472,8 @@ function renderHc(){
   renderCtxThumbs('hc');renderBThumbs();
 }
 function renderBThumbs(){const el=document.getElementById('blood-thumbs');if(!el)return;
-  el.innerHTML=BFILES.map((x,i)=>`<div class="thumb">${x.url?`<img src="${x.url}" alt="血檢 ${i+1}">`:`<span>PDF<br>${esc(x.file.name.slice(0,28))}</span>`}<button type="button" data-brm="${i}" aria-label="移除">×</button></div>`).join('')}
-function addBFiles(fs){for(const f of fs){const pdf=f.type==='application/pdf'||/\.pdf$/i.test(f.name);if(!pdf&&!f.type.startsWith('image/'))continue;BFILES.push({file:f,pdf,url:pdf?null:URL.createObjectURL(f)})}renderBThumbs()}
+  el.innerHTML=BFILES.map((x,i)=>`<div class="thumb">${x.url?`<img src="${x.url}" alt="血檢 ${i+1}">`:`<span>${x.xls?'Excel':'PDF'}<br>${esc(x.file.name.slice(0,28))}</span>`}<button type="button" data-brm="${i}" aria-label="移除">×</button></div>`).join('')}
+function addBFiles(fs){for(const f of fs){const xls=isXls(f),pdf=!xls&&(f.type==='application/pdf'||/\.pdf$/i.test(f.name));if(!pdf&&!xls&&!f.type.startsWith('image/'))continue;BFILES.push({file:f,pdf,xls,url:pdf||xls?null:URL.createObjectURL(f)})}renderBThumbs()}
 
 /* ---- report ---- */
 const paw=on=>`<img class="pw${on?' on':''}" src="${IMG.paw}" alt="">`;
@@ -1558,9 +1575,10 @@ async function bloodRead(){
   const st=$('#blood-status'),txt=($('#blood-text').value||'').trim();
   if(!BFILES.length&&!txt){st.className='aistatus err';st.textContent='請先加入血檢檔案，或貼上文字。';return}
   st.className='aistatus';st.textContent='讀取中…';
-  let t=txt;for(const x of BFILES.filter(x=>x.pdf)){try{t+='\n'+await pdfText(x.file)}catch(e){}}
-  let rows=parseBloodText(t),snap='',via='文字';
-  const imgs=BFILES.filter(x=>!x.pdf).map(x=>x.file);
+  let t=txt,xrows=[];for(const x of BFILES.filter(x=>x.pdf)){try{t+='\n'+await pdfText(x.file)}catch(e){}}
+  for(const x of BFILES.filter(x=>x.xls)){try{xrows.push(...await sheetBlood(x.file));t+='\n'+await sheetText(x.file)}catch(e){}}
+  let rows=xrows.length?xrows:parseBloodText(t),snap='',via=xrows.length?'Excel':'文字';
+  const imgs=BFILES.filter(x=>!x.pdf&&!x.xls).map(x=>x.file);
   if((imgs.length||rows.length<3)&&SAMPLE&&(!imgs.length||IMG_OK)){
     st.textContent='AI 讀取血檢中，約需 10–60 秒…';
     const prompt=`你是台灣小動物醫院的檢驗報告助理。請從${imgs.length?'附圖':''}${imgs.length&&t.trim()?'與':''}${t.trim()?'下方文字':''}讀出血液檢查結果（CBC、血液生化、電解質、特殊生化、快篩）。
