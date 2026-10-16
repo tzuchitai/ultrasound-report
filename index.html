@@ -515,7 +515,8 @@ const REFS={
  ph:{short:'ACVIM 2020 犬肺高壓共識',full:'Reinero C, et al. ACVIM consensus statement guidelines for the diagnosis, classification, treatment, and monitoring of pulmonary hypertension in dogs. J Vet Intern Med. 2020;34:549-573.',sp:DOG},
  fcm:{short:'ACVIM 2020 貓心肌病共識',full:'Luis Fuentes V, et al. ACVIM consensus statement guidelines for the classification, diagnosis, and management of cardiomyopathies in cats. J Vet Intern Med. 2020;34:1062-1077.',sp:CAT},
  nut:{short:'AAHA 2010 營養評估指引',full:'Baldwin K, et al. AAHA nutritional assessment guidelines for dogs and cats. J Am Anim Hosp Assoc. 2010;46:285-296.',sp:null},
- senior:{short:'AAHA 2023 高齡照護指引',full:'Dhaliwal R, et al. 2023 AAHA senior care guidelines for dogs and cats. J Am Anim Hosp Assoc. 2023;59:1-21.',sp:null}};
+ senior:{short:'AAHA 2023 高齡照護指引',full:'Dhaliwal R, et al. 2023 AAHA senior care guidelines for dogs and cats. J Am Anim Hosp Assoc. 2023;59:1-21.',sp:null},
+ iris:{short:'IRIS 2026 指引',full:'International Renal Interest Society (IRIS). IRIS Staging of CKD; Treatment Recommendations for CKD in Dogs and Cats; Grading of Acute Kidney Injury (modified 2026). https://www.iris-kidney.com/iris-guidelines-1',sp:null}};
 const EVID={
  mmvd:[
   ['dx','B2 期需同時符合：心雜音 ≥3/6、右短軸舒張早期 LA/Ao ≥1.6、LVIDDN ≥1.7、品種校正 VHS >10.5；其中以超音波顯示左心房與左心室擴大最具代表性'],
@@ -578,7 +579,32 @@ const EVID={
   ['rec','慢性腎病自 IRIS 第 2 期起建議補充長鏈 omega-3；健康與早期腎病不需限制蛋白質，IRIS 第 3 期建議限制蛋白質並控制磷攝取'],
   ['rec','皮膚腫塊建議測量三個維度、細針採樣，並記錄位置以追蹤變化'],
   ['rec','居家環境調整：鋪設防滑墊或地毯、樓梯與泳池加裝護欄、調整食碗高度，以提升行動安全與生活品質'],
-  ['rec','建議及早與飼主討論生活品質評估與安寧照護，規劃照護目標']]};
+  ['rec','建議及早與飼主討論生活品質評估與安寧照護，規劃照護目標']],
+ iris:[
+  ['rec','慢性腎病須先確診才進行分期：以禁食下的血中 creatinine 和／或 SDMA，在水合充足且穩定的狀態下至少測量兩次'],
+  ['rec','單次 creatinine 或 SDMA 升高本身不足以診斷慢性腎病'],
+  ['rec','Creatinine 分期（mg/dl）：犬第 1 期 <1.4、第 2 期 1.4–2.8、第 3 期 2.9–5.0、第 4 期 >5.0；貓第 1 期 <1.6、第 2 期 1.6–2.8、第 3 期 2.9–5.0、第 4 期 >5.0'],
+  ['rec','SDMA 分期（μg/dl）：犬第 1 期 <18、第 2 期 18–35、第 3 期 36–54、第 4 期 >54；貓第 1 期 <18、第 2 期 18–25、第 3 期 26–38、第 4 期 >38'],
+  ['rec','SDMA 持續 >14 μg/dl 可用於診斷早期慢性腎病；SDMA 較不受肌肉量流失影響，肌肉明顯流失時可作為分期依據'],
+  ['rec','Creatinine 與 SDMA 分期不一致時，若 SDMA 持續高於該期上限（犬 18／35／54、貓 18／25／38 μg/dl），應依較高的分期評估與治療'],
+  ['rec','蛋白尿分期（UPC）：犬 <0.2 非蛋白尿、0.2–0.5 臨界、>0.5 蛋白尿；貓 <0.2、0.2–0.4、>0.4；建議以間隔至少 2 週的兩次尿液判定，臨界者 2 個月內再評估'],
+  ['rec','血壓分期（收縮壓）：<140 正常、140–159 高血壓前期、160–179 高血壓、≥180 嚴重高血壓；需在動物適應後多次測量，最好在不同天'],
+  ['rec','各期共通處置：停用可能有腎毒性的藥物、處理腎前與腎後性問題、以 X 光或超音波排除腎盂腎炎與輸尿管阻塞，並測量血壓與 UPC'],
+  ['rec','隨時提供新鮮飲水；若因其他疾病造成脫水，應儘速以等張晶體液靜脈或皮下補充'],
+  ['rec','第 2 期起建議考慮腎臟處方飲食（在食慾下降前較容易轉換），第 3、4 期建議給予腎臟處方飲食'],
+  ['rec','血磷目標：第 2 期 <4.5 mg/dl（不低於 2.7）、第 3 期 <5.0 mg/dl、第 4 期 <6.0 mg/dl；先以飲食限磷，未達標再加磷結合劑（起始 30–60 mg/kg/day，分次拌入餐中）'],
+  ['rec','貓血磷在目標內但 FGF23 >400 pg/ml（且無高血鈣、貧血或明顯發炎）時可開始飲食限磷；總鈣 >12 mg/dl 時改用限磷較少的飲食'],
+  ['rec','高血壓：收縮壓持續 >160 mmHg 或已有標的器官傷害時應治療，目標 <160 mmHg 並避免 <120 mmHg；穩定後至少每 3 個月追蹤'],
+  ['rec','降壓藥物：貓以 amlodipine 0.125–0.25 mg/kg q24h 或 telmisartan 2 mg/kg q24h 開始，不足時 amlodipine 加倍或兩者併用；犬以 ACEI（如 benazepril）開始，不足時加倍或併用 amlodipine，再考慮 telmisartan'],
+  ['rec','蛋白尿：犬 UPC >0.5、貓 UPC >0.4 應找出原因，並使用 RAAS 抑制劑（ACEI 或 ARB）搭配腎臟處方飲食；脫水時禁用 RAAS 抑制劑'],
+  ['rec','犬原發性腎絲球疾病的 UPC 不一定能降到 <0.5，目標可設為較治療前下降 50%；可考慮 clopidogrel 1.1–3 mg/kg q24h 預防血栓'],
+  ['rec','降壓或抗蛋白尿治療後 creatinine 小幅上升（<0.5 mg/dl）可接受，明顯上升應懷疑藥物不良反應'],
+  ['rec','代謝性酸中毒：貓 HCO₃⁻／tCO₂ <16 mmol/l、犬 <18 mmol/l 時補充口服碳酸氫鈉（低血鉀時改用檸檬酸鉀），維持在貓 16–24、犬 18–24 mmol/l'],
+  ['rec','貓低血鉀時補充檸檬酸鉀或葡萄糖酸鉀（約 1–2 mmol/kg/day）'],
+  ['rec','嘔吐、食慾差、體重或肌肉流失時可使用止吐或食慾刺激藥物（maropitant、ondansetron、mirtazapine、capromorelin）；效果不佳或需長期補液時考慮放置餵食管'],
+  ['rec','腎性貧血：犬 Hct <30%（或持續 30–35%）、貓 Hct <25%（或持續 25–28%）時應治療，可用 darbepoetin、HIF-PH 抑制劑（如 molidustat）或輸血，並同時排除其他原因'],
+  ['rec','第 3、4 期需依腎功能調整主要經腎排除藥物的劑量，避免蓄積'],
+  ['rec','IRIS 急性腎損傷分級（creatinine mg/dl）：I <1.6、II 1.7–2.5、III 2.6–5.0、IV 5.1–10.0、V >10.0；48 小時內上升 ≥0.3 mg/dl 即符合，再依尿量（<1 ml/kg/h 持續 6 小時為寡尿）與是否需腎臟替代療法細分']]};
 const evLine=(g,t)=>`${t}〔${REFS[g].short}〕`;
 const PFIELDS=[['name','動物名字'],['chart','病歷號碼'],['wt','體重 (kg)'],['sp','種別'],['age','年紀'],['bcs','體態評分'],['breed','品種'],['sex','性別'],['mcs','肌肉量評分'],['date','檢查日期']];
 const TITLES={abd:'腹部超音波報告',card:'心肺評估檢查報告',hc:'健康檢查報告書'};
@@ -886,7 +912,7 @@ function renderEditor(k){
   if(k==='abd'){
     h+=`<div class="card"><h2>腹部超音波檢查結果 <small>黃底為正常描述，橘底為異常描述，再點一次取消；綠框為書本專業描述</small></h2>${ABD.map(s=>secHTML(k,s)).join('')}</div>`;
     h+=`<div class="card"><h2>影像診斷與建議 <small>每行一點，報告自動編號</small></h2>${ta(k,'dx','',4,'影像診斷')}${ta(k,'rec','',4,'建議')}${aiDraftRow(k)}</div>`;
-    h+=`<div class="card"><h2>指引證據引用 <small>AAHA 營養評估與高齡照護指引；點選後加入「建議」，句尾自動標註出處，報告最後附參考文獻</small></h2>${evidenceHTML('abd')}</div>`;
+    h+=`<div class="card"><h2>指引證據引用 <small>AAHA 營養評估、高齡照護與 IRIS 2026 腎臟指引；點選後加入「建議」，句尾自動標註出處，報告最後附參考文獻</small></h2>${evidenceHTML('abd')}</div>`;
   }else{
     const c=cardCalc(),f=(path,l,list,ph='')=>`<div class="fld"><label for="t-card-${path}">${l}</label><input id="t-card-${path}" data-k="card" data-f="${path}" value="${esc(getP(st,path)||'')}"${list?` list="${list}"`:''} placeholder="${ph}"></div>`;
     h+=`<div class="card"><h2>就診原因與病史</h2>${ta(k,'hist','',2)}</div>`;
@@ -907,7 +933,7 @@ function renderEditor(k){
     h+=`<div class="card"><h2>超音波檢查結果 (Findings) <small>依序列成條列；黃底正常、橘底異常、綠框書本專業描述</small></h2>${CARD.map(s=>secHTML(k,s)).join('')}</div>`;
     h+=`<div class="card"><h2>診斷與結論・用藥・注意事項</h2>${ta(k,'dx','每行一點',4,'診斷與結論')}${ta(k,'meds','每行一點',3,'建議用藥')}
       <p class="sub">注意事項</p>${tchips(k,'notes',NOTE_LIB)}${ta(k,'notes','',2)}<p class="sub">下次建議回診時間（點選或自行輸入，每行一項；日期依檢查日期推算）</p><div id="next-chips">${tchips(k,'next',nextOpts())}</div>${ta(k,'next','例：心臟超音波 2027/01 月',2)}${aiDraftRow(k)}</div>`;
-    h+=`<div class="card"><h2>指引證據引用 <small>ACVIM 心臟指引與 AAHA 營養、高齡照護指引；點選後加入「診斷與結論」或「建議用藥」，句尾自動標註出處，報告最後附參考文獻</small></h2>${evidenceHTML('card')}</div>`;
+    h+=`<div class="card"><h2>指引證據引用 <small>ACVIM 心臟指引、AAHA 營養與高齡照護、IRIS 2026 腎臟指引；點選後加入「診斷與結論」或「建議用藥」，句尾自動標註出處，報告最後附參考文獻</small></h2>${evidenceHTML('card')}</div>`;
   }
   el.innerHTML=h;
   el.querySelectorAll('textarea').forEach(autoGrow);
@@ -1286,7 +1312,7 @@ let NOT_OWNER=false;
 /* ================= English report -> Chinese ================= */
 function mindrayComments(t){const m=String(t||'').match(/Comments:\s*([\s\S]*?)(?:Signature\s*\(seal\)|Signature|$)/);return m?m[1].trim():''}
 let EN=null,POL=null;
-const AAHA_EV=()=>'\n\n可引用的 AAHA 營養評估／高齡照護指引重點（只在與本病例相符時用於建議，引用時句尾保留〔〕出處標註，不要改寫數字）：\n'+['nut','senior'].flatMap(g=>EVID[g].map(x=>'- '+evLine(g,x[1]))).join('\n');
+const AAHA_EV=()=>'\n\n可引用的 AAHA 營養評估／高齡照護與 IRIS 2026 腎臟指引重點（只在與本病例相符時用於建議，引用時句尾保留〔〕出處標註，不要改寫數字）：\n'+['nut','senior','iris'].flatMap(g=>EVID[g].map(x=>'- '+evLine(g,x[1]))).join('\n');
 async function enPolish(){
   const st=$('#en-status'),box=$('#en-draft'),src=(S.card.en||'').trim();
   if(!src){st.className='aistatus err';st.textContent='請先貼上英文報告文字。';return}
@@ -1405,6 +1431,15 @@ const NORM_RE=/未見|無明顯|正常|可接受|可能性低/;
 function bflag(r){const v=parseFloat(String(r.val||'').replace(/[<>≦≧]/g,'')),m=String(r.ref||'').match(/(-?\d+(?:\.\d+)?)\s*[-–~]\s*(-?\d+(?:\.\d+)?)/);
   if(isFinite(v)&&m){if(v<+m[1])return 'L';if(v>+m[2])return 'H';return ''}
   return String(r.flag||'').toUpperCase().replace(/[^HL]/g,'').slice(0,1)}
+function irisCalc(){const rows=(S.hc.blood||[]).filter(r=>r.name),cat=S.hc.p.sp===CAT;
+  const num=r=>{const v=parseFloat(String(r.val).replace(/[<>≦≧]/g,''));return isFinite(v)?v:NaN};
+  const cr=rows.find(r=>/^(CREA|CRE|CREAT|Creatinine|肌酸酐)/i.test(r.name)),sd=rows.find(r=>/SDMA/i.test(r.name));
+  let c=cr?num(cr):NaN;if(cr&&/mol/i.test(cr.unit||''))c=c/88.4;const d=sd?num(sd):NaN;
+  if(!isFinite(c)&&!isFinite(d))return null;
+  const cs=!isFinite(c)?0:c<(cat?1.6:1.4)?1:c<=2.8?2:c<=5.0?3:4;
+  const sCut=cat?[18,25,38]:[18,35,54],ss=!isFinite(d)?0:d<sCut[0]?1:d<=sCut[1]?2:d<=sCut[2]?3:4;
+  const st=Math.max(cs,ss),parts=[];if(isFinite(c))parts.push(`creatinine ${+c.toFixed(2)} mg/dl`);if(isFinite(d))parts.push(`SDMA ${d} μg/dl`);
+  return {st,cs,ss,txt:`依本次 ${parts.join('、')}，若已確診慢性腎病，對應 IRIS 第 ${st} 期（分期需在水合充足且穩定下至少測量兩次確認）〔IRIS 2026 指引〕`}}
 const flagTxt=f=>f==='H'?'偏高 ↑':f==='L'?'偏低 ↓':'';
 function parseBloodText(t){const rows=[];
   for(const raw of String(t||'').split(/\n/)){const line=raw.trim();if(!line)continue;
@@ -1497,6 +1532,7 @@ function renderHc(){
       ${['name','val','unit','ref'].map(kk=>`<td><input data-brow="${i}" data-bk="${kk}" value="${esc(r[kk]||'')}" aria-label="${kk}"></td>`).join('')}
       <td class="bf" data-bfi="${i}">${flagTxt(bflag(r))}</td><td><button type="button" class="btn" data-bdel="${i}" aria-label="刪除">×</button></td></tr>`).join('')||'<tr><td colspan="7" class="hint">尚未加入血檢數值</td></tr>'}
     </tbody></table></div>
+    ${(()=>{const ir=irisCalc();return ir?`<p class="sub">IRIS 腎臟分期參考 <span class="hint">creatinine 第 ${ir.cs||'—'} 期、SDMA 第 ${ir.ss||'—'} 期（${st.p.sp}）</span></p>${tchips('hc','rec',[ir.txt])}`:''})()}
     ${ta('hc','bloodNote','例：檢體輕度溶血',1,'血檢備註（會印在血檢結果表下方）')}
     <label class="chk"><input type="checkbox" data-hcb="incBlood"${st.incBlood?' checked':''}> 報告附上血檢結果表（異常項目排在最上面）</label>
     <label class="chk"><input type="checkbox" data-hcb="bloodAbnOnly"${st.bloodAbnOnly?' checked':''}> 報告只列出異常項目</label></div>`;
@@ -1508,7 +1544,7 @@ function renderHc(){
     <label class="chk"><input type="checkbox" data-hcb="incAbd"${st.incAbd?' checked':''}> 附上腹部超音波摘要：${stat('abd')}</label>
     <label class="chk"><input type="checkbox" data-hcb="incCard"${st.incCard?' checked':''}> 附上心臟超音波摘要：${stat('card')}</label></div>`;
   h+=`<div class="card"><h2>建議及注意事項</h2>${ta('hc','rec','每行一點',4)}${aiDraftRow('hc')}</div>`;
-  h+=`<div class="card"><h2>指引證據引用 <small>AAHA 營養評估與高齡照護指引；點選後加入「建議及注意事項」，句尾自動標註出處，報告附參考文獻</small></h2>${evidenceHTML('hc')}</div>`;
+  h+=`<div class="card"><h2>指引證據引用 <small>AAHA 營養評估、高齡照護與 IRIS 2026 腎臟指引；點選後加入「建議及注意事項」，句尾自動標註出處，報告附參考文獻</small></h2>${evidenceHTML('hc')}</div>`;
   setTimeout(()=>refreshTchips(el),0);
   el.innerHTML=h;el.querySelectorAll('textarea').forEach(autoGrow);
   if(!AI_ON)el.querySelectorAll('.ai-only').forEach(x=>x.hidden=true);
