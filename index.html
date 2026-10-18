@@ -425,7 +425,8 @@ const ABD=[
   G('gb1',['膽囊大小正常','膽囊異常增大']),
   G('gb2',['未見膽泥或沉積物','可見膽泥或沉積物','可見大量膽泥，未隨體位移動']),
   G('gb3',['未見總膽管擴張','總膽管擴張']),
-  N('cbd','總膽管直徑','總膽管直徑約 {v} cm',R({max:0.4,txt:'≤0.4'},{max:0.3,txt:'≤0.3'}))],
+  N('gbw','膽囊壁厚度','膽囊壁厚度約 {v} cm',R({max:0.1,txt:'<0.1（Griffin 2019）'},null)),
+  N('cbd','總膽管直徑','總膽管直徑約 {v} cm',R({max:0.4,txt:'≤0.4（>0.5 提示阻塞）'},{max:0.3,txt:'≤0.3'}))],
   lib:['膽囊內可見隨體位移動之重力依賴性膽泥','膽泥不隨體位移動，需與膽囊息肉或腫瘤鑑別（彩色都卜勒未見血流）','膽囊內容物呈星芒狀或奇異果切面樣排列，符合膽囊黏液囊腫','膽囊壁增厚呈雙層（halo sign），需考慮膽囊炎、水腫或低白蛋白血症','膽囊壁不連續，周圍脂肪回音增強並有少量液體，需排除膽囊破裂','可見膽結石，伴隨後方聲影','膽囊壁可見礦化','總膽管擴張並呈彎曲走向，需考慮肝外膽道阻塞','十二指腸大乳頭增大']},
  {id:'spleen',title:'脾臟',items:[
   G('sp1',['脾臟大小正常','脾臟輕度增大','脾臟明顯增大']),
@@ -585,6 +586,7 @@ const REFS={
  fcm:{short:'ACVIM 2020 貓心肌病共識',full:'Luis Fuentes V, et al. ACVIM consensus statement guidelines for the classification, diagnosis, and management of cardiomyopathies in cats. J Vet Intern Med. 2020;34:1062-1077.',sp:CAT},
  nut:{short:'AAHA 2010 營養評估指引',full:'Baldwin K, et al. AAHA nutritional assessment guidelines for dogs and cats. J Am Anim Hosp Assoc. 2010;46:285-296.',sp:null},
  senior:{short:'AAHA 2023 高齡照護指引',full:'Dhaliwal R, et al. 2023 AAHA senior care guidelines for dogs and cats. J Am Anim Hosp Assoc. 2023;59:1-21.',sp:null},
+ griffin:{short:'Griffin 2019 貓膽道超音波',full:'Griffin S. Feline abdominal ultrasonography: what\'s normal? what\'s abnormal? The biliary tree. J Feline Med Surg. 2019;21(5):429-441. doi:10.1177/1098612X19843212',sp:CAT,abd:true},
  wsava:{short:'WSAVA 2024 疫苗指引',full:'Squires RA, Crawford C, Marcondes M, Whitley N. 2024 guidelines for the vaccination of dogs and cats – compiled by the Vaccination Guidelines Group (VGG) of the World Small Animal Veterinary Association (WSAVA). J Small Anim Pract. 2024.',sp:null},
  iris:{short:'IRIS 2026 指引',full:'International Renal Interest Society (IRIS). IRIS Staging of CKD; Treatment Recommendations for CKD in Dogs and Cats; Grading of Acute Kidney Injury (modified 2026). https://www.iris-kidney.com/iris-guidelines-1',sp:null}};
 const EVID={
@@ -650,6 +652,18 @@ const EVID={
   ['rec','皮膚腫塊建議測量三個維度、細針採樣，並記錄位置以追蹤變化'],
   ['rec','居家環境調整：鋪設防滑墊或地毯、樓梯與泳池加裝護欄、調整食碗高度，以提升行動安全與生活品質'],
   ['rec','建議及早與飼主討論生活品質評估與安寧照護，規劃照護目標']],
+ griffin:[
+  ['dx','貓正常膽囊壁與總膽管壁厚度 <1 mm；膽囊壁 >1 mm 可準確提示膽囊疾病，但 <1 mm 不能排除輕度或慢性發炎'],
+  ['dx','貓總膽管正常直徑 ≤4 mm；>5 mm 多數提示肝外膽道阻塞'],
+  ['dx','貓膽囊擴大並非膽道阻塞的可靠指標，膽囊或膽管沒有擴張也不能排除阻塞'],
+  ['dx','貓膽管炎／膽管肝炎可見膽囊或總膽管壁增厚、膽泥、膽結石與總膽管擴張，但超音波也可能完全正常；常合併胰臟炎或發炎性腸病'],
+  ['dx','貓肝外膽道阻塞多發生在十二指腸乳頭附近，常見原因為胰臟炎壓迫、膽結石、膽泥或黏膜增生，腫瘤較少見'],
+  ['dx','腹水可能造成膽囊壁假性增厚，判讀時需注意'],
+  ['dx','約 1/8 的貓有副膽囊（如雙葉膽囊），多為先天、無臨床意義的偶發發現'],
+  ['dx','貓膽囊黏液囊腫極少見，犬典型的星芒狀／奇異果樣影像不適用於貓'],
+  ['dx','貓膽總管囊腫可使總膽管 >5 mm 但沒有阻塞，容易誤判為肝外膽道阻塞，且常合併膽管炎、胰臟炎或腸病'],
+  ['rec','懷疑膽管炎時，可安排超音波導引經皮膽囊穿刺，取膽汁做細胞學與細菌培養／藥敏'],
+  ['rec','超音波正常不能排除膽道疾病，需配合臨床症狀、肝指數與膽紅素綜合評估']],
  wsava:[
   ['rec','幼犬幼貓需每 2–4 週補強核心疫苗，最後一劑在 16 週齡以後；26 週齡以後再補強一劑'],
   ['rec','犬核心疫苗為犬瘟熱、犬腺病毒、犬小病毒；貓核心疫苗為貓瘟、貓皰疹病毒、貓卡里西病毒；狂犬病流行或法規要求地區，狂犬病疫苗亦屬核心'],
@@ -1000,8 +1014,8 @@ function ym(n){const d=(S.card.p.date||today()).split('-').map(Number),x=new Dat
 const nextOpts=()=>[`心臟超音波 1 個月後追蹤（${ym(1)}）`,`心臟超音波 3 個月內複查（${ym(3)} 前）`,`心臟超音波 6 個月後追蹤（${ym(6)}）`,`心臟超音波 1 年後追蹤（${ym(12)}）`,`胸腔 X 光 3 個月後追蹤（${ym(3)}）`,'血檢於調整藥物後 2–4 週追蹤','血壓於 2–4 週後複查'];
 function evidenceHTML(k='card'){
   const spc=sp(k),tgt=t=>t==='rec'?(k==='card'?'dx':'rec'):t;
-  const lab={dx:'→ 診斷與結論',meds:'→ 建議用藥',rec:k==='card'?'→ 診斷與結論':k==='hc'?'→ 建議及注意事項':'→ 建議'};
-  const gs=Object.keys(REFS).filter(g=>k==='card'||REFS[g].sp===null).sort((a,b)=>((REFS[b].sp===spc)*2+(REFS[b].sp===null))-((REFS[a].sp===spc)*2+(REFS[a].sp===null)));
+  const lab={dx:k==='abd'?'→ 影像診斷':'→ 診斷與結論',meds:'→ 建議用藥',rec:k==='card'?'→ 診斷與結論':k==='hc'?'→ 建議及注意事項':'→ 建議'};
+  const gs=Object.keys(REFS).filter(g=>k==='card'?!REFS[g].abd:(REFS[g].sp===null||(k==='abd'&&REFS[g].abd))).sort((a,b)=>((REFS[b].sp===spc)*2+(REFS[b].sp===null))-((REFS[a].sp===spc)*2+(REFS[a].sp===null)));
   return gs.map(g=>{const R_=REFS[g],mine=R_.sp===spc||R_.sp===null;
     const kinds=[...new Set(EVID[g].map(x=>x[0]))];
     const chips=t=>`<div class="grp">${EVID[g].filter(x=>x[0]===t).map(x=>`<button type="button" class="chip tchip" data-tk="${k}" data-tf="${tgt(x[0])}" data-line="${esc(evLine(g,x[1]))}">${esc(x[1])}</button>`).join('')}</div>`;
@@ -1023,7 +1037,7 @@ function renderEditor(k){
     h+=cmpCardHTML(k);
     h+=`<div class="card"><h2>腹部超音波檢查結果 <small>黃底為正常描述，橘底為異常描述，再點一次取消；綠框為書本專業描述</small></h2>${ABD.map(s=>secHTML(k,s)).join('')}</div>`;
     h+=`<div class="card"><h2>影像診斷與建議 <small>每行一點，報告自動編號</small></h2>${ta(k,'dx','',4,'影像診斷')}${ta(k,'rec','',4,'建議')}${aiDraftRow(k)}</div>`;
-    h+=`<div class="card"><h2>指引證據引用 <small>AAHA 營養評估、高齡照護與 IRIS 2026 腎臟指引；點選後加入「建議」，句尾自動標註出處，報告最後附參考文獻</small></h2>${evidenceHTML('abd')}</div>`;
+    h+=`<div class="card"><h2>指引證據引用 <small>AAHA 營養評估、高齡照護、IRIS 2026 腎臟指引與 Griffin 2019 貓膽道超音波；點選後加入「影像診斷」或「建議」，句尾自動標註出處，報告最後附參考文獻</small></h2>${evidenceHTML('abd')}</div>`;
   }else{
     const c=cardCalc(),f=(path,l,list,ph='')=>`<div class="fld"><label for="t-card-${path}">${l}</label><input id="t-card-${path}" data-k="card" data-f="${path}" value="${esc(getP(st,path)||'')}"${list?` list="${list}"`:''} placeholder="${ph}"></div>`;
     h+=`<div class="card"><h2>就診原因與病史</h2>${ta(k,'hist','',2)}</div>`;
@@ -1399,7 +1413,7 @@ async function aiDraft(k){
   const st=$('#'+k+'-dstatus'),box=$('#'+k+'-draft'),p=S[k].p;
   if(!SAMPLE){st.className='aistatus err';st.textContent='AI 尚未就緒，請稍候幾秒再試。';return}
   let body,flags,want;
-  if(k==='abd'){const m=contentAbd();flags=m.flags;body=m.secs.map(s=>`【${s.title}】\n`+s.lines.map(l=>'・'+l).join('\n')).join('\n');want='{"dx":["影像診斷…"],"rec":["建議…"]}，影像診斷 2–5 點、建議 2–4 點';body+=AAHA_EV()}
+  if(k==='abd'){const m=contentAbd();flags=m.flags;body=m.secs.map(s=>`【${s.title}】\n`+s.lines.map(l=>'・'+l).join('\n')).join('\n');want='{"dx":["影像診斷…"],"rec":["建議…"]}，影像診斷 2–5 點、建議 2–4 點';body+=AAHA_EV();if(sp('abd')===CAT)body+='\n\n貓膽道超音波文獻重點（Griffin 2019；與本病例相符時引用，句尾保留〔〕出處）：\n'+EVID.griffin.map(x=>'- '+evLine('griffin',x[1])).join('\n')}
   else{const m=contentCard(),pe=S.card.pe;flags=m.flags;
     body=`就診原因與病史：${S.card.hist}\n理學檢查：聽診 ${pe.aus}、血壓 ${pe.bp}、心跳 ${pe.hr}\n放射線：心臟輪廓 ${pe.heart}、VHS ${pe.vhs}、VLAS ${pe.vlas}、肺血管 ${pe.vessel}\n心電圖：${m.ecg.join('，')}\n胸腔X光：${m.xray.join('；')}\n心臟超音波：\n`+m.find.map(l=>'・'+l).join('\n')+(m.meas.length?'\n量測：'+m.meas.map(g=>g.rows.map(r=>r.label+' '+r.val).join('、')).join('；'):'');
     want='{"dx":["診斷與結論…"]}，3–6 點，包含追蹤時程建議';
@@ -2148,6 +2162,7 @@ document.fonts&&document.fonts.ready.then(()=>renderReport(true));
   const lim=await SAMPLE.limits().catch(()=>null);LIM=lim;IMG_OK=!!lim?.images;
 })();
 </script>
+
 
 </body>
 </html>
