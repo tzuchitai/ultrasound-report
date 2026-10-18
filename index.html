@@ -389,6 +389,16 @@ details summary{cursor:pointer;font-weight:700}
           <div class="fld"><label for="s-addr">地址</label><input id="s-addr" data-s="addr"></div>
         </div>
         <p class="hint">設定只存在這台電腦的瀏覽器。</p>
+        <div id="ext-ai" hidden style="margin-top:12px;border-top:1px solid var(--line);padding-top:10px">
+          <p class="sub">AI 設定（Google Gemini／OpenAI GPT）</p>
+          <div class="pgrid">
+            <div class="fld"><label for="ext-prov">AI 服務</label><select id="ext-prov"><option value="gemini">Google Gemini</option><option value="openai">OpenAI GPT</option></select></div>
+            <div class="fld"><label for="ext-key">API 金鑰</label><input id="ext-key" type="password" autocomplete="off" placeholder="貼上你的 API 金鑰"></div>
+            <div class="fld"><label for="ext-model">模型（可留空）</label><input id="ext-model" placeholder="gemini-2.5-flash"></div>
+          </div>
+          <div class="airow"><button class="btn primary" id="ext-save">儲存並啟用</button><button class="btn" id="ext-test">測試連線</button><button class="btn danger" id="ext-clear">清除金鑰</button><span class="aistatus" id="ext-status"></span></div>
+          <p class="hint">金鑰只存在這台電腦的瀏覽器，不會傳到本網站。啟用後，截圖與報告內容會送到 Google 或 OpenAI 處理，費用由金鑰所屬帳號支付。請使用付費 API（免費版 Gemini 可能用資料改進模型），並避免上傳含飼主電話、地址的畫面。</p>
+        </div>
       </details>
     </div>
   </div>
@@ -397,7 +407,7 @@ details summary{cursor:pointer;font-weight:700}
     <p class="pvlabel"><span id="pv-count">報告預覽（A4）</span><span>點報告上的句子，可直接修改文字</span></p>
     <div id="pages-scale"><div class="pages" id="pages"></div></div>
     <div class="lineedit" id="lineedit" hidden><p class="hint" id="le-hint" style="margin:0 0 4px">修改這一句（只改報告上的文字）</p><textarea id="le-text" rows="2"></textarea>
-      <div class="airow"><button class="btn primary" id="le-apply">套用</button><button class="btn" id="le-reset" hidden>恢復自動產生的句子</button><button class="btn" id="le-jump">到左邊欄位</button><button class="btn" id="le-cancel">取消</button></div></div>
+      <div class="airow"><button class="btn primary" id="le-apply">套用</button><button class="btn" id="le-reset" hidden>恢復自動產生的句子</button><button class="btn aib ai-only" id="le-ai">AI 擴寫</button><button class="btn" id="le-jump">到左邊欄位</button><button class="btn" id="le-cancel">取消</button></div></div>
   </aside>
 </main>
 <div id="measure"></div>
@@ -1441,7 +1451,7 @@ ${body}`;
   catch(e){st.className='aistatus err';st.textContent=errMsg(e);if(e?.code==='not_granted')disableAI()}
 }
 function disableAI(notOwner){AI_ON=false;NOT_OWNER=!!notOwner;document.querySelectorAll('.ai-only').forEach(x=>x.hidden=true);
-  $('#ai-hint').textContent=notOwner==='public'?'可直接讀取 Mindray 心臟量測 PDF 的數值（量測與病患資料自動帶入）。截圖與影像 PDF 請手動填寫。':notOwner?'可直接讀取 Mindray 心臟量測 PDF 的數值。截圖、Soulvet 影像 PDF 與 AI 草擬僅限網站管理者使用。':'Mindray 心臟量測 PDF 可直接讀取。截圖讀取與 AI 草擬需要在 claude.ai 開啟此頁面。'}
+  $('#ai-hint').textContent=notOwner==='public'?'可直接讀取 Mindray 心臟量測 PDF 的數值（量測與病患資料自動帶入）。截圖與影像 PDF 請手動填寫；到最下方「報告頁首與頁尾設定」輸入 Gemini 或 GPT 的 API 金鑰，即可啟用 AI 功能。':notOwner?'可直接讀取 Mindray 心臟量測 PDF 的數值。截圖、Soulvet 影像 PDF 與 AI 草擬僅限網站管理者使用。':'Mindray 心臟量測 PDF 可直接讀取。截圖讀取與 AI 草擬需要在 claude.ai 開啟此頁面。'}
 let NOT_OWNER=false;
 
 /* ================= English report -> Chinese ================= */
@@ -2134,6 +2144,74 @@ document.addEventListener('click',e=>{const m=e.target.closest('[data-cmpmode]')
   const all=rows.every(r=>pv.ns[r.id]);rows.forEach(r=>pv.ns[r.id]=!all);renderEditor(k);changed(k)});
 document.addEventListener('input',e=>{const t=e.target;if(t.dataset.pv){const k=t.dataset.k;S[k].prev.vals[t.dataset.pv]=t.value;const r=cmpRows(k).find(x=>x.id===t.dataset.pv),c=document.querySelector(`[data-cmpd="${t.dataset.pv}"]`);if(c&&r){c.textContent=fmtD(r);c.classList.toggle('nsc',r.ns)}changed(k)}});
 
+/* ================= External AI (Gemini / OpenAI) — public site only; key stays in this browser ================= */
+const EXTKEY='usReportGen.extai',EXT_DEF={gemini:'gemini-2.5-flash',openai:'gpt-4.1-mini'};
+function loadExt(){try{const c=JSON.parse(localStorage.getItem(EXTKEY)||'null');return c&&c.key?c:null}catch(e){return null}}
+async function blobToB64(b){const bmp=await createImageBitmap(b),sc=Math.min(1,1600/Math.max(bmp.width,bmp.height)),c=document.createElement('canvas');
+  c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);return c.toDataURL('image/jpeg',0.9).split(',')[1]}
+function parseJSONText(t){t=String(t||'');try{return JSON.parse(t)}catch(e){}
+  const m=t.match(/```(?:json)?\s*([\s\S]*?)```/);if(m){try{return JSON.parse(m[1])}catch(e){}}
+  const a=[t.indexOf('{'),t.indexOf('[')].filter(i=>i>=0),b=Math.max(t.lastIndexOf('}'),t.lastIndexOf(']'));
+  if(a.length&&b>Math.min(...a)){try{return JSON.parse(t.slice(Math.min(...a),b+1))}catch(e){}}
+  throw {code:'invalid_json',message:'AI 回覆無法解析',text:t}}
+function makeExtAI(cfg){
+  const call=async(prompt,opts={})=>{
+    const src=opts&&opts.images?(opts.images instanceof Blob?[opts.images]:[...opts.images]):[],b64=[];
+    for(const im of src)b64.push(await blobToB64(im));
+    const sys='你只回傳 JSON，不要加任何說明文字。';let txt='';
+    try{
+      if(cfg.provider==='gemini'){
+        const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(cfg.model||EXT_DEF.gemini)}:generateContent`,{method:'POST',signal:opts&&opts.signal,
+          headers:{'Content-Type':'application/json','x-goog-api-key':cfg.key},
+          body:JSON.stringify({contents:[{role:'user',parts:[{text:sys+'\n\n'+prompt},...b64.map(d=>({inlineData:{mimeType:'image/jpeg',data:d}}))]}],generationConfig:{responseMimeType:'application/json',temperature:0.2}})});
+        const j=await res.json().catch(()=>null);
+        if(!res.ok)throw {code:'ext_error',message:`Gemini 回應錯誤（${res.status}）${j?.error?.message?'：'+j.error.message:''}`};
+        txt=(j?.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('');
+      }else{
+        const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',signal:opts&&opts.signal,
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfg.key},
+          body:JSON.stringify({model:cfg.model||EXT_DEF.openai,temperature:0.2,response_format:{type:'json_object'},
+            messages:[{role:'system',content:sys},{role:'user',content:[{type:'text',text:prompt},...b64.map(d=>({type:'image_url',image_url:{url:'data:image/jpeg;base64,'+d}}))]}]})});
+        const j=await res.json().catch(()=>null);
+        if(!res.ok)throw {code:'ext_error',message:`OpenAI 回應錯誤（${res.status}）${j?.error?.message?'：'+j.error.message:''}`};
+        txt=j?.choices?.[0]?.message?.content||'';
+      }
+    }catch(e){if(e&&e.name==='AbortError')throw {code:'cancelled',message:'已停止'};if(e&&e.code)throw e;throw {code:'ext_error',message:'無法連線到 AI 服務：'+(e&&e.message||e)}}
+    return parseJSONText(txt);
+  };
+  const f=async(p,o)=>({text:JSON.stringify(await call(p,o))});f.json=call;f.limits=async()=>({images:{maxCount:10}});f.ext=cfg.provider;return f;
+}
+function enableExtAI(){const cfg=loadExt();if(!cfg)return false;
+  SAMPLE=makeExtAI(cfg);IMG_OK=true;LIM={images:{maxCount:10}};AI_ON=true;NOT_OWNER=false;
+  ['abd','card','hc','pup'].forEach(k=>renderEditor(k));document.querySelectorAll('.ai-only').forEach(x=>x.hidden=false);
+  $('#ai-hint').textContent=`已用 ${cfg.provider==='gemini'?'Google Gemini':'OpenAI GPT'}（${cfg.model||EXT_DEF[cfg.provider]}）啟用 AI：截圖讀取、Soulvet 影像 PDF、AI 草擬、翻譯與擴寫。資料會送到該服務處理，費用由金鑰所屬帳號支付。Mindray PDF 仍直接讀取，不用 AI。`;
+  return true}
+function extStatus(m,err){const s=$('#ext-status');s.className='aistatus'+(err?' err':'');s.textContent=m}
+$('#ext-prov').onchange=()=>{$('#ext-model').placeholder=EXT_DEF[$('#ext-prov').value]};
+$('#ext-save').onclick=()=>{const cfg={provider:$('#ext-prov').value,key:$('#ext-key').value.trim(),model:$('#ext-model').value.trim()};
+  if(!cfg.key){extStatus('請先貼上 API 金鑰',true);return}
+  try{localStorage.setItem(EXTKEY,JSON.stringify(cfg))}catch(e){extStatus('瀏覽器無法儲存設定',true);return}
+  enableExtAI();extStatus('已儲存並啟用 AI');toast('AI 功能已啟用')};
+$('#ext-test').onclick=async()=>{const cfg={provider:$('#ext-prov').value,key:$('#ext-key').value.trim(),model:$('#ext-model').value.trim()};
+  if(!cfg.key){extStatus('請先貼上 API 金鑰',true);return}extStatus('測試中…');
+  try{const r=await makeExtAI(cfg).json('請回傳 JSON：{"ok":true}');extStatus(r&&r.ok?'連線成功':'有回應，但格式不如預期',!(r&&r.ok))}catch(e){extStatus(errMsg(e),true)}};
+$('#ext-clear').onclick=()=>{try{localStorage.removeItem(EXTKEY)}catch(e){}$('#ext-key').value='';SAMPLE=null;disableAI(PUBLIC?'public':false);
+  ['abd','card','hc','pup'].forEach(k=>renderEditor(k));extStatus('已清除金鑰，AI 功能已關閉')};
+
+/* ---- AI 擴寫 in the sentence editor ---- */
+function secOf(el){const box=el&&el.closest('.box');if(box)return box.querySelector('.bxh')?.textContent||'';
+  let n=el&&el.closest('.blk');while(n){n=n.previousElementSibling;if(!n)break;const h=n.matches('h1,h2,h3,.hsec')?n:n.querySelector('h3,.hsec,h2');if(h)return h.textContent}return ''}
+$('#le-ai').onclick=async()=>{if(!LE)return;if(!SAMPLE){toast('AI 尚未啟用');return}
+  const k=LE.k,txt=$('#le-text').value.trim();if(!txt)return;const b=$('#le-ai'),sec=secOf(document.querySelector('#pages .le-sel'));
+  b.disabled=true;b.textContent='AI 擴寫中…';
+  const prompt=`你是台灣小動物醫院的獸醫報告助理。請把下面這句「${TITLES[k]}」中的描述，擴寫成一到兩句更完整、專業、通順的繁體中文（台灣獸醫用語），讓飼主也看得懂。
+規則：保留原句所有數字、單位與判讀；不要新增原句沒有的檢查發現或數值；不要下確定診斷；不要寫藥物劑量；原句若有〔〕出處標註，保留在句尾。
+物種：${(S[k].p&&S[k].p.sp)||'未填'}；所屬段落：${sec||'未知'}
+只回傳 JSON：{"text":"擴寫後的句子"}
+原句：${txt}`;
+  try{const r=await SAMPLE.json(prompt);if(r&&r.text){$('#le-text').value=String(r.text).trim();autoGrow($('#le-text'));toast('已擴寫，確認後按「套用」')}else toast('AI 沒有回傳內容')}
+  catch(e){toast(errMsg(e))}finally{b.disabled=false;b.textContent='AI 擴寫'}};
+
 /* ================= boot ================= */
 document.body.insertAdjacentHTML('beforeend',`<datalist id="dl-sex"><option>公</option><option>母</option><option>公（已結紮）</option><option>母（已結紮）</option></datalist>
 <datalist id="dl-mcs"><option>無明顯肌肉量流失</option><option>輕微肌肉量流失</option><option>中度肌肉量流失</option><option>嚴重肌肉量流失</option></datalist>
@@ -2150,7 +2228,8 @@ document.fonts&&document.fonts.ready.then(()=>renderReport(true));
   if(!use){disableAI(PUBLIC?'public':false);
     // Outside claude.ai: plain browser download.
     DL={save:async({filename,data})=>{const b=data instanceof Blob?data:new Blob([data],{type:'text/html;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=filename;document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}};
-    $('#btn-pdf').hidden=false;$('#btn-html').hidden=false;return}
+    $('#btn-pdf').hidden=false;$('#btn-html').hidden=false;
+    $('#ext-ai').hidden=false;const ec=loadExt();if(ec){$('#ext-prov').value=ec.provider;$('#ext-key').value=ec.key;$('#ext-model').value=ec.model||'';enableExtAI()}$('#ext-model').placeholder=EXT_DEF[$('#ext-prov').value];return}
   use('db').then(db=>{if(!db)return;DBH=db;
     db.collection('drafts').orderBy('createdAt','desc').limit(30).onSnapshot(sn=>{DRAFTS=sn.docs.map(d=>({id:d.id,...(d.data()||{})}));renderDrafts()},()=>{DRAFTS=[];renderDrafts()})}).catch(()=>{});
   use('downloads').then(d=>{if(d){DL=d;$('#btn-pdf').hidden=false;$('#btn-html').hidden=false}}).catch(()=>{});
