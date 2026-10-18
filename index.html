@@ -394,7 +394,7 @@ details summary{cursor:pointer;font-weight:700}
           <div class="pgrid">
             <div class="fld"><label for="ext-prov">AI 服務</label><select id="ext-prov"><option value="gemini">Google Gemini</option><option value="openai">OpenAI GPT</option></select></div>
             <div class="fld"><label for="ext-key">API 金鑰</label><input id="ext-key" type="password" autocomplete="off" placeholder="貼上你的 API 金鑰"></div>
-            <div class="fld"><label for="ext-model">模型（可留空）</label><input id="ext-model" placeholder="gemini-2.5-flash"></div>
+            <div class="fld"><label for="ext-model">模型（可留空）</label><input id="ext-model" placeholder="gemini-3.8-flash"></div>
           </div>
           <div class="airow"><button class="btn primary" id="ext-save">儲存並啟用</button><button class="btn" id="ext-test">測試連線</button><button class="btn danger" id="ext-clear">清除金鑰</button><span class="aistatus" id="ext-status"></span></div>
           <p class="hint">金鑰只存在這台電腦的瀏覽器，不會傳到本網站。啟用後，截圖與報告內容會送到 Google 或 OpenAI 處理，費用由金鑰所屬帳號支付。請使用付費 API（免費版 Gemini 可能用資料改進模型），並避免上傳含飼主電話、地址的畫面。</p>
@@ -2145,7 +2145,7 @@ document.addEventListener('click',e=>{const m=e.target.closest('[data-cmpmode]')
 document.addEventListener('input',e=>{const t=e.target;if(t.dataset.pv){const k=t.dataset.k;S[k].prev.vals[t.dataset.pv]=t.value;const r=cmpRows(k).find(x=>x.id===t.dataset.pv),c=document.querySelector(`[data-cmpd="${t.dataset.pv}"]`);if(c&&r){c.textContent=fmtD(r);c.classList.toggle('nsc',r.ns)}changed(k)}});
 
 /* ================= External AI (Gemini / OpenAI) — public site only; key stays in this browser ================= */
-const EXTKEY='usReportGen.extai',EXT_DEF={gemini:'gemini-2.5-flash',openai:'gpt-4.1-mini'};
+const EXTKEY='usReportGen.extai',EXT_DEF={gemini:'gemini-3.8-flash',openai:'gpt-4.1-mini'};
 function loadExt(){try{const c=JSON.parse(localStorage.getItem(EXTKEY)||'null');return c&&c.key?c:null}catch(e){return null}}
 async function blobToB64(b){const bmp=await createImageBitmap(b),sc=Math.min(1,1600/Math.max(bmp.width,bmp.height)),c=document.createElement('canvas');
   c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);return c.toDataURL('image/jpeg',0.9).split(',')[1]}
@@ -2161,10 +2161,15 @@ function makeExtAI(cfg){
     const sys='你只回傳 JSON，不要加任何說明文字。';let txt='';
     try{
       if(cfg.provider==='gemini'){
-        const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(cfg.model||EXT_DEF.gemini)}:generateContent`,{method:'POST',signal:opts&&opts.signal,
+        // Google retires older models for new keys; if it names a replacement, retry once with it and remember it.
+        const ask=m=>fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent`,{method:'POST',signal:opts&&opts.signal,
           headers:{'Content-Type':'application/json','x-goog-api-key':cfg.key},
           body:JSON.stringify({contents:[{role:'user',parts:[{text:sys+'\n\n'+prompt},...b64.map(d=>({inlineData:{mimeType:'image/jpeg',data:d}}))]}],generationConfig:{responseMimeType:'application/json',temperature:0.2}})});
-        const j=await res.json().catch(()=>null);
+        let res=await ask(cfg.model||EXT_DEF.gemini),j=await res.json().catch(()=>null);
+        const alt=!res.ok&&(res.status===404||res.status===400)&&String(j?.error?.message||'').match(/models\/(gemini-[\w.\-]+)/g);
+        const sug=alt&&alt.map(x=>x.slice(7)).find(m=>m!==(cfg.model||EXT_DEF.gemini));
+        if(sug){res=await ask(sug);j=await res.json().catch(()=>null);
+          if(res.ok){cfg.model=sug;try{const st=loadExt();if(st&&st.key===cfg.key){st.model=sug;localStorage.setItem(EXTKEY,JSON.stringify(st))}}catch(e){}const mi=document.getElementById('ext-model');if(mi&&!mi.value)mi.value=sug}}
         if(!res.ok)throw {code:'ext_error',message:`Gemini 回應錯誤（${res.status}）${j?.error?.message?'：'+j.error.message:''}`};
         txt=(j?.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('');
       }else{
