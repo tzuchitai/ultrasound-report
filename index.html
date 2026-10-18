@@ -1684,7 +1684,7 @@ function patchItemRows(ids){for(const id of ids){const it=S.hc.items[id]||{};
   const tag=document.getElementById(`auto-${id}`);if(tag)tag.hidden=!it.auto}}
 function blankHC(){return {p:blankP(),temp:'',plan:'',fast:'',doctor:'',hr:'',rr:'',bp:'',
   ecto:{reg:'',prod:'',last:''},endo:{reg:'',prod:'',last:''},vac:{reg:'',last:'',content:''},
-  items:{},blood:[],bloodNote:'',bloodAbnOnly:false,wts:[],rec:'',ctx:'',incAbd:true,incCard:true,incBlood:true}}
+  items:{},blood:[],bloodNote:'',bloodAbnOnly:false,wts:[],rec:'',diet:'',cal:{},ctx:'',incAbd:true,incCard:true,incBlood:true}}
 
 /* ---- editor ---- */
 const BFILES=[];
@@ -1733,6 +1733,7 @@ function renderHc(){
   h+=`<div class="card"><h2>超音波摘要 <small>報告會附上腹部與心臟超音波的重點</small></h2>
     <label class="chk"><input type="checkbox" data-hcb="incAbd"${st.incAbd?' checked':''}> 附上腹部超音波摘要：${stat('abd')}</label>
     <label class="chk"><input type="checkbox" data-hcb="incCard"${st.incCard?' checked':''}> 附上心臟超音波摘要：${stat('card')}</label></div>`;
+  h+=calCard('hc')+dietCard('hc');
   h+=`<div class="card"><h2>建議及注意事項</h2>${ta('hc','rec','每行一點',4)}${aiDraftRow('hc')}</div>`;
   h+=`<div class="card"><h2>指引證據引用 <small>AAHA 2021 營養與體重管理、高齡照護、IRIS 2026 腎臟指引，貓另有 AAHA/AAFP 2021 貓生命階段指引；點選後加入「建議及注意事項」，句尾自動標註出處，報告附參考文獻</small></h2>${evidenceHTML('hc')}</div>`;
   setTimeout(()=>refreshTchips(el),0);
@@ -1767,11 +1768,12 @@ function blocksHc(){
         <td class="ok${n?' on':''}" data-src="g:${id}">${paw(n)}無明顯異常${n&&it.note?`（${esc(it.note)}）`:''}</td>
         <td class="abn${a?' on':''}" data-src="f:items.${id}.note">${paw(a)}異常：${a?esc(it.note||''):''}</td></tr>`});
     B.push({h:h+'</table>'})});
-  const rec=lines(st.rec);
+  const rec=lines(st.rec),diet=lines(st.diet||'');
+  if(diet.length){B.push({h:`<div class="hsec rec">飲食建議</div>`,keep:1});diet.forEach(l=>B.push({h:`<ul class="hrec"><li data-src="f:diet">${esc(l)}</li></ul>`}))}
   B.push({h:`<div class="hsec rec">建議及注意事項</div>`,keep:1});
   if(rec.length)rec.forEach(l=>B.push({h:`<ul class="hrec"><li data-src="f:rec">${esc(l)}</li></ul>`}));else B.push({h:'<div style="height:40px"></div>'});
   B.push({h:'<div class="hend"></div>'});
-  const hrefs=Object.values(REFS).filter(r=>rec.some(l=>l.includes(r.short)));
+  const hrefs=Object.values(REFS).filter(r=>[...diet,...rec].some(l=>l.includes(r.short)));
   // page 2: details
   const rows=(st.blood||[]).filter(r=>r.name);
   const tbl=(title,rs,cls='')=>`<table class="bt ${cls}"><colgroup><col style="width:30%"><col style="width:16%"><col style="width:16%"><col style="width:22%"><col style="width:16%"></colgroup><tr><th colspan="5">${title}</th></tr><tr class="hd"><td>項目</td><td>結果</td><td>單位</td><td>參考範圍</td><td>判讀</td></tr>`+rs.map(r=>{const f=bflag(r);return `<tr class="${f?'f'+f:''}"><td>${esc(r.name)}</td><td class="v">${esc(r.val)}</td><td>${esc(r.unit)}</td><td>${esc(r.ref)}</td><td class="fl">${flagTxt(f)}</td></tr>`}).join('')+'</table>';
@@ -1811,8 +1813,9 @@ function weightChart(pts){
 function hcText(){const st=S.hc,p=st.p,o=['健康檢查報告書',`日期：${fmtDate(p.date)}　飼主：${p.owner}　寵物：${p.name}（${p.chart}）`,`${p.sp}　${p.breed}　${p.sex}　${p.age}　體重 ${p.wt?p.wt+' kg':''}　體溫 ${st.temp}　BCS ${p.bcs}　MCS ${p.mcs}`,`HR ${st.hr}　RR ${st.rr}　BP ${st.bp}`,''];
   HCI.forEach(c=>{o.push(`【${c.cat}】`);c.items.forEach(([id,l])=>{const it=st.items[id]||{};o.push(`${l}：${it.st==='n'?'無明顯異常':it.st==='a'?'異常：'+(it.note||''):'—'}`)})});
   const rows=(st.blood||[]).filter(r=>r.name);if(rows.length){o.push('','【血液檢查結果】');rows.forEach(r=>o.push(`${r.name} ${r.val} ${r.unit}（${r.ref}）${flagTxt(bflag(r))}`))}
+  const diet=lines(st.diet||'');if(diet.length){o.push('','【飲食建議】');diet.forEach(l=>o.push('・'+l))}
   const rec=lines(st.rec);if(rec.length){o.push('','【建議及注意事項】');rec.forEach(l=>o.push('・'+l))}
-  const hr_=Object.values(REFS).filter(r=>rec.some(l=>l.includes(r.short)));if(hr_.length){o.push('','【參考文獻】');hr_.forEach(r=>o.push(r.full))}
+  const hr_=Object.values(REFS).filter(r=>[...diet,...rec].some(l=>l.includes(r.short)));if(hr_.length){o.push('','【參考文獻】');hr_.forEach(r=>o.push(r.full))}
   return o.join('\n')}
 
 /* ---- events ---- */
@@ -1995,17 +1998,50 @@ const PUP_DIET=[
 // Energy factors × RER (AAHA nutrition guideline Box 1 life-stage factors)
 const CALF={[DOG]:[['3','幼犬 4 個月以下 ×3.0'],['2','幼犬 4 個月至成犬 ×2.0'],['1.6','已絕育成犬 ×1.6'],['1.8','未絕育成犬 ×1.8'],['1.4','活動量低／易胖成犬 ×1.4'],['1','減重（以理想體重）×1.0']],
  [CAT]:[['2.5','幼貓（1 歲以下）×2.5'],['1.2','已絕育成貓 ×1.2'],['1.4','未絕育成貓 ×1.4'],['1','活動量低／易胖成貓 ×1.0'],['0.8','減重（以理想體重）×0.8']]};
-function calDefFac(st){const aw=ageWeeks(st);if(st.p.sp===CAT)return !isFinite(aw)||aw<52?'2.5':'1.2';return !isFinite(aw)||aw<17?'3':aw<52?'2':'1.6'}
-function calc(st){const c=st.cal||{},kg=parseFloat(c.kg||st.p.wt),fac=parseFloat(c.fac||calDefFac(st)),aw=ageWeeks(st);
+const HC_DIET=[
+ [`零食、人類食物與訓練用獎勵合計不超過每日總熱量的 10%〔${NREF}〕`],
+ [`絕育後能量需求會下降，請依醫師建議調整餵食量，預防肥胖〔${NREF}〕`],
+ [`可利用益智餵食玩具或自動餵食器增加活動量、減慢進食速度〔${NREF}〕`],
+ [`目前沒有官方的「高齡」飲食營養標準，是否改成高齡飼料應依個別健康狀況評估，不必只因年齡更換〔${NREF}〕`],
+ [`高齡貓的消化率可能下降，若體重或肌肉量減少，可能需要提高熱量〔${NREF}〕`,CAT],
+ [`不建議餵食生食或未經殺菌處理的食物，以免寵物與家人感染病原〔${NREF}〕`],
+ [`無穀或以豆類為主的飼料與犬擴張型心肌病的關聯仍在研究中，建議暫時避免〔${NREF}〕`,DOG],
+ [`若想自製飲食，請由獸醫營養專科醫師設計配方，並每年重新檢視〔${NREF}〕`],
+ ['減重期間請每 2–4 週回診量體重，依體重變化調整熱量'],
+ ['每次回診量體重並評估體態（BCS）與肌肉量（MCS），依變化調整餵食量'],
+ ['換飼料時請用 7–10 天逐漸混合轉換，避免腸胃不適'],
+ ['隨時提供新鮮乾淨的飲水，每天更換並清洗水碗'],
+ ['可在家中多處放置水碗，或搭配濕食增加喝水量',CAT]];
+const bcs9=p=>{const m=String(p.bcs||'').match(/(\d+(?:\.\d+)?)\s*(?:\/\s*(\d+))?/);if(!m)return NaN;const v=+m[1],d=+(m[2]||9);return d===5?v*2-1:v};
+function calDefFac(st,k='pup'){const p=st.p,c=p.sp===CAT;
+  if(k==='hc'){if(bcs9(p)>=6&&!(st.cal||{}).ideal)return c?'1':'1.4';if(bcs9(p)>=6)return c?'0.8':'1';return /結紮|絕育/.test(p.sex||'')?(c?'1.2':'1.6'):(c?'1.4':'1.8')}
+  const aw=ageWeeks(st);if(c)return !isFinite(aw)||aw<52?'2.5':'1.2';return !isFinite(aw)||aw<17?'3':aw<52?'2':'1.6'}
+function calc(st,k='pup'){const c=st.cal||{},ideal=parseFloat(c.ideal),kg=ideal>0?ideal:parseFloat(c.kg||st.p.wt),fac=parseFloat(c.fac||calDefFac(st,k)),aw=k==='pup'?ageWeeks(st):NaN;
   if(!(kg>0)||!(fac>0))return null;
-  const rer=70*Math.pow(kg,0.75),der=rer*fac,kd=parseFloat(c.kcal),meals=+c.meals||(isFinite(aw)&&aw>=26?2:4);
+  const rer=70*Math.pow(kg,0.75),der=rer*fac,kd=parseFloat(c.kcal),meals=+c.meals||(k==='hc'||(isFinite(aw)&&aw>=26)?2:4);
   const g=kd>0?der/kd*1000:NaN,r=x=>Math.round(x);
-  return {kg,fac,rer:r(rer),der:r(der),g:isFinite(g)?r(g):null,meals,meal:isFinite(g)?r(g/meals):null,treat:r(der*0.1),water:r(der),kd}}
-const calLine=x=>`每日熱量需求約 ${x.der} kcal（體重 ${x.kg} kg，RER ${x.rer} kcal × ${x.fac}）`+(x.g?`；目前飼料（${x.kd} kcal/kg）每天約 ${x.g} 公克，分 ${x.meals} 餐，每餐約 ${x.meal} 公克`:'')+`；零食上限每天約 ${x.treat} kcal；每日總飲水量（含食物水分）約 ${x.water} ml〔${NREF}〕`;
-function calHTML(st){const x=calc(st);if(!x)return '<span class="hint">請填入體重（基本資料或上方欄位）</span>';
-  return `RER = 70 × ${x.kg}<sup>0.75</sup> = <b>${x.rer}</b> kcal／天<br>每日熱量需求 = ${x.rer} × ${x.fac} = <b>${x.der}</b> kcal／天<br>`+
+  return {kg,ideal:ideal>0,fac,rer:r(rer),der:r(der),g:isFinite(g)?r(g):null,meals,meal:isFinite(g)?r(g/meals):null,treat:r(der*0.1),water:r(der),kd}}
+const calLine=x=>`每日熱量需求約 ${x.der} kcal（${x.ideal?'以理想體重':'體重'} ${x.kg} kg，RER ${x.rer} kcal × ${x.fac}）`+(x.g?`；目前飼料（${x.kd} kcal/kg）每天約 ${x.g} 公克，分 ${x.meals} 餐，每餐約 ${x.meal} 公克`:'')+`；零食上限每天約 ${x.treat} kcal；每日總飲水量（含食物水分）約 ${x.water} ml〔${NREF}〕`;
+function calHTML(st,k='pup'){const x=calc(st,k);if(!x)return '<span class="hint">請填入體重（基本資料或上方欄位）</span>';
+  return `RER = 70 × ${x.kg}<sup>0.75</sup>${x.ideal?'（理想體重）':''} = <b>${x.rer}</b> kcal／天<br>每日熱量需求 = ${x.rer} × ${x.fac} = <b>${x.der}</b> kcal／天<br>`+
    (x.g?`飼料每天約 <b>${x.g}</b> 公克，分 ${x.meals} 餐，每餐約 <b>${x.meal}</b> 公克<br>`:'<span class="hint">填入飼料熱量（kcal/kg）即可換算公克數</span><br>')+
    `零食上限（10%）約 <b>${x.treat}</b> kcal／天<br>每日總飲水量約 <b>${x.water}</b> ml（以 1 ml／kcal 估算，含濕食中的水分）`}
+const calAutoLab=(st,k)=>`自動（${k==='hc'?'依體態與結紮：':'依年齡：'}×${calDefFac(st,k)}）`;
+function calCard(k){const st=S[k],p=st.p,c_=st.cal||(st.cal={}),aw=k==='pup'?ageWeeks(st):NaN,id=x=>`t-${k}-cal.${x}`;
+  const inp=(x,l,ph,im='decimal')=>`<div class="fld"><label for="${id(x)}">${l}</label><input id="${id(x)}" data-k="${k}" data-f="cal.${x}" value="${esc(c_[x]||'')}" placeholder="${esc(ph)}" inputmode="${im}"></div>`;
+  return `<div class="card"><h2>熱量與飲水計算 <small>RER = 70 × 體重<sup>0.75</sup>，再乘上生命階段係數；${k==='hc'?'需要減重時填入理想體重，會以理想體重計算':'成長期體重變化快，建議每 2–4 週重新計算'}</small></h2>
+    <div class="calgrid">
+      ${inp('kg','體重 (kg)',p.wt||'同基本資料')}${k==='hc'?inp('ideal','理想體重 (kg)','需減重／增重時填'):''}
+      <div class="fld"><label for="${id('fac')}">生命階段係數</label><select id="${id('fac')}" data-k="${k}" data-f="cal.fac"><option value="" id="${k}-calauto">${calAutoLab(st,k)}</option>${CALF[p.sp].map(([v,l])=>`<option value="${v}"${c_.fac===v?' selected':''}>${l}</option>`).join('')}</select></div>
+      ${inp('kcal','飼料熱量 (kcal/kg)','包裝標示，例 3800')}${inp('meals','每天餐數',k==='hc'||(isFinite(aw)&&aw>=26)?'2':'4','numeric')}
+    </div>
+    <div class="calout" id="${k}-calout">${calHTML(st,k)}</div>
+    <div class="airow"><button class="btn" data-caladd="${k}">把計算結果加入飲食建議</button></div></div>`}
+function dietCard(k){const sp_=S[k].p.sp,L=k==='hc'?HC_DIET:PUP_DIET;
+  return `<div class="card"><h2>飲食建議 <small>點選加入，可再修改；標註〔AAHA〕的句子報告最後會附參考文獻</small></h2>
+    ${tchips(k,'diet',L.filter(a=>!a[1]||a[1]===sp_).map(a=>a[0]))}
+    ${ta(k,'diet','每行一點',3)}</div>`}
+function calRefresh(k){const o=document.getElementById(k+'-calout');if(o)o.innerHTML=calHTML(S[k],k);const a=document.getElementById(k+'-calauto');if(a)a.textContent=calAutoLab(S[k],k)}
 function loadPacks(){try{const pk=JSON.parse(localStorage.getItem('usReportGen.packs')||'{}');return pk&&typeof pk==='object'?pk:{}}catch(e){return {}}}
 function blankPUP(){return {p:blankP(),doctor:'',felv:false,lyme:false,rows:[{},{},{},{},{}],paras:[],months:6,start:today(),packs:loadPacks(),adv:'',diet:'',cal:{},next:'',dob:'',tests:{fecal:{},fivfelv:{}}}}
 const ageWeeks=st=>{if(!st.dob)return NaN;const a=new Date(st.dob),b=new Date(st.p.date||today());return (b-a)/864e5/7};
@@ -2064,19 +2100,8 @@ function renderPup(){
         ${w.length?`<span class="pwarn">${w.join('；')}</span>`:''}</div>`}).join('')}
     ${st.paras.length?(gap.length?`<p class="pwarn">目前組合尚未涵蓋：${gap.join('、')}</p>`:'<p class="hint">目前組合已涵蓋：'+NEED[sp_].join('、')+'</p>'):''}
     <p class="hint">每盒劑數為預設值，請依實際包裝修改（會記住在這台電腦）。</p></div>`;
-  const c_=st.cal||{},stg=advStage(st);
-  h+=`<div class="card"><h2>熱量與飲水計算 <small>RER = 70 × 體重<sup>0.75</sup>，再乘上生命階段係數；成長期體重變化快，建議每 2–4 週重新計算</small></h2>
-    <div class="calgrid">
-      <div class="fld"><label for="t-pup-cal.kg">體重 (kg)</label><input id="t-pup-cal.kg" data-k="pup" data-f="cal.kg" value="${esc(c_.kg||'')}" placeholder="${esc(p.wt||'同基本資料')}" inputmode="decimal"></div>
-      <div class="fld"><label for="t-pup-cal.fac">生命階段係數</label><select id="t-pup-cal.fac" data-k="pup" data-f="cal.fac"><option value="">自動（依年齡：×${calDefFac(st)}）</option>${CALF[sp_].map(([v,l])=>`<option value="${v}"${c_.fac===v?' selected':''}>${l}</option>`).join('')}</select></div>
-      <div class="fld"><label for="t-pup-cal.kcal">飼料熱量 (kcal/kg)</label><input id="t-pup-cal.kcal" data-k="pup" data-f="cal.kcal" value="${esc(c_.kcal||'')}" placeholder="包裝標示，例 3800" inputmode="decimal"></div>
-      <div class="fld"><label for="t-pup-cal.meals">每天餐數</label><input id="t-pup-cal.meals" data-k="pup" data-f="cal.meals" value="${esc(c_.meals||'')}" placeholder="${isFinite(aw)&&aw>=26?2:4}" inputmode="numeric"></div>
-    </div>
-    <div class="calout" id="pup-calout">${calHTML(st)}</div>
-    <div class="airow"><button class="btn" data-caladd="1">把計算結果加入飲食建議</button></div></div>`;
-  h+=`<div class="card"><h2>飲食建議 <small>點選加入，可再修改；標註〔AAHA〕的句子報告最後會附參考文獻</small></h2>
-    ${tchips('pup','diet',PUP_DIET.filter(a=>!a[1]||a[1]===sp_).map(a=>a[0]))}
-    ${ta('pup','diet','每行一點',3)}</div>`;
+  const stg=advStage(st);
+  h+=calCard('pup')+dietCard('pup');
   h+=`<div class="card"><h2>照顧建議 <small>依年齡排列，${stg?'已標示目前階段':'填入出生日期會標示目前階段'}；點選加入，可再修改；標註出處的句子報告最後會附參考文獻</small></h2>
     ${Object.entries(ADV_GROUP).map(([g,l])=>`<p class="sub">${l}${g===stg?'<span class="now">目前階段</span>':''}</p>${tchips('pup','adv',PUP_ADV.filter(a=>a[0]===g&&(!a[2]||a[2]===sp_)).map(a=>a[1]))}`).join('')}
     ${ta('pup','adv','每行一點',4)}
@@ -2145,7 +2170,7 @@ document.addEventListener('click',e=>{
   const pa=e.target.closest('[data-para]');if(pa){const id=pa.dataset.para,a=S.pup.paras,i=a.indexOf(id);i>=0?a.splice(i,1):a.push(id);renderPup();changed('pup');return}
   const mo=e.target.closest('[data-months]');if(mo){S.pup.months=+mo.dataset.months;renderPup();changed('pup');return}
   const aa=e.target.closest('[data-advall]');if(aa){const g=aa.dataset.advall,cur=lines(S.pup.adv);PUP_ADV.filter(a=>(!a[2]||a[2]===S.pup.p.sp)&&(g==='1'||a[0]===g||a[0]==='all')).forEach(a=>{if(!cur.includes(a[1]))cur.push(a[1])});S.pup.adv=cur.join('\n');renderPup();changed('pup');return}
-  if(e.target.closest('[data-caladd]')){const x=calc(S.pup);if(!x){toast('請先填入體重');return}const cur=lines(S.pup.diet).filter(l=>!l.startsWith('每日熱量需求約'));cur.unshift(calLine(x));S.pup.diet=cur.join('\n');renderPup();changed('pup');return}
+  const ca=e.target.closest('[data-caladd]');if(ca){const k=ca.dataset.caladd,x=calc(S[k],k);if(!x){toast('請先填入體重');return}const cur=lines(S[k].diet||'').filter(l=>!l.startsWith('每日熱量需求約'));cur.unshift(calLine(x));S[k].diet=cur.join('\n');k==='hc'?renderHc():renderPup();changed(k);return}
   if(e.target.closest('[data-puppull]')){const src=['hc','card','abd'].find(k=>S[k].p.name)||'hc',P=S[src].p;
     for(const f of ['name','chart','owner','chip','wt','sp','breed','sex'])if(P[f]&&!String(S.pup.p[f]||'').trim())S.pup.p[f]=P[f];
     renderPup();changed('pup');toast(`已從${({hc:'健檢',card:'心臟',abd:'腹部'})[src]}報告帶入（只補空白欄位）`);return}
@@ -2153,7 +2178,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('change',e=>{const t=e.target;if(t.dataset.pupb){S.pup[t.dataset.pupb]=t.checked;renderPup();changed('pup')}});
 document.addEventListener('input',e=>{const t=e.target;
   const rm=t.dataset.k==='pup'&&/^rows\.(\d+)\.done$/.exec(t.dataset.f||'');if(rm){const rr=S.pup.rows[+rm[1]]||{};setTimeout(()=>document.querySelectorAll(`[data-pupst="${rm[1]}"]`).forEach(b=>b.classList.toggle('on',b.dataset.v===rowSt(S.pup,rr))),0)}
-  if(t.dataset.k==='pup'&&/^cal\./.test(t.dataset.f||'')){setTimeout(()=>{const o=document.getElementById('pup-calout');if(o)o.innerHTML=calHTML(S.pup)},0)}
+  if((t.dataset.k==='pup'||t.dataset.k==='hc')&&(/^cal\./.test(t.dataset.f||'')||/^(wt|bcs|sex)$/.test(t.dataset.p||''))){const k=t.dataset.k;setTimeout(()=>calRefresh(k),0)}
   if(t.dataset.pack){S.pup.packs[t.dataset.pack]=t.value;try{const pk=JSON.parse(localStorage.getItem(PACKKEY)||'{}');pk[t.dataset.pack]=t.value;localStorage.setItem(PACKKEY,JSON.stringify(pk))}catch(_){}changed('pup')}
   if(t.dataset.k==='pup'&&(t.dataset.f==='months'||t.dataset.f==='start'||t.dataset.f==='dob'||t.dataset.p==='wt'||t.dataset.p==='date')){clearTimeout(renderPup.t);renderPup.t=setTimeout(()=>{const a=document.activeElement,id=a&&a.id;renderPup();if(id){const n=document.getElementById(id);if(n){n.focus();try{const v=n.value;n.setSelectionRange&&n.type==='text'&&n.setSelectionRange(v.length,v.length)}catch(_){}}}},500)}});
 
