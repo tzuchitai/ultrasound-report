@@ -140,8 +140,17 @@ details summary{cursor:pointer;font-weight:700}
 .hcrow.w{grid-template-columns:minmax(0,10em) minmax(0,7em) auto}
 .hcrow input,.btable input,.btable select,.hcrow select{border:1px solid var(--line);background:var(--bg);border-radius:7px;padding:5px 8px;width:100%;min-width:0}
 .autotag{display:block;font-size:11px;color:var(--ai);font-weight:500}
-.hcrow.pup{grid-template-columns:7.5em minmax(0,1.4fr) 9.5em auto minmax(0,8em)}
-@media (max-width:620px){.hcrow.pup{grid-template-columns:1fr 1fr}}
+.hcrow.pup{display:flex;flex-wrap:wrap;align-items:center}
+.hcrow.pup>:first-child{flex:0 0 7.5em}
+.hcrow.pup>:nth-child(2){flex:1 1 15em;min-width:0}
+.hcrow.pup>input[type=date]{flex:0 0 9.5em;width:auto}
+.hcrow.pup>input:not([type=date]){flex:1 1 9em;width:auto}
+.hcrow.pup .chip{white-space:nowrap}
+.calgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(10em,1fr));gap:8px 12px}
+.calgrid input,.calgrid select{border:1px solid var(--line);background:var(--bg);border-radius:7px;padding:5px 8px;width:100%;min-width:0;color:inherit;font:inherit}
+.calout{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-top:10px;font-size:14px;line-height:1.7}
+.calout b{color:var(--accent,inherit)}
+.sub .now{font-size:12px;font-weight:700;color:#fff;background:#c8892a;border-radius:10px;padding:1px 8px;margin-left:6px}
 .pcalc{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:8px;display:flex;flex-direction:column;gap:3px;font-size:13px}
 .pwarn{color:var(--warn);font-weight:700;font-size:13px}
 .chip.ab.on{background:var(--warn-soft);border-color:var(--warn)}
@@ -594,7 +603,8 @@ const REFS={
  mmvd:{short:'ACVIM 2019 MMVD 共識',full:'Keene BW, et al. ACVIM consensus guidelines for the diagnosis and treatment of myxomatous mitral valve disease in dogs. J Vet Intern Med. 2019;33:1127-1140.',sp:DOG},
  ph:{short:'ACVIM 2020 犬肺高壓共識',full:'Reinero C, et al. ACVIM consensus statement guidelines for the diagnosis, classification, treatment, and monitoring of pulmonary hypertension in dogs. J Vet Intern Med. 2020;34:549-573.',sp:DOG},
  fcm:{short:'ACVIM 2020 貓心肌病共識',full:'Luis Fuentes V, et al. ACVIM consensus statement guidelines for the classification, diagnosis, and management of cardiomyopathies in cats. J Vet Intern Med. 2020;34:1062-1077.',sp:CAT},
- nut:{short:'AAHA 2010 營養評估指引',full:'Baldwin K, et al. AAHA nutritional assessment guidelines for dogs and cats. J Am Anim Hosp Assoc. 2010;46:285-296.',sp:null},
+ nut:{short:'AAHA 2021 營養與體重管理指引',full:'Cline MG, Burns KM, Coe JB, et al. 2021 AAHA nutrition and weight management guidelines for dogs and cats. J Am Anim Hosp Assoc. 2021;57(4):153-178. doi:10.5326/JAAHA-MS-7232',sp:null},
+ felife:{short:'AAHA/AAFP 2021 貓生命階段指引',full:'Quimby J, Gowland S, Carney HC, et al. 2021 AAHA/AAFP feline life stage guidelines. J Am Anim Hosp Assoc. 2021;57(2):51-72. doi:10.5326/JAAHA-MS-7189',sp:CAT,hc:true},
  senior:{short:'AAHA 2023 高齡照護指引',full:'Dhaliwal R, et al. 2023 AAHA senior care guidelines for dogs and cats. J Am Anim Hosp Assoc. 2023;59:1-21.',sp:null},
  griffin:{short:'Griffin 2019 貓膽道超音波',full:'Griffin S. Feline abdominal ultrasonography: what\'s normal? what\'s abnormal? The biliary tree. J Feline Med Surg. 2019;21(5):429-441. doi:10.1177/1098612X19843212',sp:CAT,abd:true},
  wsava:{short:'WSAVA 2024 疫苗指引',full:'Squires RA, Crawford C, Marcondes M, Whitley N. 2024 guidelines for the vaccination of dogs and cats – compiled by the Vaccination Guidelines Group (VGG) of the World Small Animal Veterinary Association (WSAVA). J Small Anim Pract. 2024.',sp:null},
@@ -637,15 +647,36 @@ const EVID={
   ['meds','慢性心衰竭：furosemide 0.5–2 mg/kg PO q8–12h，依在家呼吸次數 <30 次/分調整；開始後 3–7 天檢查腎指數與電解質'],
   ['meds','D 期：furosemide >6 mg/kg/day 仍持續心衰竭時，可改用 torsemide 0.1–0.2 mg/kg PO q24h 起始；spironolactone 1–2 mg/kg PO q12–24h 也可考慮']],
  nut:[
-  ['rec','每次就診都應進行營養篩檢（體重、BCS、MCS 與飲食史），有風險因子時再做延伸營養評估'],
-  ['rec','營養風險因子包括：BCS（9 分制）低於 4 或高於 5、肌肉量流失、非預期體重下降超過 10%、牙齒疾病、皮毛狀況差及新診斷的疾病'],
-  ['rec','飲食史的風險因子包括：生食、自製或素食等非傳統飲食，零食與人類食物超過每日總熱量 10%，以及正在使用保健品或藥物'],
-  ['rec','建議固定使用同一套 BCS 與 MCS 評分系統追蹤，以便及早發現體態與肌肉量變化'],
-  ['rec','多數急慢性疾病造成的肌肉流失比脂肪流失更明顯，且會影響肌力、免疫功能與傷口癒合，需特別留意肌肉量'],
-  ['rec','建議提供具體的餵食計畫，包括主食、零食、份量、餐次與餵食地點，零食熱量也要計入每日總熱量'],
-  ['rec','若有肥胖，建議擬定完整減重計畫（飲食調整、增加活動、行為與環境調整），並安排電話追蹤與回診再評估'],
-  ['rec','高齡、成長期、懷孕或哺乳中的動物需要更頻繁地進行營養評估'],
-  ['rec','可教導飼主在家自行評估 BCS 與 MCS，提高參與度與執行成效']],
+  ['rec','每次就診都應進行營養評估，包括體重、體態評分（BCS）與肌肉量評分（MCS）'],
+  ['rec','建議使用 9 分制 BCS 並以整數記錄；每 1 分約代表體脂 5% 的差異，高於 5/9 時每多 1 分約超重 10%'],
+  ['rec','飲食史應包含主食、零食、人類食物、保健品，以及用來餵藥的食物；可請飼主在家先填寫飲食史問卷'],
+  ['rec','零食及非完整均衡的食物合計應控制在每日總熱量的 10% 以內'],
+  ['rec','以理想體重計算靜止能量需求（RER = 70 × 體重 kg^0.75）與每日維持能量需求，並與目前實際攝取的總熱量比較'],
+  ['rec','絕育後能量需求會下降，需調整餵食量；拉布拉多、米格魯、挪威森林貓、波斯貓等品種較容易肥胖'],
+  ['rec','減重計畫應以理想體重計算熱量，並依回診體重調整；研究中達到減重的平均熱量約為犬 63 kcal/kg^0.75、貓 52 kcal/kg^0.711'],
+  ['rec','可利用益智餵食玩具與自動餵食器增加活動量；必要時轉介復健，設計能維持肌肉量的運動計畫'],
+  ['rec','減重追蹤：請飼主離院前先預約下次量體重，並在數天內以電話或訊息關心進度，提高成功率'],
+  ['rec','幼犬幼貓應餵食生長期飼料直到骨骼成熟：貓與中小型犬約 1 歲，大型與巨型犬約 15–16 個月，並維持偏瘦體態、避免鈣攝取過量'],
+  ['rec','目前沒有「高齡」飲食的官方營養標準，是否更換高齡飼料應依個別健康狀況評估，不必只因年齡更換'],
+  ['rec','高齡貓的消化率可能下降，部分需要更多熱量才能維持體重'],
+  ['rec','無穀或富含豆類的飲食與犬擴張型心肌病的關聯仍在研究中，保守做法是避免這類飲食'],
+  ['rec','AAHA 不建議餵食生食或未經殺菌處理的食物，因有病原感染寵物與家人的風險'],
+  ['rec','自製飲食應由獸醫營養專科醫師設計配方，並至少每年重新檢視'],
+  ['rec','營養評估可納入糞便評分，作為飲食耐受度的參考']],
+ felife:[
+  ['rec','貓的生命階段：幼貓（出生至 1 歲）、青年（1–6 歲）、成熟成年（7–10 歲）、高齡（10 歲以上），以及臨終階段'],
+  ['rec','所有貓至少每年健康檢查一次；高齡貓至少每 6 個月一次，有慢性疾病者需更頻繁'],
+  ['rec','建議長期追蹤 creatinine、SDMA、T4、血壓與尿比重的變化趨勢，以便及早發現腎臟病、甲狀腺機能亢進與高血壓'],
+  ['rec','評估高血壓時建議同時進行眼底檢查'],
+  ['rec','退化性關節炎在貓很常見卻常被低估，建議使用經驗證的疼痛評分並觸診關節，同時詢問跳躍、上下樓梯與如廁行為的改變'],
+  ['rec','居家環境應提供充足且分散的資源：休息與躲藏處、餵食點、水源、貓抓板與貓砂盆'],
+  ['rec','多數貓偏好無香味的凝結砂與較大的貓砂盆'],
+  ['rec','亂尿尿時切勿處罰，應儘早就醫排除疾病；絕育有助減少尿液標記行為'],
+  ['rec','幼貓社會化期約從 2–3 週齡開始，可能在 9–10 週齡就結束，應把握時間以正向經驗接觸人與環境'],
+  ['rec','可用零食等正向獎勵練習進出外出籠；就診前也可考慮費洛蒙或醫師開立的就診前用藥（如 gabapentin）降低緊迫'],
+  ['rec','首次就診時建議討論晶片與身分辨識、指甲照護與災難應變準備'],
+  ['rec','生活型態風險評估不應只分室內或室外，需了解實際外出與接觸其他動物的情形'],
+  ['rec','新收養或病史不明的幼貓，建議使用涵蓋心絲蟲、腸道寄生蟲與跳蚤的廣效預防藥']],
  senior:[
   ['rec','高齡的定義：犬為預估壽命的最後 25%，貓為 10 歲以上'],
   ['rec','高齡犬貓建議每 6–12 個月檢查 CBC、血液生化（含 SDMA）與尿液分析'],
@@ -738,10 +769,10 @@ function exCard(){const s=blankK('card');
   return s}
 const DEFSET={doctor:window.US_PUBLIC?'':'戴子綺 獸醫師',hosp:'聯盟桃園龜山萬壽動物醫院',contact:'03-3505565/LINE@252qxbwu',addr:'桃園市龜山區萬壽路二段1125號'};
 let S,SET;
-try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+try{S=JSON.parse((localStorage.getItem(KEY)||'null').split('AAHA 2010 營養評估指引').join('AAHA 2021 營養與體重管理指引'))}catch(e){}
 const PUBLIC=!!window.US_PUBLIC;
 if(!S||!S.abd||!S.card) S=PUBLIC?{abd:blankK('abd'),card:blankK('card'),ex:{abd:false,card:false}}:{abd:exAbd(),card:exCard(),ex:{abd:true,card:true}};
-['abd','card'].forEach(k=>{if(!S[k].prev)S[k].prev=blankPrev();if(!S[k].ovr)S[k].ovr={}});S.hc={...blankHC(),...(S.hc||{})};S.ex.hc=false;S.pup={...blankPUP(),...(S.pup||{})};S.pup.tests=S.pup.tests||{fecal:{},fivfelv:{}};S.ex.pup=false;
+['abd','card'].forEach(k=>{if(!S[k].prev)S[k].prev=blankPrev();if(!S[k].ovr)S[k].ovr={}});S.hc={...blankHC(),...(S.hc||{})};S.ex.hc=false;S.pup={...blankPUP(),...(S.pup||{})};S.pup.tests=S.pup.tests||{fecal:{},fivfelv:{}};S.pup.cal=S.pup.cal||{};S.pup.diet=S.pup.diet||'';S.ex.pup=false;
 try{SET={...DEFSET,...JSON.parse(localStorage.getItem(SKEY)||'{}')}}catch(e){SET={...DEFSET}}
 let KIND='abd';
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
@@ -1025,7 +1056,7 @@ const nextOpts=()=>[`心臟超音波 1 個月後追蹤（${ym(1)}）`,`心臟超
 function evidenceHTML(k='card'){
   const spc=sp(k),tgt=t=>t==='rec'?(k==='card'?'dx':'rec'):t;
   const lab={dx:k==='abd'?'→ 影像診斷':'→ 診斷與結論',meds:'→ 建議用藥',rec:k==='card'?'→ 診斷與結論':k==='hc'?'→ 建議及注意事項':'→ 建議'};
-  const gs=Object.keys(REFS).filter(g=>k==='card'?!REFS[g].abd:(REFS[g].sp===null||(k==='abd'&&REFS[g].abd))).sort((a,b)=>((REFS[b].sp===spc)*2+(REFS[b].sp===null))-((REFS[a].sp===spc)*2+(REFS[a].sp===null)));
+  const gs=Object.keys(REFS).filter(g=>k==='card'?!REFS[g].abd&&!REFS[g].hc:(REFS[g].sp===null||(k==='abd'&&REFS[g].abd)||(k==='hc'&&REFS[g].hc))).sort((a,b)=>((REFS[b].sp===spc)*2+(REFS[b].sp===null))-((REFS[a].sp===spc)*2+(REFS[a].sp===null)));
   return gs.map(g=>{const R_=REFS[g],mine=R_.sp===spc||R_.sp===null;
     const kinds=[...new Set(EVID[g].map(x=>x[0]))];
     const chips=t=>`<div class="grp">${EVID[g].filter(x=>x[0]===t).map(x=>`<button type="button" class="chip tchip" data-tk="${k}" data-tf="${tgt(x[0])}" data-line="${esc(evLine(g,x[1]))}">${esc(x[1])}</button>`).join('')}</div>`;
@@ -1047,7 +1078,7 @@ function renderEditor(k){
     h+=cmpCardHTML(k);
     h+=`<div class="card"><h2>腹部超音波檢查結果 <small>黃底為正常描述，橘底為異常描述，再點一次取消；綠框為書本專業描述</small></h2>${ABD.map(s=>secHTML(k,s)).join('')}</div>`;
     h+=`<div class="card"><h2>影像診斷與建議 <small>每行一點，報告自動編號</small></h2>${ta(k,'dx','',4,'影像診斷')}${ta(k,'rec','',4,'建議')}${aiDraftRow(k)}</div>`;
-    h+=`<div class="card"><h2>指引證據引用 <small>AAHA 營養評估、高齡照護、IRIS 2026 腎臟指引與 Griffin 2019 貓膽道超音波；點選後加入「影像診斷」或「建議」，句尾自動標註出處，報告最後附參考文獻</small></h2>${evidenceHTML('abd')}</div>`;
+    h+=`<div class="card"><h2>指引證據引用 <small>AAHA 2021 營養與體重管理、高齡照護、IRIS 2026 腎臟指引與 Griffin 2019 貓膽道超音波；點選後加入「影像診斷」或「建議」，句尾自動標註出處，報告最後附參考文獻</small></h2>${evidenceHTML('abd')}</div>`;
   }else{
     const c=cardCalc(),f=(path,l,list,ph='')=>`<div class="fld"><label for="t-card-${path}">${l}</label><input id="t-card-${path}" data-k="card" data-f="${path}" value="${esc(getP(st,path)||'')}"${list?` list="${list}"`:''} placeholder="${ph}"></div>`;
     h+=`<div class="card"><h2>就診原因與病史</h2>${ta(k,'hist','',2)}</div>`;
@@ -1457,7 +1488,7 @@ let NOT_OWNER=false;
 /* ================= English report -> Chinese ================= */
 function mindrayComments(t){const m=String(t||'').match(/Comments:\s*([\s\S]*?)(?:Signature\s*\(seal\)|Signature|$)/);return m?m[1].trim():''}
 let EN=null,POL=null;
-const AAHA_EV=()=>'\n\n可引用的 AAHA 營養評估／高齡照護與 IRIS 2026 腎臟指引重點（只在與本病例相符時用於建議，引用時句尾保留〔〕出處標註，不要改寫數字）：\n'+['nut','senior','iris'].flatMap(g=>EVID[g].map(x=>'- '+evLine(g,x[1]))).join('\n');
+const AAHA_EV=(k)=>'\n\n可引用的 AAHA 營養與體重管理／高齡照護'+(k==='hc'&&sp('hc')===CAT?'／貓生命階段':'')+'與 IRIS 2026 腎臟指引重點（只在與本病例相符時用於建議，引用時句尾保留〔〕出處標註，不要改寫數字）：\n'+['nut','senior','iris',...(k==='hc'&&sp('hc')===CAT?['felife']:[])].flatMap(g=>EVID[g].map(x=>'- '+evLine(g,x[1]))).join('\n');
 async function enPolish(){
   const st=$('#en-status'),box=$('#en-draft'),src=(S.card.en||'').trim();
   if(!src){st.className='aistatus err';st.textContent='請先貼上英文報告文字。';return}
@@ -1703,7 +1734,7 @@ function renderHc(){
     <label class="chk"><input type="checkbox" data-hcb="incAbd"${st.incAbd?' checked':''}> 附上腹部超音波摘要：${stat('abd')}</label>
     <label class="chk"><input type="checkbox" data-hcb="incCard"${st.incCard?' checked':''}> 附上心臟超音波摘要：${stat('card')}</label></div>`;
   h+=`<div class="card"><h2>建議及注意事項</h2>${ta('hc','rec','每行一點',4)}${aiDraftRow('hc')}</div>`;
-  h+=`<div class="card"><h2>指引證據引用 <small>AAHA 營養評估、高齡照護與 IRIS 2026 腎臟指引；點選後加入「建議及注意事項」，句尾自動標註出處，報告附參考文獻</small></h2>${evidenceHTML('hc')}</div>`;
+  h+=`<div class="card"><h2>指引證據引用 <small>AAHA 2021 營養與體重管理、高齡照護、IRIS 2026 腎臟指引，貓另有 AAHA/AAFP 2021 貓生命階段指引；點選後加入「建議及注意事項」，句尾自動標註出處，報告附參考文獻</small></h2>${evidenceHTML('hc')}</div>`;
   setTimeout(()=>refreshTchips(el),0);
   el.innerHTML=h;el.querySelectorAll('textarea').forEach(autoGrow);
   if(!AI_ON)el.querySelectorAll('.ai-only').forEach(x=>x.hidden=true);
@@ -1854,7 +1885,7 @@ async function hcDraft(){
 體重紀錄：${(hc.wts||[]).map(r=>`${r.date} ${r.kg}kg`).join('、')||'無'}
 腹部超音波：${am?am.secs.map(s=>s.title+'：'+s.lines.join('，')).join('；')+(am.dx.length?'；影像診斷：'+am.dx.join('；'):''):'無'}
 心臟超音波：${cm?(S.card.dis?S.card.dis+' '+S.card.stage+'；':'')+cm.find.join('；')+(cm.dx.length?'；結論：'+cm.dx.join('；'):''):'無'}
-臨床背景：${hc.ctx||'無'}`+AAHA_EV();
+臨床背景：${hc.ctx||'無'}`+AAHA_EV('hc');
   const prompt=`你是台灣小動物醫院的健康檢查報告助理。請依下列資料完成「健康檢查報告書」的檢查結果勾選與「建議及注意事項」，寫給飼主看，用語專業但易懂（繁體中文、台灣用語）。
 規則：
 - items 只填有資料可判斷的項目（代碼：${HCI.flatMap(c=>c.items.map(([id,l])=>id+'='+l)).join('、')}）；st 為 n（無明顯異常）或 a（異常）；異常時 note 用 25 字內說明；沒有資料的項目不要填。
@@ -1920,28 +1951,63 @@ const PUP_TESTS=[{id:'fecal',label:'糞便檢查',opts:[['no','尚未檢查'],['
  {id:'fivfelv',label:'貓愛滋／白血病檢驗（FIV／FeLV）',s:CAT,opts:[['no','尚未檢驗'],['n','已檢驗・皆陰性'],['a','已檢驗・陽性']]}];
 const NEED={[DOG]:['跳蚤','壁蝨','心絲蟲','蛔蟲','鉤蟲'],[CAT]:['跳蚤','心絲蟲','蛔蟲','鉤蟲']};
 const WREF='WSAVA 2024 疫苗指引';
+const NREF='AAHA 2021 營養與體重管理指引',FREF='AAHA/AAFP 2021 貓生命階段指引';
 const PUP_ADV=[
- ['vac',`幼犬幼貓體內的母源抗體會干擾疫苗效果，因此需每 2–4 週補強一次，最後一劑應在 16 週齡以後〔${WREF}〕`],
- ['vac',`建議在 26 週齡（約 6 個月）以後再補強一劑，讓少數仍受母源抗體影響的寶貝也能完成免疫〔${WREF}〕`],
- ['vac',`狂犬病流行或法規要求的地區，狂犬病疫苗屬於核心疫苗，請依規定按時施打〔${WREF}〕`],
- ['vac',`貓白血病流行地區，1 歲以下幼貓、會外出或與外出貓同住的貓，建議施打貓白血病疫苗〔${WREF}〕`,CAT],
- ['vac',`完成全部疫苗前，可在乾淨、可控的環境開始社會化（例如家中、幼犬課程），但避免接觸來路不明的動物與公共場所地面〔${WREF}〕`],
- ['vac','施打疫苗後請在院內觀察至少 15 分鐘再離開'],
- ['vac','疫苗後 1–2 天可能出現輕微精神、食慾下降或注射部位腫脹，多半會自行緩解；若出現臉部腫脹、嘔吐、腹瀉、呼吸困難或虛弱，請立即回院'],
- ['vac','疫苗後一週內避免洗澡、劇烈運動與長途外出'],
- ['vac','請保留疫苗紀錄，每次回診攜帶，以便醫師安排後續時程'],
- ['par','腸道驅蟲依時程表進行，回診時可攜帶新鮮糞便檢查'],
- ['vac','建議檢驗貓愛滋病（FIV）與貓白血病（FeLV），了解感染狀態後再規劃疫苗與照護；新貓加入家中前也建議先檢驗',CAT],
- ['par','體外寄生蟲與心絲蟲預防需每月規律使用，請在月曆或手機設定提醒'],
- ['par','犬隻心絲蟲預防若漏用超過一個月，需由醫師評估並篩檢心絲蟲後，再決定後續預防用藥',DOG],
- ['care','選擇幼犬／幼貓專用飼料，少量多餐，並定期量體重，記錄成長情形'],
- ['care','4–6 個月大為換牙期，注意乳牙是否殘留；從小開始練習摸嘴巴與刷牙'],
- ['care','最後一次補強疫苗約一週後可安排絕育手術，術前會再評估身體狀況'],
- ['care','依規定辦理寵物登記並植入晶片'],
- ['care','從小練習剪指甲、梳毛、洗澡與搭乘外出籠，減少日後就診與照護的壓力']];
-const ADV_GROUP={vac:'疫苗與注意事項',par:'驅蟲',care:'日常照護'};
+ ['w8',`幼犬幼貓體內的母源抗體會干擾疫苗效果，因此需每 2–4 週補強一次，最後一劑應在 16 週齡以後〔${WREF}〕`],
+ ['w8',`完成全部疫苗前，可在乾淨、可控的環境開始社會化（例如家中、幼犬課程），但避免接觸來路不明的動物與公共場所地面〔${WREF}〕`,DOG],
+ ['w8',`幼貓社會化關鍵期約在 2–9 週齡，請多以正向經驗讓牠接觸人、聲音、觸摸與新環境〔${FREF}〕`,CAT],
+ ['w8',`家中請提供足夠且分散的休息躲藏處、食物、水、貓抓板與貓砂盆；多數貓偏好無香味的凝結砂與較大的砂盆〔${FREF}〕`,CAT],
+ ['w8','建議檢驗貓愛滋病（FIV）與貓白血病（FeLV），了解感染狀態後再規劃疫苗與照護；新貓加入家中前也建議先檢驗',CAT],
+ ['w8',`貓白血病流行地區，1 歲以下幼貓、會外出或與外出貓同住的貓，建議施打貓白血病疫苗〔${WREF}〕`,CAT],
+ ['w8','腸道驅蟲依時程表進行，回診時可攜帶新鮮糞便檢查'],
+ ['w8','體外寄生蟲與心絲蟲預防需每月規律使用，請在月曆或手機設定提醒'],
+ ['w8','從小練習剪指甲、梳毛、洗澡與搭乘外出籠，減少日後就診與照護的壓力'],
+ ['w8',`可用零食獎勵練習自己走進外出籠，讓就醫更輕鬆〔${FREF}〕`,CAT],
+ ['w8','依規定辦理寵物登記並植入晶片'],
+ ['m4',`狂犬病流行或法規要求的地區，狂犬病疫苗屬於核心疫苗，請依規定按時施打〔${WREF}〕`],
+ ['m4','4–6 個月大為換牙期，注意乳牙是否殘留；從小開始練習摸嘴巴與刷牙'],
+ ['m6',`建議在 26 週齡（約 6 個月）以後再補強一劑，讓少數仍受母源抗體影響的寶貝也能完成免疫〔${WREF}〕`],
+ ['m6','最後一次補強疫苗約一週後可安排絕育手術，術前會再評估身體狀況'],
+ ['m6',`絕育有助於減少尿液標記行為；家中若有亂尿尿情形請勿處罰，應儘早就醫排除疾病〔${FREF}〕`,CAT],
+ ['m6',`絕育後能量需求會下降，術後請依醫師建議調整餵食量，預防肥胖〔${NREF}〕`],
+ ['y1',`成年後每年至少健康檢查一次，並依醫師評估安排補強疫苗〔${FREF}〕`,CAT],
+ ['y1','成年後每年至少健康檢查一次，並依醫師評估安排補強疫苗',DOG],
+ ['y1',`成年後核心疫苗通常不需每年施打（可間隔 3 年），非核心疫苗則依生活型態每年評估〔${WREF}〕`],
+ ['y1','犬隻心絲蟲預防若漏用超過一個月，需由醫師評估並篩檢心絲蟲後，再決定後續預防用藥',DOG],
+ ['all','施打疫苗後請在院內觀察至少 15 分鐘再離開'],
+ ['all','疫苗後 1–2 天可能出現輕微精神、食慾下降或注射部位腫脹，多半會自行緩解；若出現臉部腫脹、嘔吐、腹瀉、呼吸困難或虛弱，請立即回院'],
+ ['all','疫苗後一週內避免洗澡、劇烈運動與長途外出'],
+ ['all','請保留疫苗紀錄，每次回診攜帶，以便醫師安排後續時程']];
+const ADV_GROUP={w8:'2–4 個月（疫苗期）',m4:'4–6 個月（換牙期）',m6:'6–12 個月（最後補強・絕育）',y1:'1 歲以後',all:'每次施打疫苗後'};
+const advStage=st=>{const aw=ageWeeks(st);return !isFinite(aw)?'':aw<17?'w8':aw<26?'m4':aw<52?'m6':'y1'};
+const PUP_DIET=[
+ [`請餵食生長期（幼犬／幼貓）配方的完整均衡飼料，直到骨骼發育成熟：貓與中小型犬約 1 歲，大型與巨型犬約 15–16 個月〔${NREF}〕`],
+ [`大型犬幼犬請維持偏瘦體態，不要額外補充鈣質，以免影響骨骼發育〔${NREF}〕`,DOG],
+ [`零食、人類食物與訓練用獎勵合計不超過每日總熱量的 10%〔${NREF}〕`],
+ [`不建議餵食生食或未經殺菌處理的食物，以免寵物與家人感染病原〔${NREF}〕`],
+ [`無穀或以豆類為主的飼料與犬擴張型心肌病的關聯仍在研究中，建議暫時避免〔${NREF}〕`,DOG],
+ [`若想自製飲食，請由獸醫營養專科醫師設計配方，並每年重新檢視〔${NREF}〕`],
+ ['6 個月以下建議每天 3–4 餐，6 個月以後可改為每天 2–3 餐'],
+ ['每 2–4 週量一次體重並評估體態，依成長情況調整餵食量'],
+ ['換飼料時請用 7–10 天逐漸混合轉換，避免腸胃不適'],
+ ['隨時提供新鮮乾淨的飲水，每天更換並清洗水碗'],
+ ['可在家中多處放置水碗，或搭配濕食增加喝水量',CAT]];
+// Energy factors × RER (AAHA nutrition guideline Box 1 life-stage factors)
+const CALF={[DOG]:[['3','幼犬 4 個月以下 ×3.0'],['2','幼犬 4 個月至成犬 ×2.0'],['1.6','已絕育成犬 ×1.6'],['1.8','未絕育成犬 ×1.8'],['1.4','活動量低／易胖成犬 ×1.4'],['1','減重（以理想體重）×1.0']],
+ [CAT]:[['2.5','幼貓（1 歲以下）×2.5'],['1.2','已絕育成貓 ×1.2'],['1.4','未絕育成貓 ×1.4'],['1','活動量低／易胖成貓 ×1.0'],['0.8','減重（以理想體重）×0.8']]};
+function calDefFac(st){const aw=ageWeeks(st);if(st.p.sp===CAT)return !isFinite(aw)||aw<52?'2.5':'1.2';return !isFinite(aw)||aw<17?'3':aw<52?'2':'1.6'}
+function calc(st){const c=st.cal||{},kg=parseFloat(c.kg||st.p.wt),fac=parseFloat(c.fac||calDefFac(st)),aw=ageWeeks(st);
+  if(!(kg>0)||!(fac>0))return null;
+  const rer=70*Math.pow(kg,0.75),der=rer*fac,kd=parseFloat(c.kcal),meals=+c.meals||(isFinite(aw)&&aw>=26?2:4);
+  const g=kd>0?der/kd*1000:NaN,r=x=>Math.round(x);
+  return {kg,fac,rer:r(rer),der:r(der),g:isFinite(g)?r(g):null,meals,meal:isFinite(g)?r(g/meals):null,treat:r(der*0.1),water:r(der),kd}}
+const calLine=x=>`每日熱量需求約 ${x.der} kcal（體重 ${x.kg} kg，RER ${x.rer} kcal × ${x.fac}）`+(x.g?`；目前飼料（${x.kd} kcal/kg）每天約 ${x.g} 公克，分 ${x.meals} 餐，每餐約 ${x.meal} 公克`:'')+`；零食上限每天約 ${x.treat} kcal；每日總飲水量（含食物水分）約 ${x.water} ml〔${NREF}〕`;
+function calHTML(st){const x=calc(st);if(!x)return '<span class="hint">請填入體重（基本資料或上方欄位）</span>';
+  return `RER = 70 × ${x.kg}<sup>0.75</sup> = <b>${x.rer}</b> kcal／天<br>每日熱量需求 = ${x.rer} × ${x.fac} = <b>${x.der}</b> kcal／天<br>`+
+   (x.g?`飼料每天約 <b>${x.g}</b> 公克，分 ${x.meals} 餐，每餐約 <b>${x.meal}</b> 公克<br>`:'<span class="hint">填入飼料熱量（kcal/kg）即可換算公克數</span><br>')+
+   `零食上限（10%）約 <b>${x.treat}</b> kcal／天<br>每日總飲水量約 <b>${x.water}</b> ml（以 1 ml／kcal 估算，含濕食中的水分）`}
 function loadPacks(){try{const pk=JSON.parse(localStorage.getItem('usReportGen.packs')||'{}');return pk&&typeof pk==='object'?pk:{}}catch(e){return {}}}
-function blankPUP(){return {p:blankP(),doctor:'',felv:false,lyme:false,rows:[{},{},{},{},{}],paras:[],months:6,start:today(),packs:loadPacks(),adv:'',next:'',dob:'',tests:{fecal:{},fivfelv:{}}}}
+function blankPUP(){return {p:blankP(),doctor:'',felv:false,lyme:false,rows:[{},{},{},{},{}],paras:[],months:6,start:today(),packs:loadPacks(),adv:'',diet:'',cal:{},next:'',dob:'',tests:{fecal:{},fivfelv:{}}}}
 const ageWeeks=st=>{if(!st.dob)return NaN;const a=new Date(st.dob),b=new Date(st.p.date||today());return (b-a)/864e5/7};
 const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+Math.round(n));return x};
 const md=d=>`${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
@@ -1998,11 +2064,24 @@ function renderPup(){
         ${w.length?`<span class="pwarn">${w.join('；')}</span>`:''}</div>`}).join('')}
     ${st.paras.length?(gap.length?`<p class="pwarn">目前組合尚未涵蓋：${gap.join('、')}</p>`:'<p class="hint">目前組合已涵蓋：'+NEED[sp_].join('、')+'</p>'):''}
     <p class="hint">每盒劑數為預設值，請依實際包裝修改（會記住在這台電腦）。</p></div>`;
-  h+=`<div class="card"><h2>照顧建議 <small>點選加入，可再修改；標註〔WSAVA〕的句子報告最後會附參考文獻</small></h2>
-    ${Object.entries(ADV_GROUP).map(([g,l])=>`<p class="sub">${l}</p>${tchips('pup','adv',PUP_ADV.filter(a=>a[0]===g&&(!a[2]||a[2]===sp_)).map(a=>a[1]))}`).join('')}
+  const c_=st.cal||{},stg=advStage(st);
+  h+=`<div class="card"><h2>熱量與飲水計算 <small>RER = 70 × 體重<sup>0.75</sup>，再乘上生命階段係數；成長期體重變化快，建議每 2–4 週重新計算</small></h2>
+    <div class="calgrid">
+      <div class="fld"><label for="t-pup-cal.kg">體重 (kg)</label><input id="t-pup-cal.kg" data-k="pup" data-f="cal.kg" value="${esc(c_.kg||'')}" placeholder="${esc(p.wt||'同基本資料')}" inputmode="decimal"></div>
+      <div class="fld"><label for="t-pup-cal.fac">生命階段係數</label><select id="t-pup-cal.fac" data-k="pup" data-f="cal.fac"><option value="">自動（依年齡：×${calDefFac(st)}）</option>${CALF[sp_].map(([v,l])=>`<option value="${v}"${c_.fac===v?' selected':''}>${l}</option>`).join('')}</select></div>
+      <div class="fld"><label for="t-pup-cal.kcal">飼料熱量 (kcal/kg)</label><input id="t-pup-cal.kcal" data-k="pup" data-f="cal.kcal" value="${esc(c_.kcal||'')}" placeholder="包裝標示，例 3800" inputmode="decimal"></div>
+      <div class="fld"><label for="t-pup-cal.meals">每天餐數</label><input id="t-pup-cal.meals" data-k="pup" data-f="cal.meals" value="${esc(c_.meals||'')}" placeholder="${isFinite(aw)&&aw>=26?2:4}" inputmode="numeric"></div>
+    </div>
+    <div class="calout" id="pup-calout">${calHTML(st)}</div>
+    <div class="airow"><button class="btn" data-caladd="1">把計算結果加入飲食建議</button></div></div>`;
+  h+=`<div class="card"><h2>飲食建議 <small>點選加入，可再修改；標註〔AAHA〕的句子報告最後會附參考文獻</small></h2>
+    ${tchips('pup','diet',PUP_DIET.filter(a=>!a[1]||a[1]===sp_).map(a=>a[0]))}
+    ${ta('pup','diet','每行一點',3)}</div>`;
+  h+=`<div class="card"><h2>照顧建議 <small>依年齡排列，${stg?'已標示目前階段':'填入出生日期會標示目前階段'}；點選加入，可再修改；標註出處的句子報告最後會附參考文獻</small></h2>
+    ${Object.entries(ADV_GROUP).map(([g,l])=>`<p class="sub">${l}${g===stg?'<span class="now">目前階段</span>':''}</p>${tchips('pup','adv',PUP_ADV.filter(a=>a[0]===g&&(!a[2]||a[2]===sp_)).map(a=>a[1]))}`).join('')}
     ${ta('pup','adv','每行一點',4)}
     ${ta('pup','next','例：2026/11/14 第二劑疫苗',1,'下次回診')}
-    <div class="airow"><button class="btn" data-advall="1">加入全部建議</button></div></div>`;
+    <div class="airow">${stg?`<button class="btn" data-advall="${stg}">加入目前階段建議</button>`:''}<button class="btn" data-advall="1">加入全部建議</button></div></div>`;
   el.innerHTML=h;el.querySelectorAll('textarea').forEach(autoGrow);refreshTchips(el);
 }
 
@@ -2033,11 +2112,12 @@ function blocksPup(){
     const dl=sel.filter(pr=>pr.days<365).map(pr=>`<b>${esc(pr.name)}</b>：${paraDates(st,pr).map(d=>`${d.getMonth()+1}/${d.getDate()}`).join('、')}`);
     if(dl.length)B.push({h:`<p class="hnote" style="font-size:12px">用藥日期提醒　${dl.join('　｜　')}</p>`});
   }
-  const adv=lines(st.adv);
+  const diet=lines(st.diet||''),adv=lines(st.adv);
+  if(diet.length){B.push({h:'<div class="hsec">飲食建議</div>',keep:1});diet.forEach(l=>B.push({h:`<ul class="hrec"><li data-src="f:diet">${esc(l)}</li></ul>`}))}
   if(adv.length){B.push({h:'<div class="hsec">照顧建議</div>',keep:1});adv.forEach(l=>B.push({h:`<ul class="hrec"><li data-src="f:adv">${esc(l)}</li></ul>`}))}
   if(st.next.trim())B.push({h:`<div class="hsec">下次回診</div><p class="hnote" style="font-size:13px;color:#222" data-src="f:next"><b>${esc(st.next.trim())}</b></p>`});
   B.push({h:'<div class="hend"></div>'});
-  const refs=Object.values(REFS).filter(r=>adv.some(l=>l.includes(r.short)));
+  const refs=Object.values(REFS).filter(r=>[...diet,...adv].some(l=>l.includes(r.short)));
   if(refs.length){B.push({h:'<div class="hsec">參考文獻</div>',keep:1});refs.forEach(r=>B.push({h:`<p class="hnote">${esc(r.full)}</p>`}))}
   return B;
 }
@@ -2046,7 +2126,9 @@ function pupText(){const st=S.pup,p=st.p,o=[`${p.sp==='貓'?'幼貓':'幼犬'}�
   o.push('','【篩檢紀錄】');PUP_TESTS.filter(x=>!x.s||x.s===p.sp).forEach(x=>{const v=st.tests[x.id]||{},q=x.opts.find(z=>z[0]===v.st);o.push(`${x.label}：${q?q[1]:'—'}${v.date?'（'+fmtDate(v.date)+'）':''}${v.note?'　'+v.note:''}`)});
   const sel=st.paras.map(id=>PARA[p.sp].find(x=>x.id===id)).filter(Boolean);
   if(sel.length){o.push('',`【驅蟲藥建議（${st.months} 個月）】`);sel.forEach(pr=>{const c=paraCalc(st,pr);o.push(`${pr.name}：${c.doses} 次，約 ${c.boxes} ${c.unit}（${pr.cov.join('、')}）`)})}
+  const diet=lines(st.diet||'');if(diet.length){o.push('','【飲食建議】');diet.forEach(l=>o.push('・'+l))}
   const adv=lines(st.adv);if(adv.length){o.push('','【照顧建議】');adv.forEach(l=>o.push('・'+l))}
+  const rf=Object.values(REFS).filter(r=>[...diet,...adv].some(l=>l.includes(r.short)));if(rf.length){o.push('','【參考文獻】');rf.forEach(r=>o.push(r.full))}
   if(st.next.trim())o.push('','下次回診：'+st.next.trim());return o.join('\n')}
 
 /* ---- events ---- */
@@ -2062,7 +2144,8 @@ document.addEventListener('click',e=>{
     ps.parentElement.querySelectorAll('.chip').forEach(b=>b.classList.toggle('on',b.dataset.v===rowSt(S.pup,rr)));changed('pup');return}
   const pa=e.target.closest('[data-para]');if(pa){const id=pa.dataset.para,a=S.pup.paras,i=a.indexOf(id);i>=0?a.splice(i,1):a.push(id);renderPup();changed('pup');return}
   const mo=e.target.closest('[data-months]');if(mo){S.pup.months=+mo.dataset.months;renderPup();changed('pup');return}
-  if(e.target.closest('[data-advall]')){const cur=lines(S.pup.adv);PUP_ADV.filter(a=>!a[2]||a[2]===S.pup.p.sp).forEach(a=>{if(!cur.includes(a[1]))cur.push(a[1])});S.pup.adv=cur.join('\n');renderPup();changed('pup');return}
+  const aa=e.target.closest('[data-advall]');if(aa){const g=aa.dataset.advall,cur=lines(S.pup.adv);PUP_ADV.filter(a=>(!a[2]||a[2]===S.pup.p.sp)&&(g==='1'||a[0]===g||a[0]==='all')).forEach(a=>{if(!cur.includes(a[1]))cur.push(a[1])});S.pup.adv=cur.join('\n');renderPup();changed('pup');return}
+  if(e.target.closest('[data-caladd]')){const x=calc(S.pup);if(!x){toast('請先填入體重');return}const cur=lines(S.pup.diet).filter(l=>!l.startsWith('每日熱量需求約'));cur.unshift(calLine(x));S.pup.diet=cur.join('\n');renderPup();changed('pup');return}
   if(e.target.closest('[data-puppull]')){const src=['hc','card','abd'].find(k=>S[k].p.name)||'hc',P=S[src].p;
     for(const f of ['name','chart','owner','chip','wt','sp','breed','sex'])if(P[f]&&!String(S.pup.p[f]||'').trim())S.pup.p[f]=P[f];
     renderPup();changed('pup');toast(`已從${({hc:'健檢',card:'心臟',abd:'腹部'})[src]}報告帶入（只補空白欄位）`);return}
@@ -2070,6 +2153,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('change',e=>{const t=e.target;if(t.dataset.pupb){S.pup[t.dataset.pupb]=t.checked;renderPup();changed('pup')}});
 document.addEventListener('input',e=>{const t=e.target;
   const rm=t.dataset.k==='pup'&&/^rows\.(\d+)\.done$/.exec(t.dataset.f||'');if(rm){const rr=S.pup.rows[+rm[1]]||{};setTimeout(()=>document.querySelectorAll(`[data-pupst="${rm[1]}"]`).forEach(b=>b.classList.toggle('on',b.dataset.v===rowSt(S.pup,rr))),0)}
+  if(t.dataset.k==='pup'&&/^cal\./.test(t.dataset.f||'')){setTimeout(()=>{const o=document.getElementById('pup-calout');if(o)o.innerHTML=calHTML(S.pup)},0)}
   if(t.dataset.pack){S.pup.packs[t.dataset.pack]=t.value;try{const pk=JSON.parse(localStorage.getItem(PACKKEY)||'{}');pk[t.dataset.pack]=t.value;localStorage.setItem(PACKKEY,JSON.stringify(pk))}catch(_){}changed('pup')}
   if(t.dataset.k==='pup'&&(t.dataset.f==='months'||t.dataset.f==='start'||t.dataset.f==='dob'||t.dataset.p==='wt'||t.dataset.p==='date')){clearTimeout(renderPup.t);renderPup.t=setTimeout(()=>{const a=document.activeElement,id=a&&a.id;renderPup();if(id){const n=document.getElementById(id);if(n){n.focus();try{const v=n.value;n.setSelectionRange&&n.type==='text'&&n.setSelectionRange(v.length,v.length)}catch(_){}}}},500)}});
 
