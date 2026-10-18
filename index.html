@@ -605,6 +605,7 @@ const REFS={
  fcm:{short:'ACVIM 2020 貓心肌病共識',full:'Luis Fuentes V, et al. ACVIM consensus statement guidelines for the classification, diagnosis, and management of cardiomyopathies in cats. J Vet Intern Med. 2020;34:1062-1077.',sp:CAT},
  nut:{short:'AAHA 2021 營養與體重管理指引',full:'Cline MG, Burns KM, Coe JB, et al. 2021 AAHA nutrition and weight management guidelines for dogs and cats. J Am Anim Hosp Assoc. 2021;57(4):153-178. doi:10.5326/JAAHA-MS-7232',sp:null},
  felife:{short:'AAHA/AAFP 2021 貓生命階段指引',full:'Quimby J, Gowland S, Carney HC, et al. 2021 AAHA/AAFP feline life stage guidelines. J Am Anim Hosp Assoc. 2021;57(2):51-72. doi:10.5326/JAAHA-MS-7189',sp:CAT,hc:true},
+ feenv:{short:'AAFP/ISFM 2013 貓環境需求指引',full:'Ellis SLH, Rodan I, Carney HC, et al. AAFP and ISFM feline environmental needs guidelines. J Feline Med Surg. 2013;15:219-230. doi:10.1177/1098612X13477537',sp:CAT,hc:true},
  senior:{short:'AAHA 2023 高齡照護指引',full:'Dhaliwal R, et al. 2023 AAHA senior care guidelines for dogs and cats. J Am Anim Hosp Assoc. 2023;59:1-21.',sp:null},
  griffin:{short:'Griffin 2019 貓膽道超音波',full:'Griffin S. Feline abdominal ultrasonography: what\'s normal? what\'s abnormal? The biliary tree. J Feline Med Surg. 2019;21(5):429-441. doi:10.1177/1098612X19843212',sp:CAT,abd:true},
  wsava:{short:'WSAVA 2024 疫苗指引',full:'Squires RA, Crawford C, Marcondes M, Whitley N. 2024 guidelines for the vaccination of dogs and cats – compiled by the Vaccination Guidelines Group (VGG) of the World Small Animal Veterinary Association (WSAVA). J Small Anim Pract. 2024.',sp:null},
@@ -677,6 +678,21 @@ const EVID={
   ['rec','首次就診時建議討論晶片與身分辨識、指甲照護與災難應變準備'],
   ['rec','生活型態風險評估不應只分室內或室外，需了解實際外出與接觸其他動物的情形'],
   ['rec','新收養或病史不明的幼貓，建議使用涵蓋心絲蟲、腸道寄生蟲與跳蚤的廣效預防藥']],
+ feenv:[
+  ['rec','滿足環境需求是維持貓身心健康的必要條件，可依「五大支柱」評估居家環境：安全處所、分開的資源、遊戲與狩獵、可預期的互動、尊重嗅覺'],
+  ['rec','提供安全的躲藏處（紙箱、外出籠、高處層架）；多貓家庭的躲藏處數量至少與貓數相同，並有多個出入口'],
+  ['rec','外出籠平常放在貓容易進出的地方，當作可攜帶的安全空間，可減少外出與就醫的緊迫'],
+  ['rec','食物、水、貓砂盆、貓抓板、遊戲與休息區應分開放置，每項至少有兩處可選；食物與水分開，貓砂盆遠離食物與水'],
+  ['rec','多貓家庭每隻貓都應有自己的餵食點，並與其他社交群體的資源分開'],
+  ['rec','提供遊戲與模擬狩獵的機會（逗貓棒、藏食、拋乾糧、益智餵食器）；缺乏這類活動可能導致肥胖、無聊、過度理毛或攻擊行為'],
+  ['rec','玩具輪替使用以避免厭倦；不要用手腳逗貓；含繩線或小零件的玩具玩完要收好'],
+  ['rec','讓貓主導互動，不強迫接觸；撫摸頭部與臉頰周圍最合適'],
+  ['rec','幼貓 2–7 週齡是與人社會化的關鍵期，最好有至少 4 個人溫和觸摸，每天短時間累計約 1 小時'],
+  ['rec','高齡貓互動偏好改變可能與疾病有關，應就醫評估；行動不便的貓應將層架與躲藏處放低或加斜坡'],
+  ['rec','尊重貓的嗅覺：避免有香味的清潔劑與貓砂；寢具輪流清洗以保留熟悉氣味；不要清除貓臉頰磨蹭過的位置'],
+  ['rec','可使用合成費洛蒙降低焦慮；新物品可先用沾有貓氣味的布擦拭'],
+  ['rec','多貓家庭中，從醫院返家的貓氣味改變，可能讓原本相處融洽的同伴出現排斥'],
+  ['rec','氣味標記與亂尿尿都不應處罰']],
  senior:[
   ['rec','高齡的定義：犬為預估壽命的最後 25%，貓為 10 歲以上'],
   ['rec','高齡犬貓建議每 6–12 個月檢查 CBC、血液生化（含 SDMA）與尿液分析'],
@@ -1735,7 +1751,7 @@ function renderHc(){
     <label class="chk"><input type="checkbox" data-hcb="incCard"${st.incCard?' checked':''}> 附上心臟超音波摘要：${stat('card')}</label></div>`;
   h+=calCard('hc')+dietCard('hc');
   h+=`<div class="card"><h2>建議及注意事項</h2>${ta('hc','rec','每行一點',4)}${aiDraftRow('hc')}</div>`;
-  h+=`<div class="card"><h2>指引證據引用 <small>AAHA 2021 營養與體重管理、高齡照護、IRIS 2026 腎臟指引，貓另有 AAHA/AAFP 2021 貓生命階段指引；點選後加入「建議及注意事項」，句尾自動標註出處，報告附參考文獻</small></h2>${evidenceHTML('hc')}</div>`;
+  h+=`<div class="card"><h2>指引證據引用 <small>AAHA 2021 營養與體重管理、高齡照護、IRIS 2026 腎臟指引，貓另有 AAHA/AAFP 2021 貓生命階段與 AAFP/ISFM 2013 貓環境需求指引；點選後加入「建議及注意事項」，句尾自動標註出處，報告附參考文獻</small></h2>${evidenceHTML('hc')}</div>`;
   setTimeout(()=>refreshTchips(el),0);
   el.innerHTML=h;el.querySelectorAll('textarea').forEach(autoGrow);
   if(!AI_ON)el.querySelectorAll('.ai-only').forEach(x=>x.hidden=true);
@@ -1966,6 +1982,9 @@ const PUP_ADV=[
  ['w8','體外寄生蟲與心絲蟲預防需每月規律使用，請在月曆或手機設定提醒'],
  ['w8','從小練習剪指甲、梳毛、洗澡與搭乘外出籠，減少日後就診與照護的壓力'],
  ['w8',`可用零食獎勵練習自己走進外出籠，讓就醫更輕鬆〔${FREF}〕`,CAT],
+ ['w8','外出籠平常放在幼貓容易進出的地方，當作牠的安全小窩，可減少外出與就醫的緊迫〔AAFP/ISFM 2013 貓環境需求指引〕',CAT],
+ ['w8','每天用逗貓棒等玩具陪玩、模擬狩獵；不要用手腳逗貓，含繩線或小零件的玩具玩完要收好〔AAFP/ISFM 2013 貓環境需求指引〕',CAT],
+ ['w8','讓幼貓主導互動，不強迫抱；避免使用有香味的清潔劑與貓砂〔AAFP/ISFM 2013 貓環境需求指引〕',CAT],
  ['w8','依規定辦理寵物登記並植入晶片'],
  ['m4',`狂犬病流行或法規要求的地區，狂犬病疫苗屬於核心疫苗，請依規定按時施打〔${WREF}〕`],
  ['m4','4–6 個月大為換牙期，注意乳牙是否殘留；從小開始練習摸嘴巴與刷牙'],
