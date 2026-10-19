@@ -763,26 +763,8 @@ const today=()=>new Date().toISOString().slice(0,10);
 const blankP=()=>({owner:'',chip:'',name:'',chart:'',wt:'',sp:DOG,age:'',bcs:'',breed:'',sex:'',mcs:'',date:today()});
 const blankK=k=>k==='pup'?blankPUP():k==='hc'?blankHC():k==='abd'?{p:blankP(),vals:{},sel:{},extra:{},skip:{},dx:'',rec:'',ctx:'',prev:blankPrev()}
   :{p:blankP(),vals:{},sel:{},extra:{},skip:{},dis:'',stage:'',stageNote:'',hist:'',pe:{aus:'',bp:'',hr:'',heart:'',vhs:'',vlas:'',vessel:''},ecg:'',xray:'',dx:'',meds:'',notes:NOTE_LIB[0],next:'',ctx:'',en:'',table:true,prev:blankPrev()};
-function exAbd(){const s=blankK('abd');
-  Object.assign(s.p,{name:'奇奇',chart:'115029401',wt:'6.3',sp:CAT,bcs:'4/9',breed:'混種',sex:'公',mcs:'輕微肌肉量流失',date:'2026-08-22'});
-  Object.assign(s.vals,{cbd:'0.23',spt:'0.78',stw:'0.34',duo:'0.28-0.30',ile:'0.21-0.29',jej:'0.21-0.28',pap:'0.44',col:'0.11',pl:'0.48-0.65',rk:'4.22',lk:'4.49',adr:'0.76 x 0.26',adl:'0.78 x 0.24',blw:'0.11'});
-  Object.assign(s.sel,{kd1:1,kd3:1,ab2:-1});
-  s.extra={kidney:'右腎右側皮質有下凹狀況'};
-  s.dx='腎臟的影像學異常應為老年性腎臟退化，目前血液檢查無腎臟疾病相關反應，建議每半年進行健康檢查以追蹤相關指數。\n胃腸道的厚度與分層皆正常，胰臟實質均勻且周圍脂肪無發炎反應，目前沒有強烈證據支持急性胰臟炎。\n超音波未見明顯消化道腫瘤、消化道異物阻塞、膽道阻塞或泌尿道阻塞。';
-  s.rec='腎臟的影像學異常應為老年性腎臟退化，建議每三到四個月進行健康檢查以追蹤相關指數，並於日常確保奇奇的飲水量充足。\n基於本次腹腔超音波與血液檢查結果，奇奇食慾低下與嘔吐可能與呼吸道感染相關，但後續仍需要持續觀察貧血與食慾狀況，建議持續監測食慾、精神與呼吸狀況。\n下頷淋巴結細針採樣結果為發炎反應，可能與呼吸道感染相關，因為對於抗病毒藥物反應良好，建議持續服用抗病毒藥至少2週。後續仍需持續注意淋巴結狀況，若仍變大，建議進一步進行斷層掃描。\n建議9月底回診檢查 CBC/白蛋白/總蛋白/ALT/CREA。';
-  return s}
-function exCard(){const s=blankK('card');
-  Object.assign(s.p,{name:'NANA',chart:'115081101',wt:'3.6',sp:DOG,age:'13歲',bcs:'4/9',breed:'貴賓犬',sex:'母',mcs:'輕微肌肉量流失',date:'2026-08-21'});
-  s.hist='去年開始固定在人人動物醫院就診心臟問題，曾因為咳嗽就診，診斷有肺積水的狀況';
-  s.pe={aus:'IV-V/VI',bp:'120mmHg',hr:'108bpm',heart:'明顯偏大',vhs:'13.08',vlas:'3.27',vessel:'些微變粗'};
-  s.ecg='竇性心律\n偶發心房早期收縮';s.xray='左心房明顯擴張\n右後肺部間質影像輕微增加';
-  Object.assign(s.vals,{laao:'2.98',lviddn:'2.00',mve:'1.29',tr:'1.30',ar:'2.65'});
-  s.dis='黏液樣二尖瓣疾病 (MMVD)';s.stage='C';s.stageNote='（已於去年開始使用利尿劑 torsemide）';
-  Object.assign(s.sel,{m1:2,m2:3,l1:3,l2:1,v1:1,v3:-1,r1:1,g4:0,p1:-1});
-  s.dx='目前咳嗽狀況增加與心臟明顯擴張與支氣管問題相關，建議需要控制心臟擴張狀況與給予氣管支氣管相關藥物。\n因為左心房明顯擴張，隨時有嚴重肺積水可能性，建議需要密切注意呼吸次數。\n嚴密監測臨床症狀（如咳嗽、呼吸速率上升、運動耐受度下降）。\n目前可能因為咳嗽狀況有給予類固醇，因為肝指數上升，建議如果咳嗽狀況穩定可以減少類固醇劑量。\n腎臟指數偏高，建議減少零食給予，並且保持足夠水分\n建議於 3-4 個月內再次安排心臟超音波追蹤，必要時提早。';
-  s.meds='繼續心臟用藥並且調整類固醇劑量\n腎臟指數與肝臟指數偏高，建議之後需要做完整的血檢確認長期使用類固醇的狀況\n沒有預防心絲蟲，建議之後也需要進一步確認排除狀況';
-  s.next='血檢建議更改藥物後2-4周追蹤\n胸腔XRAY 2025/11-12月\n心臟超音波 2025/11-12月';
-  return s}
+function exAbd(){return blankK('abd')}
+function exCard(){return blankK('card')}
 const DEFSET={doctor:window.US_PUBLIC?'':'戴子綺 獸醫師',hosp:'聯盟桃園龜山萬壽動物醫院',contact:'03-3505565/LINE@252qxbwu',addr:'桃園市龜山區萬壽路二段1125號'};
 let S,SET;
 try{S=JSON.parse((localStorage.getItem(KEY)||'null').split('AAHA 2010 營養評估指引').join('AAHA 2021 營養與體重管理指引'))}catch(e){}
@@ -1137,7 +1119,7 @@ function refreshFlags(){
 function refreshTchips(root){root.querySelectorAll('.tchip').forEach(b=>{const ls=lines(getP(S[b.dataset.tk],b.dataset.tf));const on=ls.includes(b.dataset.line);b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)})}
 function autoGrow(t){if(!t.offsetParent)return;t.style.height='auto';t.style.height=Math.max(t.scrollHeight+2,34)+'px'}
 function updateBanner(){const b=$('#example-banner');b.hidden=!S.ex[KIND];
-  b.textContent=KIND==='abd'?'目前顯示範例（奇奇 2026/08/22 腹部超音波報告）。按右上「新報告」清空後開始填寫。':'目前顯示範例（NANA 2026/08/21 心肺評估報告）。按右上「新報告」清空後開始填寫。'}
+  b.textContent=KIND==='abd'?'目前顯示範例。按右上「新報告」清空後開始填寫。':'目前顯示範例。按右上「新報告」清空後開始填寫。'}
 function changed(k=KIND){if(k==='card'){const el=document.getElementById('next-chips');if(el){const h=tchips('card','next',nextOpts());if(el.innerHTML!==h){el.innerHTML=h;refreshTchips(el)}}}save();refreshFlags();renderReport();if(S.ex[k]){S.ex[k]=false;updateBanner();save()}}
 
 /* ================= events ================= */
