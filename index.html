@@ -879,7 +879,7 @@ function ptTable(p){const d=x=>esc(x)||'&nbsp;';
   <tr><td class="l">種　　別</td><td class="v">${d(p.sp)}</td><td class="l">年　　紀</td><td class="v">${d(p.age)}</td><td class="l">體態評分</td><td class="v">${d(p.bcs)}</td></tr>
   <tr><td class="l">品　　種</td><td class="v">${d(p.breed)}</td><td class="l">性　　別</td><td class="v">${d(p.sex)}</td><td class="l">肌肉量評分</td><td class="v">${d(p.mcs)}</td></tr></table>`}
 const hdrTable=p=>`<table class="hdr"><tr><td class="l">主治醫師</td><td class="v">${esc(p.att||SET.doctor)||'&nbsp;'}</td><td class="l">檢查日期</td><td class="d">${esc(fmtDate(p.date))||'&nbsp;'}</td></tr></table>`;
-function measTable(meas){let h='<table class="ms">';const inl=cmpMode('card')==='inline',cr=inl?Object.fromEntries(cmpRows('card').filter(r=>r.both).map(r=>[r.id,r])):{};
+function measTable(meas){let h='<table class="ms">';const inl=cmpMode('card')==='inline',cr=inl?Object.fromEntries(cmpRows('card').filter(r=>r.both&&!r.hide).map(r=>[r.id,r])):{};
   for(const g of meas){h+=`<tr><th colspan="6">${esc(g.g)}</th></tr>`;
     for(let i=0;i<g.rows.length;i+=3){h+='<tr>';for(let j=0;j<3;j++){const r=g.rows[i+j];const q=r&&cr[r.id];h+=r?`<td class="l">${esc(r.label)}</td><td class="v">${esc(r.val)}${q?`<span class="pc">前次 ${esc(q.prev)}｜${esc(fmtD(q))}</span>`:''}</td>`:'<td></td><td></td>'}h+='</tr>'}}
   return h+'</table>'}
@@ -2252,9 +2252,9 @@ document.addEventListener('input',e=>{const t=e.target;
 
 /* ================= 與前次檢查比較 (abdominal + cardiac) ================= */
 const HISTKEY='usReportGen.hist';
-function blankPrev(){return {date:'',vals:{},on:true,mode:'table',ns:{}}}
+function blankPrev(){return {date:'',vals:{},on:true,mode:'table',ns:{},hide:{}}}
 const cmpMode=k=>{const p=S[k]&&S[k].prev;if(!p)return 'off';return p.mode||(p.on===false?'off':'table')};
-function cmpSuffix(k,id){if(cmpMode(k)!=='inline')return '';const r=cmpRows(k).find(x=>x.id===id&&x.both);if(!r)return '';const pd=fmtDate(S[k].prev.date)||'前次',u=r.unit?' '+r.unit:'';
+function cmpSuffix(k,id){if(cmpMode(k)!=='inline')return '';const r=cmpRows(k).find(x=>x.id===id&&x.both&&!x.hide);if(!r)return '';const pd=fmtDate(S[k].prev.date)||'前次',u=r.unit?' '+r.unit:'';
   return r.ns?`（與前次 ${pd} ${r.prev}${u} 相比無顯著變化）`:`（前次 ${pd}：${r.prev}${u}，${fmtD(r)}）`}
 function loadHist(){try{const h=JSON.parse(localStorage.getItem(HISTKEY)||'{}');return h&&typeof h==='object'?h:{}}catch(e){return {}}}
 function saveHist(h){try{localStorage.setItem(HISTKEY,JSON.stringify(h))}catch(e){toast('無法儲存紀錄（瀏覽器儲存空間不足或被封鎖）')}}
@@ -2270,11 +2270,11 @@ function cmpRows(k){
   const cur=k==='card'?Object.fromEntries(Object.entries(cardCalc()).map(([id,x])=>[id,x.val])):st.vals;
   return cmpFields(k).map(f=>{const a=String(pv[f.id]||'').trim(),b=String(cur[f.id]||'').trim();
     const na=numOf(a,f.on),nb=numOf(b,f.on),d=nb-na,pct=na?d/na*100:NaN;
-    return {...f,prev:a,cur:b,d,pct,ns:!!(st.prev.ns||{})[f.id],both:!!(a&&b&&isFinite(na)&&isFinite(nb))}}).filter(r=>r.prev||r.cur);
+    return {...f,prev:a,cur:b,d,pct,ns:!!(st.prev.ns||{})[f.id],hide:!!(st.prev.hide||{})[f.id],both:!!(a&&b&&isFinite(na)&&isFinite(nb))}}).filter(r=>r.prev||r.cur);
 }
 const fmtD=(r)=>{if(!r.both)return '';if(r.ns)return '無顯著變化';if(Math.abs(r.d)<1e-9)return '持平';const dec=Math.max(...[r.prev,r.cur].map(v=>((String(v).match(/\.(\d+)/)||[,''])[1]).length),0);
   return `${r.d>0?'↑ +':'↓ '}${r.d.toFixed(Math.min(dec||1,2))}${isFinite(r.pct)?`（${r.pct>0?'+':''}${r.pct.toFixed(0)}%）`:''}`};
-function cmpBlock(k){const st=S[k];if(cmpMode(k)!=='table')return null;const rows=cmpRows(k).filter(r=>r.both);if(!rows.length)return null;
+function cmpBlock(k){const st=S[k];if(cmpMode(k)!=='table')return null;const rows=cmpRows(k).filter(r=>r.both&&!r.hide);if(!rows.length)return null;
   const pd=fmtDate(st.prev.date)||'前次',cd=fmtDate(st.p.date)||'本次';
   const t=`<table class="ms cmp"><colgroup><col style="width:34%"><col style="width:20%"><col style="width:20%"><col style="width:26%"></colgroup><tr><th>項目</th><th>${esc(pd)}</th><th>${esc(cd)}</th><th>變化</th></tr>`+
     rows.map(r=>`<tr><td class="l">${esc(r.label)}</td><td class="v pv">${esc(r.prev)}${r.unit?' '+r.unit:''}</td><td class="v">${esc(r.cur)}${r.unit?' '+r.unit:''}</td><td class="v dl ${r.ns?'nsc':r.d>0?'up':r.d<0?'dn':''}">${fmtD(r)}</td></tr>`).join('')+'</table>';
@@ -2282,14 +2282,14 @@ function cmpBlock(k){const st=S[k];if(cmpMode(k)!=='table')return null;const row
 function cmpCardHTML(k){
   const st=S[k],p=st.p,h=loadHist(),recs=((h[p.chart]||[]).filter(r=>r.k===k));
   const rows=cmpRows(k);
-  return `<div class="card"><h2>與前次檢查比較 <small>比較表會顯示在報告上方</small></h2>
+  return `<div class="card"><h2>與前次檢查比較 <small>比較表會顯示在報告上方；取消勾選「呈現」的項目不會出現在報告上</small></h2>
     <div class="airow" style="margin-top:0"><span class="sub" style="margin:0">報告呈現方式</span>${[['table','獨立比較表（放在報告上方）'],['inline',k==='abd'?'融入各器官描述':'融入量測數值表'],['off','不顯示']].map(([v,l])=>`<button type="button" class="chip${cmpMode(k)===v?' on':''}" data-cmpmode="${k}" data-v="${v}">${l}</button>`).join('')}</div>
     ${cmpMode(k)==='inline'?`<p class="hint" style="margin:4px 0 0">${k==='abd'?'例：右腎長約 3.61 cm（前次 2026/01/03：3.31 cm，↑ +0.30（+9%））；勾選無顯著變化的項目會寫「與前次 … 相比無顯著變化」':'前次數值與變化會以小字加在「心臟超音波量測數值」表中（需勾選「報告中附上量測數值表」）'}</p>`:''}
     <div class="pgrid" style="margin-top:8px"><div class="fld"><label for="t-${k}-prev.date">前次檢查日期</label><input type="date" id="t-${k}-prev.date" data-k="${k}" data-f="prev.date" value="${esc(st.prev.date||'')}"></div>
     <div class="fld"><label for="cmp-rec-${k}">從檢查紀錄選擇（病歷號碼 ${esc(p.chart||'未填')}）</label><select id="cmp-rec-${k}"><option value="">${recs.length?'— 選擇紀錄 —':'尚無此病歷號碼的紀錄'}</option>${recs.map((r,i)=>`<option value="${i}">${fmtDate(r.date)}（${Object.keys(r.vals).length} 項）</option>`).join('')}</select></div></div>
     <div class="airow"><button class="btn" data-cmpuse="${k}"${recs.length?'':' disabled'}>設為前次</button><button class="btn" data-cmpsave="${k}">把本次存入檢查紀錄</button><button class="btn danger" data-cmpclear="${k}">清除前次</button></div>
     <p class="hint">也可以在上方「自動帶入數值」選「帶入到：前次檢查」，讀取舊的 Mindray／Soulvet PDF 或截圖；日期會從報告內容或照片拍攝日期讀出。紀錄只存在這台電腦。</p>
-    ${rows.length?`<div class="btwrap"><table class="btable cmpe"><thead><tr><th>項目</th><th>前次</th><th>本次</th><th>變化</th><th><button type="button" class="btn" data-nsall="${k}" style="font-size:11px;padding:1px 6px">無顯著變化（全選）</button></th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.label)}</td><td><input data-k="${k}" data-pv="${r.id}" value="${esc((st.prev.vals||{})[r.id]||'')}" aria-label="${esc(r.label)} 前次"></td><td>${esc(r.cur)}${r.unit&&r.cur?' '+r.unit:''}</td><td class="bf${r.ns?' nsc':''}" data-cmpd="${r.id}">${fmtD(r)}</td><td>${r.both?`<input type="checkbox" data-ns="${r.id}" data-k="${k}"${r.ns?' checked':''} aria-label="${esc(r.label)} 無顯著變化" style="width:18px;height:18px">`:''}</td></tr>`).join('')}</tbody></table></div>`:'<p class="hint" style="margin:0">本次或前次有量測值後，這裡會列出可以比較的項目。</p>'}</div>`;
+    ${rows.length?`<div class="btwrap"><table class="btable cmpe"><thead><tr><th><button type="button" class="btn" data-showall="${k}" style="font-size:11px;padding:1px 6px" title="全部呈現／全部不呈現">呈現</button></th><th>項目</th><th>前次</th><th>本次</th><th>變化</th><th><button type="button" class="btn" data-nsall="${k}" style="font-size:11px;padding:1px 6px">無顯著變化（全選）</button></th></tr></thead><tbody>${rows.map(r=>`<tr data-cmprow="${r.id}"${r.hide?' style="opacity:.45"':''}><td>${r.both?`<input type="checkbox" data-cmpshow="${r.id}" data-k="${k}"${r.hide?'':' checked'} aria-label="${esc(r.label)} 在報告中呈現" style="width:18px;height:18px">`:''}</td><td>${esc(r.label)}</td><td><input data-k="${k}" data-pv="${r.id}" value="${esc((st.prev.vals||{})[r.id]||'')}" aria-label="${esc(r.label)} 前次"></td><td>${esc(r.cur)}${r.unit&&r.cur?' '+r.unit:''}</td><td class="bf${r.ns?' nsc':''}" data-cmpd="${r.id}">${fmtD(r)}</td><td>${r.both?`<input type="checkbox" data-ns="${r.id}" data-k="${k}"${r.ns?' checked':''} aria-label="${esc(r.label)} 無顯著變化" style="width:18px;height:18px">`:''}</td></tr>`).join('')}</tbody></table></div>`:'<p class="hint" style="margin:0">本次或前次有量測值後，這裡會列出可以比較的項目。</p>'}</div>`;
 }
 async function exifDate(file){
   try{const b=new DataView(await file.slice(0,256*1024).arrayBuffer());
@@ -2314,9 +2314,11 @@ document.addEventListener('click',e=>{
   const cl=e.target.closest('[data-cmpclear]');if(cl){const k=cl.dataset.cmpclear;if(!cl.classList.contains('armed')){cl.classList.add('armed');cl.textContent='再按一次清除';setTimeout(()=>{cl.classList.remove('armed');cl.textContent='清除前次'},3000);return}
     S[k].prev=blankPrev();renderEditor(k);changed(k);return}
 });
-document.addEventListener('change',e=>{const t=e.target;if(t.dataset.cmpon){S[t.dataset.cmpon].prev.on=t.checked;changed(t.dataset.cmpon)}
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset.cmpshow){const k=t.dataset.k,pv=S[k].prev;pv.hide=pv.hide||{};pv.hide[t.dataset.cmpshow]=!t.checked;const tr=t.closest('tr');if(tr)tr.style.opacity=t.checked?'':'.45';changed(k);return}
+  if(t.dataset.cmpon){S[t.dataset.cmpon].prev.on=t.checked;changed(t.dataset.cmpon)}
   if(t.dataset.ns){const k=t.dataset.k,pv=S[k].prev;pv.ns=pv.ns||{};pv.ns[t.dataset.ns]=t.checked;const r=cmpRows(k).find(x=>x.id===t.dataset.ns),c=document.querySelector(`[data-cmpd="${t.dataset.ns}"]`);if(c&&r){c.textContent=fmtD(r);c.classList.toggle('nsc',r.ns)}changed(k)}});
 document.addEventListener('click',e=>{const m=e.target.closest('[data-cmpmode]');if(m){const k=m.dataset.cmpmode;S[k].prev.mode=m.dataset.v;S[k].prev.on=m.dataset.v!=='off';renderEditor(k);changed(k);return}
+  const sa=e.target.closest('[data-showall]');if(sa){const k=sa.dataset.showall,pv=S[k].prev,rows=cmpRows(k).filter(r=>r.both);pv.hide=pv.hide||{};const allShown=rows.every(r=>!pv.hide[r.id]);rows.forEach(r=>pv.hide[r.id]=allShown);renderEditor(k);changed(k);return}
   const b=e.target.closest('[data-nsall]');if(!b)return;const k=b.dataset.nsall,pv=S[k].prev,rows=cmpRows(k).filter(r=>r.both);pv.ns=pv.ns||{};
   const all=rows.every(r=>pv.ns[r.id]);rows.forEach(r=>pv.ns[r.id]=!all);renderEditor(k);changed(k)});
 document.addEventListener('input',e=>{const t=e.target;if(t.dataset.pv){const k=t.dataset.k;S[k].prev.vals[t.dataset.pv]=t.value;const r=cmpRows(k).find(x=>x.id===t.dataset.pv),c=document.querySelector(`[data-cmpd="${t.dataset.pv}"]`);if(c&&r){c.textContent=fmtD(r);c.classList.toggle('nsc',r.ns)}changed(k)}});
