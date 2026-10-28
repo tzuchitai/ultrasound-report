@@ -353,6 +353,7 @@ details summary{cursor:pointer;font-weight:700}
   </div>
   <div class="actions">
     <button class="btn primary" id="btn-pdf" hidden>下載 PDF</button>
+    <button class="btn" id="btn-docx" hidden>下載 Word</button>
     <button class="btn" id="btn-html" hidden>下載 HTML</button>
     <button class="btn" id="btn-copy">複製內容（含格式）</button>
     <button class="btn" id="btn-text">複製純文字</button>
@@ -1226,6 +1227,90 @@ $('#btn-pdf').onclick=async()=>{
   }catch(e){toast('PDF 產生失敗：'+(e?.message||e));}
   finally{host&&host.remove();busy.hidden=true;busy.textContent='正在產生 PDF…'}
 };
+
+/* ================= Word (.docx) export: walks the rendered preview pages so styles match ================= */
+const DOCXJS='https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js';
+const dataBytes=u=>{const b=atob(u.split(',')[1]),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a};
+const hexOf=c=>{const m=String(c||'').match(/[\d.]+/g);if(!m||m.length<3||(m.length>3&&+m[3]<0.05))return null;return m.slice(0,3).map(x=>(Math.round(+x)).toString(16).padStart(2,'0')).join('').toUpperCase()};
+const isBlockEl=n=>n.nodeType===1&&/^(block|flex|grid|table|list-item|flow-root)$/.test(getComputedStyle(n).display)&&n.tagName!=='BR';
+async function imgSize(src){return new Promise(r=>{const i=new Image();i.onload=()=>r([i.naturalWidth,i.naturalHeight]);i.onerror=()=>r([0,0]);i.src=src})}
+async function svgPng(svg,w){const xml=new XMLSerializer().serializeToString(svg),u='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(xml);
+  const vb=(svg.getAttribute('viewBox')||'0 0 600 200').split(/\s+/).map(Number),h=Math.round(w*vb[3]/vb[2]);
+  return new Promise(r=>{const i=new Image();i.onload=()=>{const c=document.createElement('canvas');c.width=w*2;c.height=h*2;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(i,0,0,c.width,c.height);r({data:dataBytes(c.toDataURL('image/png')),w,h})};i.onerror=()=>r(null);i.src=u})}
+function runStyle(el){const cs=getComputedStyle(el);const o={size:Math.max(14,Math.round(parseFloat(cs.fontSize)*1.5))};
+  if(+cs.fontWeight>=600)o.bold=true;if(cs.fontStyle==='italic')o.italics=true;const c=hexOf(cs.color);if(c&&c!=='000000')o.color=c;return o}
+async function runsOf(nodes){const D=docx,out=[];
+  for(const n of nodes){
+    if(n.nodeType===3){const p=n.parentElement,pre=/pre/.test(getComputedStyle(p).whiteSpace),st=runStyle(p);
+      if(pre){String(n.data).split('\n').forEach((t,i)=>{if(i)out.push(new D.TextRun({break:1}));if(t)out.push(new D.TextRun({text:t,...st}))})}
+      else{const t=n.data.replace(/\s+/g,' ');if(t.trim()||(t===' '&&out.length))out.push(new D.TextRun({text:t,...st}))}continue}
+    if(n.nodeType!==1)continue;const cs=getComputedStyle(n);if(cs.display==='none'||cs.visibility==='hidden')continue;
+    if(n.tagName==='BR'){out.push(new D.TextRun({break:1}));continue}
+    if(n.tagName==='IMG'){const w=parseFloat(cs.width)||n.width,h=parseFloat(cs.height)||n.height;
+      if(n.classList.contains('pw')){out.push(new D.TextRun({text:n.classList.contains('on')?'● ':'○ ',...runStyle(n.parentElement)}));continue}
+      if(w<30||!/^data:image\/(png|jpe?g)/.test(n.src))continue;out.push(new D.ImageRun({data:dataBytes(n.src),transformation:{width:Math.round(w),height:Math.round(h)}}));continue}
+    if(n.tagName.toLowerCase()==='svg'){const p=await svgPng(n,600);if(p)out.push(new D.ImageRun({data:p.data,transformation:{width:p.w,height:p.h}}));continue}
+    const kids=await runsOf([...n.childNodes]);
+    if(isBlockEl(n)&&out.length&&kids.length)out.push(new D.TextRun({break:1}));
+    out.push(...kids)}
+  return out}
+function paraProps(el,opt={}){const D=docx,cs=getComputedStyle(el),p={spacing:{after:60}};
+  const al={center:D.AlignmentType.CENTER,right:D.AlignmentType.RIGHT,end:D.AlignmentType.RIGHT}[cs.textAlign];if(al)p.alignment=al;
+  const bg=hexOf(cs.backgroundColor);if(bg&&bg!=='FFFFFF'&&!opt.cell)p.shading={type:D.ShadingType.CLEAR,fill:bg,color:'auto'};
+  const bd={};for(const s of ['Top','Bottom']){const w=parseFloat(cs['border'+s+'Width']),c=hexOf(cs['border'+s+'Color']);if(w>=1&&cs['border'+s+'Style']!=='none'&&c&&!opt.cell)bd[s.toLowerCase()]={style:D.BorderStyle.SINGLE,size:Math.round(w*6),color:c,space:2}}
+  if(Object.keys(bd).length)p.border=bd;if(opt.bullet)p.bullet={level:0};return p}
+async function paraOf(el,nodes,opt={}){const D=docx;let runs;
+  if(opt.row){runs=[];for(const c of el.childNodes){const r=await runsOf([c]);if(!r.length)continue;if(runs.length)runs.push(new D.TextRun({text:'　　'}));runs.push(...r)}}
+  else runs=await runsOf(nodes);
+  if(!runs.length)return null;if(opt.num)runs.unshift(new D.TextRun({text:opt.num+'. '}));
+  return new D.Paragraph({children:runs,...paraProps(el,opt)})}
+async function tableOf(t){const D=docx,TW=9900;
+  const ncol=Math.max(...[...t.rows].map(r=>[...r.cells].reduce((a,c)=>a+(c.colSpan||1),0)),1);
+  const cols=[...t.querySelectorAll('col')].map(c=>parseFloat(c.style.width)).filter(x=>x>0);
+  const widths=cols.length===ncol?cols.map(x=>Math.round(TW*x/cols.reduce((a,b)=>a+b,0))):Array(ncol).fill(Math.round(TW/ncol));
+  const line={style:D.BorderStyle.SINGLE,size:4,color:'E6D6A8'};
+  const rows=[];for(const tr of t.rows){const cells=[];
+    for(const td of tr.cells){let kids=await blocksOf(td,{cell:true});if(!kids.length)kids=[new D.Paragraph('')];
+      const bg=hexOf(getComputedStyle(td).backgroundColor)||hexOf(getComputedStyle(tr).backgroundColor);
+      cells.push(new D.TableCell({children:kids,columnSpan:td.colSpan>1?td.colSpan:undefined,rowSpan:td.rowSpan>1?td.rowSpan:undefined,
+        shading:bg&&bg!=='FFFFFF'?{type:D.ShadingType.CLEAR,fill:bg,color:'auto'}:undefined,verticalAlign:D.VerticalAlign.CENTER,margins:{top:30,bottom:30,left:70,right:70}}))}
+    rows.push(new D.TableRow({children:cells}))}
+  return new D.Table({rows,width:{size:TW,type:D.WidthType.DXA},columnWidths:widths,borders:{top:line,bottom:line,left:line,right:line,insideHorizontal:line,insideVertical:line}})}
+async function blocksOf(el,opt={}){const cs=getComputedStyle(el);if(cs.display==='none')return [];
+  const tag=el.tagName;
+  if(tag==='TABLE')return [await tableOf(el),new docx.Paragraph({spacing:{after:60},children:[]})];
+  if(tag==='UL'||tag==='OL'){const r=[];let n=0;for(const li of el.children){n++;const p=await paraOf(li,[...li.childNodes],{...opt,bullet:tag==='UL',num:tag==='OL'?n:0});p&&r.push(p)}return r}
+  if(cs.display==='flex'&&cs.flexDirection.startsWith('row')&&!el.querySelector('table,ul,ol')){const p=await paraOf(el,null,{...opt,row:true});return p?[p]:[]}
+  const kids=[...el.childNodes];
+  if(!kids.some(isBlockEl)){const p=await paraOf(el,kids,opt);return p?[p]:[]}
+  const r=[];let inl=[];
+  const flush=async()=>{if(inl.length){const p=await paraOf(el,inl,opt);p&&r.push(p);inl=[]}};
+  for(const n of kids){if(isBlockEl(n)){await flush();r.push(...await blocksOf(n,opt))}else inl.push(n)}
+  await flush();return r}
+async function buildDocx(k){
+  if(!window.docx)await loadScript(DOCXJS);const D=docx;
+  renderReport(true);await (document.fonts?document.fonts.ready:Promise.resolve());
+  const body=[],title={pup:(S.pup.p.sp===CAT?'幼貓':'幼犬')+'疫苗與照護手冊'}[k]||TITLES[k];
+  if(k!=='abd')body.push(new D.Paragraph({alignment:D.AlignmentType.CENTER,spacing:{after:200},children:[new D.TextRun({text:title,bold:true,size:36,color:'3A2A1A'})]}));
+  let lastBox=null;
+  for(const pg of document.querySelectorAll('#pages .page .pbody')){
+    for(const el of pg.children){
+      if(el.classList.contains('box')){const h=el.querySelector('.bxh'),t=h?h.textContent.trim():'';
+        if(t!==lastBox&&h)body.push(new D.Paragraph({spacing:{before:200,after:100},border:{bottom:{style:D.BorderStyle.SINGLE,size:12,color:'FBE3A0',space:2}},children:[new D.TextRun({text:t,bold:true,size:30,color:'5A4636'})]}));
+        lastBox=t;body.push(...await blocksOf(el.querySelector('.bxb')||el))}
+      else{lastBox=null;body.push(...await blocksOf(el))}}}
+  const [lw,lh]=await imgSize(IMG.logoH),LH=42;
+  const header=new D.Header({children:[new D.Paragraph({children:lw?[new D.ImageRun({data:dataBytes(IMG.logoH),transformation:{width:Math.round(lw*LH/lh),height:LH}})]:[]})]});
+  const footer=new D.Footer({children:[new D.Paragraph({alignment:D.AlignmentType.CENTER,children:[new D.TextRun({text:[SET.hosp,SET.contact,SET.addr].filter(Boolean).join('　'),size:16,color:'8A5A2B'})]}),
+    new D.Paragraph({alignment:D.AlignmentType.CENTER,children:[new D.TextRun({children:['第 ',D.PageNumber.CURRENT,' 頁'],size:16,color:'999999'})]})]});
+  const doc=new D.Document({creator:SET.hosp||'聯盟動物醫院',title:`${S[k].p.name||''} ${title}`,
+    styles:{default:{document:{run:{font:{ascii:'Arial',hAnsi:'Arial',eastAsia:'Microsoft JhengHei',cs:'Arial'},size:22}}}},
+    sections:[{properties:{page:{size:{width:11906,height:16838},margin:{top:1300,bottom:1100,left:1000,right:1000,header:500,footer:400}}},headers:{default:header},footers:{default:footer},children:body}]});
+  return D.Packer.toBlob(doc)}
+$('#btn-docx').onclick=async()=>{const busy=$('#busy');busy.textContent='正在產生 Word…';busy.hidden=false;
+  try{const blob=await buildDocx(KIND);busy.hidden=true;await save_(fname('docx'),blob)}
+  catch(e){toast('Word 產生失敗：'+(e?.message||e))}
+  finally{busy.hidden=true;busy.textContent='正在產生 PDF…'}};
 
 /* ================= import: Mindray PDF / AI ================= */
 let AI_ON=true,SAMPLE=null,IMG_OK=false,LIM=null;
@@ -2428,11 +2513,11 @@ document.fonts&&document.fonts.ready.then(()=>renderReport(true));
   if(!use){disableAI(PUBLIC?'public':false);
     // Outside claude.ai: plain browser download.
     DL={save:async({filename,data})=>{const b=data instanceof Blob?data:new Blob([data],{type:'text/html;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=filename;document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}};
-    $('#btn-pdf').hidden=false;$('#btn-html').hidden=false;
+    $('#btn-pdf').hidden=false;$('#btn-html').hidden=false;$('#btn-docx').hidden=false;
     $('#ext-ai').hidden=false;const ec=loadExt();if(ec){$('#ext-prov').value=ec.provider;$('#ext-key').value=ec.key;$('#ext-model').value=ec.model||'';enableExtAI()}$('#ext-model').placeholder=EXT_DEF[$('#ext-prov').value];return}
   use('db').then(db=>{if(!db)return;DBH=db;
     db.collection('drafts').orderBy('createdAt','desc').limit(30).onSnapshot(sn=>{DRAFTS=sn.docs.map(d=>({id:d.id,...(d.data()||{})}));renderDrafts()},()=>{DRAFTS=[];renderDrafts()})}).catch(()=>{});
-  use('downloads').then(d=>{if(d){DL=d;$('#btn-pdf').hidden=false;$('#btn-html').hidden=false}}).catch(()=>{});
+  use('downloads').then(d=>{if(d){DL=d;$('#btn-pdf').hidden=false;$('#btn-html').hidden=false;$('#btn-docx').hidden=false}}).catch(()=>{});
   // AI features are reserved for the site owner; shared viewers get the same tool without AI.
   const U=await use('user').catch(()=>null),owner=U?await U.isOwner().catch(()=>false):false;
   if(!owner){disableAI(true);return}
