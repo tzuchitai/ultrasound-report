@@ -400,6 +400,13 @@ details summary{cursor:pointer;font-weight:700}
           <div class="fld"><label for="s-addr">地址</label><input id="s-addr" data-s="addr"></div>
         </div>
         <p class="hint">設定只存在這台電腦的瀏覽器。</p>
+        <div id="save-loc" hidden style="margin-top:12px;border-top:1px solid var(--line);padding-top:10px">
+          <p class="sub">下載存檔位置</p>
+          <label class="chk"><input type="radio" name="savemode" value="ask"> 每次下載時詢問存放位置（會記住上次選的資料夾）</label>
+          <label class="chk"><input type="radio" name="savemode" value="auto"> 自動存到固定資料夾：<b id="save-dirname">尚未選擇</b></label>
+          <div class="airow"><button class="btn" id="save-pick">選擇資料夾</button><label class="chk" style="margin:0"><input type="checkbox" id="save-sub"> 依報告種類建立子資料夾（腹部超音波報告、心肺評估檢查報告…）</label></div>
+          <p class="hint">建議在雲端硬碟的同步資料夾裡建一個「超音波報告」資料夾再選它，報告就會自動同步到雲端。只支援電腦版 Chrome／Edge；第一次存檔時瀏覽器會詢問是否允許編輯這個資料夾，可選「每次造訪都允許」。</p>
+        </div>
         <div id="ext-ai" hidden style="margin-top:12px;border-top:1px solid var(--line);padding-top:10px">
           <p class="sub">AI 設定（Google Gemini／OpenAI GPT）</p>
           <div class="pgrid">
@@ -1209,9 +1216,35 @@ $('#btn-text').onclick=async()=>{const t=reportText(KIND);
 /* ================= downloads ================= */
 let DL=null;
 const fname=ext=>`${S[KIND].p.name||'病患'}_${TITLES[KIND]}_${fmtDate(S[KIND].p.date).replace(/\//g,'')}.${ext}`;
-async function save_(name,data){try{await DL.save({filename:name,data});toast('已下載 '+name)}catch(e){if(e?.code!=='declined')toast('下載失敗：'+(e?.message||e?.code||''))}}
-$('#btn-html').onclick=()=>{renderReport(true);save_(fname('html'),fullDoc(KIND))};
-$('#btn-pdf').onclick=async()=>{
+// Public site on desktop Chrome/Edge: ask where to save (remembering the last folder) or write straight into a chosen folder.
+const FSA_OK=PUBLIC&&'showSaveFilePicker' in window&&'showDirectoryPicker' in window&&window.self===window.top;
+const MIME={pdf:'application/pdf',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',html:'text/html'};
+function idb(){return new Promise((res,rej)=>{const r=indexedDB.open('usReportGen',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function kvGet(k){try{const db=await idb();return await new Promise(r=>{const q=db.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>r(q.result||null);q.onerror=()=>r(null)})}catch(e){return null}}
+async function kvSet(k,v){try{const db=await idb();await new Promise(r=>{const t=db.transaction('kv','readwrite'),o=t.objectStore('kv');v==null?o.delete(k):o.put(v,k);t.oncomplete=r;t.onerror=r})}catch(e){}}
+// Must run at the start of a click handler (pickers and permission prompts need the user gesture). null = user cancelled.
+async function saveTarget(name){if(!FSA_OK)return {dl:1};const ext=name.split('.').pop();
+  if(SET.saveMode==='auto'){const dir=await kvGet('saveDir');
+    if(dir){let p=await dir.queryPermission({mode:'readwrite'});if(p!=='granted')p=await dir.requestPermission({mode:'readwrite'}).catch(()=>'denied');
+      if(p==='granted')return {dir};toast('沒有取得資料夾權限，請選擇存放位置')}}
+  try{return {fh:await showSaveFilePicker({id:'usreport',suggestedName:name,types:[{description:ext.toUpperCase()+' 檔',accept:{[MIME[ext]]:['.'+ext]}}]})}}
+  catch(e){return e.name==='AbortError'?null:{dl:1}}}
+async function writeTarget(T,name,data){const blob=data instanceof Blob?data:new Blob([data],{type:'text/html;charset=utf-8'});
+  if(T.fh){const w=await T.fh.createWritable();await w.write(blob);await w.close();toast('已儲存 '+T.fh.name);return}
+  let d=T.dir;if(SET.saveSub)d=await d.getDirectoryHandle(TITLES[KIND],{create:true});
+  const base=name.replace(/\.[^.]+$/,''),ext=name.slice(base.length);let n=name,i=2;
+  for(;;){try{await d.getFileHandle(n);n=`${base}(${i++})${ext}`}catch(e){break}}
+  const fh=await d.getFileHandle(n,{create:true}),w=await fh.createWritable();await w.write(blob);await w.close();
+  toast(`已存到「${T.dir.name}${SET.saveSub?'／'+TITLES[KIND]:''}」：${n}`)}
+async function save_(name,data,T){try{if(T&&!T.dl){await writeTarget(T,name,data);return}await DL.save({filename:name,data});toast('已下載 '+name)}catch(e){if(e?.code!=='declined')toast('下載失敗：'+(e?.message||e?.code||''))}}
+if(FSA_OK){$('#save-loc').hidden=false;const m=SET.saveMode||'ask';
+  document.querySelectorAll('[name=savemode]').forEach(r=>{r.checked=r.value===m;r.onchange=()=>{SET.saveMode=r.value;saveSet();if(r.value==='auto')kvGet('saveDir').then(d=>{if(!d)$('#save-pick').click()})}});
+  $('#save-sub').checked=!!SET.saveSub;$('#save-sub').onchange=e=>{SET.saveSub=e.target.checked;saveSet()};
+  kvGet('saveDir').then(d=>{if(d)$('#save-dirname').textContent=d.name});
+  $('#save-pick').onclick=async()=>{try{const d=await showDirectoryPicker({id:'usreportdir',mode:'readwrite'});await kvSet('saveDir',d);$('#save-dirname').textContent=d.name;
+    SET.saveMode='auto';saveSet();document.querySelector('[name=savemode][value=auto]').checked=true;toast('之後的報告會自動存到「'+d.name+'」')}catch(e){if(e.name!=='AbortError')toast('無法選擇資料夾：'+e.message)}}}
+$('#btn-html').onclick=async()=>{const n=fname('html'),T=await saveTarget(n);if(!T)return;renderReport(true);save_(n,fullDoc(KIND),T)};
+$('#btn-pdf').onclick=async()=>{const n=fname('pdf'),T=await saveTarget(n);if(!T)return;
   renderReport(true);const busy=$('#busy');busy.hidden=false;let host;
   try{
     if(!window.html2canvas)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
@@ -1223,7 +1256,7 @@ $('#btn-pdf').onclick=async()=>{
       const cv=await html2canvas(pgs[i],{scale:2,backgroundColor:'#ffffff',logging:false});
       if(i)pdf.addPage();pdf.addImage(cv.toDataURL('image/jpeg',0.92),'JPEG',0,0,210,297)}
     host.remove();host=null;busy.hidden=true;
-    await save_(fname('pdf'),pdf.output('blob'));
+    await save_(n,pdf.output('blob'),T);
   }catch(e){toast('PDF 產生失敗：'+(e?.message||e));}
   finally{host&&host.remove();busy.hidden=true;busy.textContent='正在產生 PDF…'}
 };
@@ -1307,8 +1340,8 @@ async function buildDocx(k){
     styles:{default:{document:{run:{font:{ascii:'Arial',hAnsi:'Arial',eastAsia:'Microsoft JhengHei',cs:'Arial'},size:22}}}},
     sections:[{properties:{page:{size:{width:11906,height:16838},margin:{top:1300,bottom:1100,left:1000,right:1000,header:500,footer:400}}},headers:{default:header},footers:{default:footer},children:body}]});
   return D.Packer.toBlob(doc)}
-$('#btn-docx').onclick=async()=>{const busy=$('#busy');busy.textContent='正在產生 Word…';busy.hidden=false;
-  try{const blob=await buildDocx(KIND);busy.hidden=true;await save_(fname('docx'),blob)}
+$('#btn-docx').onclick=async()=>{const n=fname('docx'),T=await saveTarget(n);if(!T)return;const busy=$('#busy');busy.textContent='正在產生 Word…';busy.hidden=false;
+  try{const blob=await buildDocx(KIND);busy.hidden=true;await save_(n,blob,T)}
   catch(e){toast('Word 產生失敗：'+(e?.message||e))}
   finally{busy.hidden=true;busy.textContent='正在產生 PDF…'}};
 
